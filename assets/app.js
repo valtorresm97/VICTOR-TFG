@@ -26,9 +26,11 @@ function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
   const f = s.features || {};
-  setText("state", status.state ?? "n/a");
-  setText("sample-rate", `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
-  setText("block-rate", `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
+  const state = status.state ?? "waiting_for_data";
+  const waiting = state === "waiting_for_data";
+  setText("state", state);
+  setText("sample-rate", waiting ? "waiting for data" : `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
+  setText("block-rate", waiting ? "waiting for data" : `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
   setText("last-idx", String(status.last_sample_idx ?? "n/a"));
   setText("malformed", String(rx.malformed_blocks_total ?? 0));
   setText("lost-frames", String(rx.lost_frames_total ?? 0));
@@ -53,5 +55,10 @@ function startSocket() {
   socket.on('eeg_snapshot', renderSnapshot);
 }
 
+function startPollingFallback() {
+  setInterval(loadInitial, 400);
+}
+
 loadInitial();
 startSocket();
+startPollingFallback();

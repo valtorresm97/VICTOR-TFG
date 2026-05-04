@@ -17,6 +17,7 @@ class EEGWebServer:
         self.backend = backend
         assets_dir = Path(__file__).resolve().parent.parent / "assets"
         self.ui = WebUI(port=port, assets_dir_path=str(assets_dir))
+        self._logged_first_nonempty_snapshot = False
         self._setup_routes()
 
     def _setup_routes(self):
@@ -44,6 +45,9 @@ class EEGWebServer:
 
     def publish_snapshot(self, snapshot: dict):
         if snapshot:
+            if (not self._logged_first_nonempty_snapshot) and snapshot.get("rx", {}).get("rx_blocks_total", 0):
+                logger.info("[WEB] first non-empty snapshot published")
+                self._logged_first_nonempty_snapshot = True
             self.ui.send_message("eeg_snapshot", snapshot)
 
     def start(self):
