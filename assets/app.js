@@ -10,6 +10,21 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function setStateChip(state) {
+  const el = document.getElementById("state");
+  if (!el) return;
+  el.textContent = state;
+  el.style.borderColor = "rgba(87, 184, 255, 0.35)";
+  el.style.background = "rgba(87, 184, 255, 0.18)";
+  if (state === "waiting_for_data") {
+    el.style.borderColor = "rgba(255, 195, 87, 0.45)";
+    el.style.background = "rgba(255, 195, 87, 0.16)";
+  } else if (state === "features_ready") {
+    el.style.borderColor = "rgba(89, 255, 212, 0.45)";
+    el.style.background = "rgba(89, 255, 212, 0.14)";
+  }
+}
+
 function renderBands(bp = {}) {
   const root = document.getElementById("bands");
   root.innerHTML = "";
@@ -26,9 +41,11 @@ function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
   const f = s.features || {};
-  setText("state", status.state ?? "n/a");
-  setText("sample-rate", `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
-  setText("block-rate", `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
+  const state = status.state ?? "waiting_for_data";
+  const waiting = state === "waiting_for_data";
+  setStateChip(state);
+  setText("sample-rate", waiting ? "waiting for data" : `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
+  setText("block-rate", waiting ? "waiting for data" : `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
   setText("last-idx", String(status.last_sample_idx ?? "n/a"));
   setText("malformed", String(rx.malformed_blocks_total ?? 0));
   setText("lost-frames", String(rx.lost_frames_total ?? 0));
@@ -42,9 +59,12 @@ function renderSnapshot(s) {
 
 async function loadInitial() {
   try {
-    const res = await fetch('/latest');
+    const res = await fetch('./latest');
     if (res.ok) renderSnapshot(await res.json());
-  } catch (_) {}
+    else console.warn('[WEBUI] /latest returned', res.status);
+  } catch (e) {
+    console.warn('[WEBUI] polling error', e);
+  }
 }
 
 function startSocket() {
@@ -53,5 +73,10 @@ function startSocket() {
   socket.on('eeg_snapshot', renderSnapshot);
 }
 
+function startPollingFallback() {
+  setInterval(loadInitial, 400);
+}
+
 loadInitial();
 startSocket();
+startPollingFallback();

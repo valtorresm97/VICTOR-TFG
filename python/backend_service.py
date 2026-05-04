@@ -37,7 +37,9 @@ class BackendService:
         self.rx = EEGReceiver(fs_hz=FS_HZ, num_ch=NUM_CH, queue_max=512)
 
         Bridge.provide("linux_started", self.rx.linux_started)
+        logger.info("[BRIDGE] registered linux_started")
         Bridge.provide("eeg_block_uV", self.rx.eeg_block_uV)
+        logger.info("[BRIDGE] registered eeg_block_uV")
 
         self._last_features: dict = {}
         self._samples_since_feature = 0
@@ -48,14 +50,23 @@ class BackendService:
 
         self._snapshot_lock = threading.Lock()
         self._latest_snapshot: dict = {}
+        self._logged_first_snapshot = False
+        self._logged_features_ready = False
 
     def _build_snapshot(self) -> dict:
         rxm = self.rx.get_window_metrics(reset=False)
-        status = {
-            "state": "running" if self.proc.is_window_ready(FEATURE_WINDOW_SEC) else "filling_window",
-            "window_ready": self.proc.is_window_ready(FEATURE_WINDOW_SEC),
-            "last_sample_idx": self.rx.last_idx,
-        }
+        window_ready = self.proc.is_window_ready(FEATURE_WINDOW_SEC)
+        rx_blocks_total = int(rxm.get("rx_blocks_total", 0) or 0)
+        has_features = bool(self._last_features)
+        if rx_blocks_total <= 0:
+            state = "waiting_for_data"
+        elif not window_ready:
+            state = "waiting_for_window"
+        elif has_features:
+            state = "features_ready"
+        else:
+            state = "receiving"
+        status = {"state": state, "window_ready": window_ready, "last_sample_idx": self.rx.last_idx}
 
         feats = self._last_features or {}
         bp_rel = feats.get("bandpower_rel", {}) or {}
@@ -129,6 +140,9 @@ class BackendService:
                 feats = self.proc.compute_live_features(channel_idx=0, window_sec=FEATURE_WINDOW_SEC, psd_method="multitaper")
                 if feats:
                     self._last_features = feats
+                    if not self._logged_features_ready:
+                        logger.info("[DSP] features ready")
+                        self._logged_features_ready = True
             except Exception as e:
                 logger.exception(f"feature computation error: {e}")
 
@@ -137,6 +151,9 @@ class BackendService:
             snap = self._build_snapshot()
             with self._snapshot_lock:
                 self._latest_snapshot = snap
+            if (not self._logged_first_snapshot) and int(snap.get("rx", {}).get("rx_blocks_total", 0) or 0) > 0:
+                logger.info("[BACKEND] first snapshot published")
+                self._logged_first_snapshot = True
             self._last_snapshot_t = now
 
         if (now - self._last_disk_publish_t) >= DISK_PUBLISH_PERIOD_SEC:

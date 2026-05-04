@@ -93,6 +93,7 @@ class EEGReceiver:
         self.expected_status_prefix: int = 0xC00000
         self.status_prefix_mask: int = 0xF00000
         self.invalid_status_total: int = 0
+        self._logged_first_block: bool = False
 
     # ============================================================
     # Helpers internos
@@ -315,6 +316,15 @@ class EEGReceiver:
             self.last_block_idx = block_idx
             self.last_block_last_sample_idx = first_sample_idx + sample_count - 1
             self.last_idx = self.last_block_last_sample_idx
+
+            if not self._logged_first_block:
+                logger.info(
+                    "[RX] first eeg_block_uV block received: block_idx=%d, first_sample_idx=%d, sample_count=%d",
+                    block_idx,
+                    first_sample_idx,
+                    sample_count,
+                )
+                self._logged_first_block = True
         finally:
             self._record_block_callback_timing(self._now_us() - t0_us)
 
