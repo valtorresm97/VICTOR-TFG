@@ -656,3 +656,26 @@ No usar código bloqueante en adquisición real.
 No introducir dependencias Python innecesarias.
 
 
+## 17. Knowledge updates / confirmed facts
+
+This section stores only durable facts discovered during development.
+
+Rules:
+- Add only facts that affect future development.
+- Do not paste long logs.
+- Do not duplicate code.
+- Prefer short bullets.
+- Include date and context.
+- If a fact becomes obsolete, update or remove it.
+
+### 2026-05-04 — ADS1299 bring-up
+
+- ADS1299-4PAG detected by SPI with ID `0x3C`.
+- Real DRDY pin on current wiring is `PIN_DRDY = 7`.
+- Valid RDATAC frames observed with `status = 0xC00000`.
+- `drdy_count` is not a FIFO. If `pending > 1`, read one current frame and count a lag/loss event.
+- `BENCH_NOTIFY_ENABLED` controls Bridge EEG block publishing, not benchmark printing.
+
+
+
+
