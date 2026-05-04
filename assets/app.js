@@ -17,10 +17,7 @@ function renderBands(bp = {}) {
     const v = Math.max(0, Math.min(1, Number(bp[b] ?? 0)));
     const row = document.createElement("div");
     row.className = "band-row";
-    row.innerHTML = `
-      <div>${b}</div>
-      <div class="bar"><div class="fill" style="width:${(v * 100).toFixed(1)}%"></div></div>
-      <div class="mono">${fmt(v, 3)}</div>`;
+    row.innerHTML = `<div>${b}</div><div class="bar"><div class="fill" style="width:${(v * 100).toFixed(1)}%"></div></div><div class="mono">${fmt(v, 3)}</div>`;
     root.appendChild(row);
   });
 }
@@ -29,7 +26,6 @@ function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
   const f = s.features || {};
-
   setText("state", status.state ?? "n/a");
   setText("sample-rate", `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
   setText("block-rate", `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
@@ -40,21 +36,21 @@ function renderSnapshot(s) {
   setText("peak-freq", `${fmt(f.peak_freq, 2)} Hz`);
   setText("dominant-band", f.dominant_band ?? "n/a");
   setText("alpha-beta", fmt(f.alpha_beta_ratio, 3));
-
   renderBands(f.bandpower_rel || {});
 }
 
-async function start() {
-  const wsProto = location.protocol === "https:" ? "wss" : "ws";
-  const ws = new WebSocket(`${wsProto}://${location.host}/ws`);
-  ws.onmessage = (ev) => {
-    try { renderSnapshot(JSON.parse(ev.data)); } catch (_) {}
-  };
-
+async function loadInitial() {
   try {
     const res = await fetch('/latest');
     if (res.ok) renderSnapshot(await res.json());
   } catch (_) {}
 }
 
-start();
+function startSocket() {
+  if (typeof io !== 'function') return;
+  const socket = io();
+  socket.on('eeg_snapshot', renderSnapshot);
+}
+
+loadInitial();
+startSocket();

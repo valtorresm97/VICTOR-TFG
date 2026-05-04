@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import json
 import logging
 from pathlib import Path
+
+from arduino.app_bricks.web_ui import WebUI
 
 from app_state import read_snapshot
 
@@ -10,38 +11,44 @@ logger = logging.getLogger("EEG_WEBUI")
 
 
 class EEGWebServer:
-    """Adaptador WebUI HTML Brick + websocket de snapshots."""
+    """Servidor WebUI HTML Brick para snapshots EEG."""
 
-    def __init__(self, ui, backend):
-        self.ui = ui
+    def __init__(self, backend, port: int = 7000):
         self.backend = backend
-        self.assets_dir = Path(__file__).resolve().parent.parent / "assets"
+        assets_dir = Path(__file__).resolve().parent.parent / "assets"
+        self.ui = WebUI(port=port, assets_dir_path=str(assets_dir))
+        self._setup_routes()
 
-    def setup_routes(self):
-        @self.ui.get("/")
-        def index():
-            return (self.assets_dir / "index.html").read_text(encoding="utf-8")
+    def _setup_routes(self):
+        self.ui.expose_api("GET", "/status", self.get_status)
+        self.ui.expose_api("GET", "/latest", self.get_latest)
+        self.ui.on_connect(self.on_connect)
+        self.ui.on_disconnect(self.on_disconnect)
 
-        @self.ui.get("/assets/{name}")
-        def assets(name: str):
-            p = self.assets_dir / name
-            if not p.exists() or not p.is_file():
-                return "", 404
-            return p.read_text(encoding="utf-8")
+    def get_status(self):
+        snap = self.backend.get_latest_snapshot() or read_snapshot(default={})
+        st = (snap.get("status", {}) if isinstance(snap, dict) else {}) or {}
+        return {"ok": True, "state": st.get("state", "unknown"), "window_ready": st.get("window_ready", False)}
 
-        @self.ui.get("/status")
-        def status():
-            snap = self.backend.get_latest_snapshot() or read_snapshot(default={})
-            return {"ok": True, "state": snap.get("status", {}).get("state", "unknown")}
+    def get_latest(self):
+        return self.backend.get_latest_snapshot() or read_snapshot(default={})
 
-        @self.ui.get("/latest")
-        def latest():
-            return self.backend.get_latest_snapshot() or read_snapshot(default={})
+    def on_connect(self, sid):
+        logger.info("[WEB] connected: %s", sid)
+        snap = self.get_latest()
+        if snap:
+            self.ui.send_message("eeg_snapshot", snap, room=sid)
 
-        @self.ui.websocket("/ws")
-        def ws_handler(ws):
-            while True:
-                snap = self.backend.get_latest_snapshot()
-                if snap:
-                    self.ui.send_message(ws, json.dumps(snap))
-                self.ui.sleep(0.2)
+    def on_disconnect(self, sid):
+        logger.info("[WEB] disconnected: %s", sid)
+
+    def publish_snapshot(self, snapshot: dict):
+        if snapshot:
+            self.ui.send_message("eeg_snapshot", snapshot)
+
+    def start(self):
+        self.ui.start()
+        try:
+            logger.info("[WEB] WebUI started: %s", self.ui.url)
+        except Exception:
+            logger.info("[WEB] WebUI started")
