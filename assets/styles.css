@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; background: #0b1220; color: #ecf0f8; margin: 0; }
+.container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.card { background: #182236; border: 1px solid #2b3956; border-radius: 8px; padding: 10px; }
+h1,h3 { margin: 6px 0 10px; }
+.band-row { display: grid; grid-template-columns: 90px 1fr 80px; align-items: center; gap: 8px; margin: 8px 0; }
+.bar { background: #24324d; border-radius: 6px; overflow: hidden; height: 14px; }
+.fill { background: linear-gradient(90deg, #32c8ff, #68ffb3); height: 100%; width: 0%; }
+.mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }

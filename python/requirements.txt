@@ -1,5 +1,2 @@
-streamlit-echarts
-plotly
-streamlit
 numpy
 scipy
