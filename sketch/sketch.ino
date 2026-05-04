@@ -276,9 +276,19 @@ void setup() {
   } else {
     Monitor.println("ERROR: no se pudo leer ADS1299 ID tras begin()");
   }
-    if (!ads.configureDefaults()) {
+  if (!ads.configureDefaults()) {
     Monitor.println("ERROR: configureDefaults() fallo");
     while (1) delay(1000);
+  }
+  {
+    uint8_t v = 0;
+    if (ads.readReg(ADS_REG_CONFIG1, v)) { Monitor.print("REG CONFIG1=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG2, v)) { Monitor.print("REG CONFIG2=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG3, v)) { Monitor.print("REG CONFIG3=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF, v)) { Monitor.print("REG LOFF=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF_SENSP, v)) { Monitor.print("REG LOFF_SENSP=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF_SENSN, v)) { Monitor.print("REG LOFF_SENSN=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG4, v)) { Monitor.print("REG CONFIG4=0x"); Monitor.println(v, HEX); }
   }
 
   // Limpiar posibles interrupciones DRDY antiguas o espurias antes de arrancar adquisición

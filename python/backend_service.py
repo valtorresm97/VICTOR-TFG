@@ -15,117 +15,67 @@ logger = logging.getLogger("EEG_BACKEND")
 
 FS_HZ = 250
 NUM_CH = 4
-
 FEATURE_WINDOW_SEC = 4.0
 FEATURE_HOP_SAMPLES = 64
-SNAPSHOT_PUBLISH_PERIOD_SEC = 0.2  # 5 Hz
+SNAPSHOT_PUBLISH_PERIOD_SEC = 0.2
 DISK_PUBLISH_PERIOD_SEC = 1.0
+BANDS = ("delta", "theta", "alpha", "beta", "gamma")
 
 
 class BackendService:
-    """Orquesta recepción Bridge, buffer DSP y publicación de snapshots ligeros."""
-
     def __init__(self):
-        self.proc = EEGSignalProcessor(
-            fs=FS_HZ,
-            num_channels=NUM_CH,
-            buffer_sec=10.0,
-            psd_window_sec=FEATURE_WINDOW_SEC,
-            window_type="hann",
-            welch_overlap=0.5,
-        )
+        self.proc = EEGSignalProcessor(fs=FS_HZ, num_channels=NUM_CH, buffer_sec=10.0, psd_window_sec=FEATURE_WINDOW_SEC)
         self.rx = EEGReceiver(fs_hz=FS_HZ, num_ch=NUM_CH, queue_max=512)
-
         Bridge.provide("linux_started", self.rx.linux_started)
-        logger.info("[BRIDGE] registered linux_started")
         Bridge.provide("eeg_block_uV", self.rx.eeg_block_uV)
-        logger.info("[BRIDGE] registered eeg_block_uV")
 
-        self._last_features: dict = {}
+        self._last_channels: list[dict] = []
         self._samples_since_feature = 0
         self._window_was_ready = False
-
         self._last_snapshot_t = 0.0
         self._last_disk_publish_t = 0.0
-
         self._snapshot_lock = threading.Lock()
         self._latest_snapshot: dict = {}
-        self._logged_first_snapshot = False
-        self._logged_features_ready = False
+
+    def _compute_global(self, channels: list[dict]) -> dict:
+        valid = [c for c in channels if c.get("connected")]
+        if not valid:
+            return {"valid_channels": 0, "rms_uV": None, "peak_freq_hz": None, "dominant_band": None, "bands": {b: 0.0 for b in BANDS}}
+        bands = {b: float(sum(float(c["bands"].get(b, 0.0) or 0.0) for c in valid) / len(valid)) for b in BANDS}
+        dom = max(bands.items(), key=lambda kv: kv[1])[0]
+        rms = float(sum(float(c.get("rms_uV") or 0.0) for c in valid) / len(valid))
+        peak = float(sum(float(c.get("peak_freq_hz") or 0.0) for c in valid) / len(valid))
+        return {"valid_channels": len(valid), "rms_uV": rms, "peak_freq_hz": peak, "dominant_band": dom, "bands": bands}
 
     def _build_snapshot(self) -> dict:
         rxm = self.rx.get_window_metrics(reset=False)
         window_ready = self.proc.is_window_ready(FEATURE_WINDOW_SEC)
-        rx_blocks_total = int(rxm.get("rx_blocks_total", 0) or 0)
-        has_features = bool(self._last_features)
-        if rx_blocks_total <= 0:
-            state = "waiting_for_data"
-        elif not window_ready:
-            state = "waiting_for_window"
-        elif has_features:
-            state = "features_ready"
-        else:
-            state = "receiving"
-        status = {"state": state, "window_ready": window_ready, "last_sample_idx": self.rx.last_idx}
-
-        feats = self._last_features or {}
-        bp_rel = feats.get("bandpower_rel", {}) or {}
-        bp_abs = feats.get("bandpower_abs", {}) or {}
-
-        alpha_rel = float(bp_rel.get("alpha", 0.0) or 0.0)
-        beta_rel = float(bp_rel.get("beta", 0.0) or 0.0)
-        alpha_beta_ratio = (alpha_rel / beta_rel) if beta_rel > 1e-12 else None
-
-        dominant_band = None
-        if bp_rel:
-            dominant_band = max(bp_rel.items(), key=lambda kv: float(kv[1] or 0.0))[0]
+        state = "waiting_for_data" if int(rxm.get("rx_blocks_total", 0) or 0) <= 0 else ("features_ready" if self._last_channels else ("waiting_for_window" if not window_ready else "receiving"))
+        channels = self._last_channels
+        if not window_ready and int(rxm.get("rx_blocks_total", 0) or 0) > 0:
+            channels = [{"index": i, "label": f"CH{i+1}", "connected": False, "quality": "waiting_for_window", "rms_uV": None, "peak_freq_hz": None, "dominant_band": None, "alpha_beta_ratio": None, "bands": {b: 0.0 for b in BANDS}} for i in range(NUM_CH)]
 
         return {
-            "ts_monotonic": time.monotonic(),
-            "config": {
-                "fs_hz": FS_HZ,
-                "num_ch": NUM_CH,
-                "feature_window_sec": FEATURE_WINDOW_SEC,
-                "feature_hop_samples": FEATURE_HOP_SAMPLES,
-                "psd_method": "multitaper",
-                "channel_idx": 0,
-            },
-            "status": status,
+            "status": state,
+            "rx_sample_rate_hz": float(rxm.get("rx_frame_rate_hz", 0.0) or 0.0),
+            "rx_block_rate_hz": float(rxm.get("rx_block_rate_hz", 0.0) or 0.0),
+            "last_sample_idx": self.rx.last_idx,
             "rx": {
-                "rx_frame_rate_hz": rxm.get("rx_frame_rate_hz", 0.0),
-                "rx_block_rate_hz": rxm.get("rx_block_rate_hz", 0.0),
                 "rx_frames_total": rxm.get("rx_frames_total", 0),
                 "rx_blocks_total": rxm.get("rx_blocks_total", 0),
-                "queue_frames_current": rxm.get("queue_frames_current", 0),
-                "queue_blocks_current": rxm.get("queue_blocks_current", 0),
                 "lost_frames_total": rxm.get("lost_frames_total", 0),
                 "lost_blocks_total": rxm.get("lost_blocks_total", 0),
                 "malformed_blocks_total": rxm.get("malformed_blocks_total", 0),
                 "invalid_status_total": rxm.get("invalid_status_total", 0),
-                "queue_drops_frames_total": rxm.get("queue_drops_frames_total", 0),
-                "queue_drops_blocks_total": rxm.get("queue_drops_blocks_total", 0),
             },
-            "features": {
-                "rms": feats.get("rms"),
-                "peak_freq": feats.get("peak_freq"),
-                "peak_delta": feats.get("peak_delta"),
-                "peak_theta": feats.get("peak_theta"),
-                "peak_alpha": feats.get("peak_alpha"),
-                "peak_beta": feats.get("peak_beta"),
-                "peak_gamma": feats.get("peak_gamma"),
-                "dominant_band": dominant_band,
-                "alpha_beta_ratio": alpha_beta_ratio,
-                "bandpower_rel": bp_rel,
-                "bandpower_abs": bp_abs,
-            },
+            "channels": channels,
+            "global": self._compute_global(channels),
         }
 
     def step(self):
         _, drained_frames = self.rx.drain_blocks_to_processor(self.proc, max_blocks=16)
-
-        window_ready = self.proc.is_window_ready(window_sec=FEATURE_WINDOW_SEC)
+        window_ready = self.proc.is_window_ready(FEATURE_WINDOW_SEC)
         need_feature = False
-
         if window_ready:
             if not self._window_was_ready:
                 self._window_was_ready = True
@@ -141,24 +91,12 @@ class BackendService:
             self._samples_since_feature = 0
 
         if need_feature and drained_frames > 0:
-            try:
-                feats = self.proc.compute_live_features(channel_idx=0, window_sec=FEATURE_WINDOW_SEC, psd_method="multitaper")
-                if feats:
-                    self._last_features = feats
-                    if not self._logged_features_ready:
-                        logger.info("[DSP] features ready")
-                        self._logged_features_ready = True
-            except Exception as e:
-                logger.exception(f"feature computation error: {e}")
+            self._last_channels = self.proc.compute_channel_features(window_sec=FEATURE_WINDOW_SEC, psd_method="multitaper")
 
         now = time.monotonic()
         if (now - self._last_snapshot_t) >= SNAPSHOT_PUBLISH_PERIOD_SEC:
-            snap = self._build_snapshot()
             with self._snapshot_lock:
-                self._latest_snapshot = snap
-            if (not self._logged_first_snapshot) and int(snap.get("rx", {}).get("rx_blocks_total", 0) or 0) > 0:
-                logger.info("[BACKEND] first snapshot published")
-                self._logged_first_snapshot = True
+                self._latest_snapshot = self._build_snapshot()
             self._last_snapshot_t = now
 
         if (now - self._last_disk_publish_t) >= DISK_PUBLISH_PERIOD_SEC:
@@ -169,11 +107,9 @@ class BackendService:
             self._last_disk_publish_t = now
 
     def start(self):
-        """Hook explícito de arranque para usar desde main.py (sin Streamlit runner)."""
         return None
 
     def loop(self):
-        """Alias semántico para el bucle principal de App.run(user_loop=...)."""
         self.step()
 
     def get_latest_snapshot(self) -> dict:
