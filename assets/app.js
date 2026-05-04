@@ -43,9 +43,11 @@ function renderSnapshot(s) {
   const f = s.features || {};
   const state = status.state ?? "waiting_for_data";
   const waiting = state === "waiting_for_data";
+  const rxFrameRate = rx.rx_frame_rate_hz ?? rx.rxFrameRateHz ?? 0;
+  const rxBlockRate = rx.rx_block_rate_hz ?? rx.rxBlockRateHz ?? 0;
   setStateChip(state);
-  setText("sample-rate", waiting ? "waiting for data" : `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
-  setText("block-rate", waiting ? "waiting for data" : `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
+  setText("sample-rate", waiting ? "waiting for data" : `${fmt(rxFrameRate, 2)} Hz`);
+  setText("block-rate", waiting ? "waiting for data" : `${fmt(rxBlockRate, 2)} Hz`);
   setText("last-idx", String(status.last_sample_idx ?? "n/a"));
   setText("malformed", String(rx.malformed_blocks_total ?? 0));
   setText("lost-frames", String(rx.lost_frames_total ?? 0));
