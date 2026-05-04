@@ -44,9 +44,12 @@ function renderSnapshot(s) {
 
 async function loadInitial() {
   try {
-    const res = await fetch('/latest');
+    const res = await fetch('./latest');
     if (res.ok) renderSnapshot(await res.json());
-  } catch (_) {}
+    else console.warn('[WEBUI] /latest returned', res.status);
+  } catch (e) {
+    console.warn('[WEBUI] polling error', e);
+  }
 }
 
 function startSocket() {
