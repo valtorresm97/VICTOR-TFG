@@ -597,7 +597,7 @@ def _render_diagnostics_panel(st, snapshot: dict):
     with st.expander("Diagnóstico avanzado", expanded=True):
         c1, c2 = st.columns(2)
         c1.metric("Estado", status.get("state_text", "n/a"))
-        c2.metric("Ready", int(bool(status.get("window_ready", False))))
+        c2.metric("Salud stream", status.get("stream_health", "n/a"))
 
         c3, c4 = st.columns(2)
         c3.metric("Edad publicación", f"{snapshot_publish_age:.2f}s" if snapshot_publish_age is not None else "n/a")
@@ -617,6 +617,15 @@ def _render_diagnostics_panel(st, snapshot: dict):
         c9, c10 = st.columns(2)
         c9.metric("Último intento", _fmt_us(status.get("last_feature_dt_us")))
         c10.metric("Estado intento", status.get("last_feature_status", "n/a"))
+
+        c11, c12 = st.columns(2)
+        c11.metric("Ready", int(bool(status.get("window_ready", False))))
+        c12.metric(
+            "Backlog/Warn/Crit",
+            f"{int(rx.get('queue_frames_current', 0))}/"
+            f"{int(runtime.get('queue_warn_frames', 0))}/"
+            f"{int(runtime.get('queue_crit_frames', 0))}",
+        )
 
         st.json(
             {
