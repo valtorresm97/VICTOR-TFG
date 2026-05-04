@@ -8,23 +8,41 @@
 </head>
 <body>
   <main class="container">
-    <h1>EEG Dashboard · WebUI</h1>
-    <section class="grid stats">
-      <div class="card"><h3>Estado</h3><p id="state">n/a</p></div>
-      <div class="card"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
-      <div class="card"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
-      <div class="card"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
-      <div class="card"><h3>Malformed</h3><p id="malformed">0</p></div>
-      <div class="card"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
-      <div class="card"><h3>Lost blocks</h3><p id="lost-blocks">0</p></div>
-      <div class="card"><h3>RMS</h3><p id="rms">n/a</p></div>
-      <div class="card"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
-      <div class="card"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
-      <div class="card"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
+    <header class="topbar card">
+      <div>
+        <h1>EEG Spectral Dashboard</h1>
+        <p class="subtitle">Arduino UNO Q · ADS1299 · Streaming en tiempo real</p>
+      </div>
+      <div class="state-chip-wrap">
+        <span class="chip-label">Estado</span>
+        <span id="state" class="state-chip">n/a</span>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2 class="section-title">Rendimiento de adquisición</h2>
+      <div class="grid stats">
+        <div class="card metric"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
+        <div class="card metric"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
+        <div class="card metric"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
+        <div class="card metric"><h3>Malformed</h3><p id="malformed">0</p></div>
+        <div class="card metric"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
+        <div class="card metric"><h3>Lost blocks</h3><p id="lost-blocks">0</p></div>
+      </div>
     </section>
 
-    <section class="card">
-      <h3>Bandpower relativo</h3>
+    <section class="section">
+      <h2 class="section-title">Features EEG</h2>
+      <div class="grid stats">
+        <div class="card metric"><h3>RMS</h3><p id="rms">n/a</p></div>
+        <div class="card metric"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
+        <div class="card metric"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
+        <div class="card metric"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2 class="section-title">Bandpower relativo</h2>
       <div id="bands"></div>
     </section>
   </main>

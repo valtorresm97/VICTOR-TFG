@@ -10,6 +10,21 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function setStateChip(state) {
+  const el = document.getElementById("state");
+  if (!el) return;
+  el.textContent = state;
+  el.style.borderColor = "rgba(87, 184, 255, 0.35)";
+  el.style.background = "rgba(87, 184, 255, 0.18)";
+  if (state === "waiting_for_data") {
+    el.style.borderColor = "rgba(255, 195, 87, 0.45)";
+    el.style.background = "rgba(255, 195, 87, 0.16)";
+  } else if (state === "features_ready") {
+    el.style.borderColor = "rgba(89, 255, 212, 0.45)";
+    el.style.background = "rgba(89, 255, 212, 0.14)";
+  }
+}
+
 function renderBands(bp = {}) {
   const root = document.getElementById("bands");
   root.innerHTML = "";
@@ -28,6 +43,12 @@ function renderSnapshot(s) {
   const f = s.features || {};
   const state = status.state ?? "waiting_for_data";
   const waiting = state === "waiting_for_data";
+  const rxFrameRate = rx.rx_frame_rate_hz ?? rx.rxFrameRateHz ?? 0;
+  const rxBlockRate = rx.rx_block_rate_hz ?? rx.rxBlockRateHz ?? 0;
+  setStateChip(state);
+  setText("state", state);
+  setText("sample-rate", waiting ? "waiting for data" : `${fmt(rxFrameRate, 2)} Hz`);
+  setText("block-rate", waiting ? "waiting for data" : `${fmt(rxBlockRate, 2)} Hz`);
   setText("state", state);
   setText("sample-rate", waiting ? "waiting for data" : `${fmt(rx.rx_frame_rate_hz, 2)} Hz`);
   setText("block-rate", waiting ? "waiting for data" : `${fmt(rx.rx_block_rate_hz, 2)} Hz`);
