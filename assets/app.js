@@ -32,6 +32,7 @@ function renderSnapshot(s) {
   setText("last-idx", String(status.last_sample_idx ?? "n/a"));
   setText("malformed", String(rx.malformed_blocks_total ?? 0));
   setText("lost-frames", String(rx.lost_frames_total ?? 0));
+  setText("lost-blocks", String(rx.lost_blocks_total ?? 0));
   setText("rms", fmt(f.rms, 6));
   setText("peak-freq", `${fmt(f.peak_freq, 2)} Hz`);
   setText("dominant-band", f.dominant_band ?? "n/a");

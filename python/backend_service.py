@@ -146,6 +146,14 @@ class BackendService:
                 publish_snapshot(snap)
             self._last_disk_publish_t = now
 
+    def start(self):
+        """Hook explícito de arranque para usar desde main.py (sin Streamlit runner)."""
+        return None
+
+    def loop(self):
+        """Alias semántico para el bucle principal de App.run(user_loop=...)."""
+        self.step()
+
     def get_latest_snapshot(self) -> dict:
         with self._snapshot_lock:
             return dict(self._latest_snapshot)
