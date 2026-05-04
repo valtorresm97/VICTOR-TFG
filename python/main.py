@@ -9,15 +9,16 @@ from web_server import EEGWebServer
 
 backend = create_backend_service()
 web = EEGWebServer(backend=backend)
+backend.start()
 web.start()
 
 
 def loop():
-    backend.step()
+    backend.loop()
     snap = backend.get_latest_snapshot()
     if snap:
         web.publish_snapshot(snap)
-    time.sleep(0.02)
+    time.sleep(0.02)  # evita busy-loop sin bloquear la recepción Bridge
 
 
 App.run(user_loop=loop)
