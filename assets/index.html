@@ -3,53 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EEG WebUI</title>
+  <title>EEG Dashboard 4CH</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="container">
-    <header class="topbar card">
-      <div>
-        <h1>EEG Spectral Dashboard</h1>
-        <p class="subtitle">Arduino UNO Q · ADS1299 · Streaming en tiempo real</p>
-      </div>
-      <div class="state-chip-wrap">
-        <span class="chip-label">Estado</span>
-        <span id="state" class="state-chip">n/a</span>
-      </div>
-    </header>
-
-    <section class="section">
-      <h2 class="section-title">Rendimiento de adquisición</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
-        <div class="card metric"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
-        <div class="card metric"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
-        <div class="card metric"><h3>Malformed</h3><p id="malformed">0</p></div>
-        <div class="card metric"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
-        <div class="card metric"><h3>Lost blocks</h3><p id="lost-blocks">0</p></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2 class="section-title">Features EEG</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>RMS</h3><p id="rms">n/a</p></div>
-        <div class="card metric"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
-        <div class="card metric"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
-        <div class="card metric"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
-      </div>
-    </section>
-
-    <section class="card section">
-      <h2 class="section-title">Bandpower relativo</h2>
-      <div id="bands"></div>
-    </section>
-
-    <section class="card section">
-      <h2 class="section-title">Bandpower absoluto (V² aprox)</h2>
-      <div id="bands-abs" class="bands-abs"></div>
-    </section>
+    <header class="card"><h1>EEG Spectral Dashboard (4 canales)</h1><div id="state" class="state-chip">waiting_for_data</div></header>
+    <section class="card"><h2>Resumen global</h2><div id="global"></div></section>
+    <section class="card"><h2>Métricas RX</h2><div id="rx"></div></section>
+    <section><h2>Canales</h2><div id="channels" class="channel-grid"></div></section>
   </main>
   <script src="./app.js"></script>
 </body>

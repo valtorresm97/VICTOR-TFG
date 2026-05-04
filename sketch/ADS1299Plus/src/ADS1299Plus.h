@@ -73,6 +73,7 @@ public:
   // programa todos los registros con los valores por defecto de arriba
   // y verifica el ID (9.6.1.1). Llama a esto tras begin().
   bool configureDefaults();
+  bool configureDifferentialWithBiasLeadOff();
 
   // Para liberar pines/ISR si procede
   void end();
@@ -122,7 +123,7 @@ public:
   bool enableLeadOffSenseN(uint8_t chMask);            // 9.6.1.10
   bool setLeadOffFlip(uint8_t chMask);                 // 9.6.1.11
   bool setSingleShot(bool singleShot);                 // CONFIG4.SINGLE_SHOT
-  bool enableLoffComparators(bool en);                 // CONFIG4.PD_LOFF_COMP (en=true => bit=0)
+  bool enableLoffComparators(bool en);                 // CONFIG4.LOFF_COMP_EN (en=true => bit=1)
 
   // BIAS derivation (no usado por defecto, pero expuesto):
   bool setBiasDeriveP(uint8_t chMask);                 // BIAS_SENSP
@@ -155,6 +156,7 @@ public:
 
   // Devuelve el ID crudo (registro 0x00) para logging/verificación
   bool readDeviceID(uint8_t& id);
+  bool readBiasStatus(bool& biasOff);
 
   // Acceso a pines (por si el usuario quiere controlar START/RESET manual)
   void pinStartHigh();
