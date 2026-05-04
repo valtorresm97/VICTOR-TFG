@@ -1,0 +1,6 @@
+name: EEG_MIDI
+description: ""
+ports: []
+bricks:
+- arduino:streamlit_ui: {}
+icon: 🎶

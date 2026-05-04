@@ -1,0 +1,21 @@
+# ignore app cache folder
+.cache/
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+
+build/
+dist/
+
+
+.env
+*.key
+*.pem
+
+
+# Backups temporales
+*.bak
+*.bak.*
+*.save
