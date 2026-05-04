@@ -348,7 +348,7 @@ class EEGReceiver:
             self.block_queue_frames_current -= sample_count
 
             # Fase 2: consumo desacoplado por bloque
-            proc.add_block_uV(samples)
+            proc.add_block_uV(samples, statuses=statuses)
 
             n_blocks += 1
             n_frames += sample_count
