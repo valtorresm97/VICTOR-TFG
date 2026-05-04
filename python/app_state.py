@@ -128,36 +128,11 @@ def _atomic_write_json(path: Path, payload: dict) -> None:
 # -----------------------------------------------------------------------------
 def _make_public_snapshot(snapshot: dict) -> dict:
     """Convierte el snapshot interno del backend en un snapshot público JSON."""
-    features = (snapshot.get("features", {}) or {})
-    last_good = (features.get("last_good", {}) or {})
-    scalars = (features.get("scalars", {}) or {})
-
-    public_last_good = {
-        "bandpower_abs": _json_safe(last_good.get("bandpower_abs", {}) or {}),
-        "bandpower_rel": _json_safe(last_good.get("bandpower_rel", {}) or {}),
-        "peak_freq": _json_safe(last_good.get("peak_freq")),
-        "peak_delta": _json_safe(last_good.get("peak_delta")),
-        "peak_theta": _json_safe(last_good.get("peak_theta")),
-        "peak_alpha": _json_safe(last_good.get("peak_alpha")),
-        "peak_beta": _json_safe(last_good.get("peak_beta")),
-        "peak_gamma": _json_safe(last_good.get("peak_gamma")),
-        "rms": _json_safe(last_good.get("rms")),
-    }
-
-    return {
-        "ts_monotonic": _json_safe(snapshot.get("ts_monotonic")),
-        "published_at_unix": time.time(),
-        "config": _json_safe(snapshot.get("config", {}) or {}),
-        "status": _json_safe(snapshot.get("status", {}) or {}),
-        "runtime": _json_safe(snapshot.get("runtime", {}) or {}),
-        "rx": _json_safe(snapshot.get("rx", {}) or {}),
-        "feature_perf": _json_safe(snapshot.get("feature_perf", {}) or {}),
-        "buffer": _json_safe(snapshot.get("buffer", {}) or {}),
-        "features": {
-            "last_good": public_last_good,
-            "scalars": _json_safe(scalars),
-        },
-    }
+    out = _json_safe(snapshot if isinstance(snapshot, dict) else {})
+    if not isinstance(out, dict):
+        out = {}
+    out["published_at_unix"] = time.time()
+    return out
 
 
 # -----------------------------------------------------------------------------
