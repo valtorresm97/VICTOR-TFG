@@ -655,4 +655,11 @@ No asumir que Python recibe 250 Hz sin medirlo.
 No usar código bloqueante en adquisición real.
 No introducir dependencias Python innecesarias.
 
+17. Knowledge updates
+
+- Hecho confirmado: el ADS1299 responde por SPI con ID `0x3C` en este hardware/proyecto.
+- Hecho confirmado: en captura válida RDATAC, `status` observado `0xC00000`; validar prefijo con máscara `0xF00000`.
+- Hecho confirmado: el contrato MCU→MPU activo usa bloques de `8` muestras (`BLOCK_SAMPLES=8`) para `eeg_block_uV`.
+- Regla Python duradera: `receiver.py` debe validar `sample_count`, longitud de payload, continuidad por índices y coherencia básica de `status`.
+- Regla de observabilidad duradera: publicar y vigilar métricas de pérdidas/drops/malformed/invalid-status en backend/dashboard.
 

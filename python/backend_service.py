@@ -338,6 +338,15 @@ def build_runtime_snapshot(reset_window_metrics: bool = False) -> dict:
     fm = app_perf.get_window_metrics(reset=reset_window_metrics)
     bs = proc.get_buffer_status(window_sec=FEATURE_WINDOW_SEC)
     has_good_feats = bool(_last_good_feats)
+    queue_frames = int(rxm.get("queue_frames_current", 0) or 0)
+    queue_warn_frames = int(FS_HZ * 1.0)   # ~1s backlog
+    queue_crit_frames = int(FS_HZ * 2.0)   # ~2s backlog
+    lost_or_drop_window = (
+        int(rxm.get("lost_frames_window", 0) or 0)
+        + int(rxm.get("queue_drops_frames_window", 0) or 0)
+        + int(rxm.get("malformed_blocks_window", 0) or 0)
+        + int(rxm.get("invalid_status_window", 0) or 0)
+    )
 
     if _last_feature_status == "failed":
         state_text = "feature_failed"
@@ -390,10 +399,18 @@ def build_runtime_snapshot(reset_window_metrics: bool = False) -> dict:
                 if _last_good_feature_update_monotonic > 0
                 else None
             ),
+            "stream_health": (
+                "critical" if (queue_frames >= queue_crit_frames or lost_or_drop_window > 0)
+                else "warning" if queue_frames >= queue_warn_frames
+                else "ok"
+            ),
         },
         "runtime": {
             "samples_since_feature": _samples_since_feature,
             "window_was_ready": _window_was_ready,
+            "queue_warn_frames": queue_warn_frames,
+            "queue_crit_frames": queue_crit_frames,
+            "lost_or_drop_window": lost_or_drop_window,
             "last_ingest_update_monotonic": (
                 _last_ingest_update_monotonic if _last_ingest_update_monotonic > 0 else None
             ),

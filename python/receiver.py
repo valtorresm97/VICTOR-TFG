@@ -88,6 +88,11 @@ class EEGReceiver:
         self._rx_block_rate_hz = 0.0
 
         self._last_report_t = self.t0
+        # Contrato esperado del firmware actual.
+        self.expected_block_samples: int = 8
+        self.expected_status_prefix: int = 0xC00000
+        self.status_prefix_mask: int = 0xF00000
+        self.invalid_status_total: int = 0
 
     # ============================================================
     # Helpers internos
@@ -101,6 +106,7 @@ class EEGReceiver:
 
         self.malformed_blocks_window: int = 0
         self.block_seq_mismatch_window: int = 0
+        self.invalid_status_window: int = 0
 
         self.queue_drops_blocks_window: int = 0
         self.queue_drops_frames_window: int = 0
@@ -242,7 +248,11 @@ class EEGReceiver:
             first_sample_idx = int(first_sample_idx)
             sample_count = int(sample_count)
 
-            if sample_count <= 0:
+            if sample_count <= 0 or sample_count > self.expected_block_samples:
+                self.malformed_blocks_total += 1
+                self.malformed_blocks_window += 1
+                return
+            if block_idx < 0 or first_sample_idx < 0:
                 self.malformed_blocks_total += 1
                 self.malformed_blocks_window += 1
                 return
@@ -281,6 +291,9 @@ class EEGReceiver:
             for i in range(sample_count):
                 base = i * stride
                 statuses[i] = int(vals[base])
+                if (statuses[i] & self.status_prefix_mask) != self.expected_status_prefix:
+                    self.invalid_status_total += 1
+                    self.invalid_status_window += 1
                 samples[i] = tuple(int(v) for v in vals[base + 1: base + 1 + self.num_ch])
 
             item: BlockItem = (
@@ -432,6 +445,8 @@ class EEGReceiver:
             "malformed_blocks_total": self.malformed_blocks_total,
             "block_seq_mismatch_window": self.block_seq_mismatch_window,
             "block_seq_mismatch_total": self.block_seq_mismatch_total,
+            "invalid_status_window": self.invalid_status_window,
+            "invalid_status_total": self.invalid_status_total,
 
             "frame_callback_avg_us_window": frame_cb_avg_us,
             "frame_callback_max_us_window": self.frame_callback_time_us_max_window,
