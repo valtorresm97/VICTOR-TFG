@@ -108,6 +108,11 @@ class BackendService:
             "features": {
                 "rms": feats.get("rms"),
                 "peak_freq": feats.get("peak_freq"),
+                "peak_delta": feats.get("peak_delta"),
+                "peak_theta": feats.get("peak_theta"),
+                "peak_alpha": feats.get("peak_alpha"),
+                "peak_beta": feats.get("peak_beta"),
+                "peak_gamma": feats.get("peak_gamma"),
                 "dominant_band": dominant_band,
                 "alpha_beta_ratio": alpha_beta_ratio,
                 "bandpower_rel": bp_rel,

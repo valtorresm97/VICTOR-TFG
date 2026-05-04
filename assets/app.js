@@ -37,6 +37,19 @@ function renderBands(bp = {}) {
   });
 }
 
+function renderAbsBands(bp = {}) {
+  const root = document.getElementById("bands-abs");
+  if (!root) return;
+  root.innerHTML = "";
+  bands.forEach((b) => {
+    const val = Number(bp[b] ?? 0);
+    const row = document.createElement("div");
+    row.className = "abs-row";
+    row.innerHTML = `<div>${b}</div><div class="mono">${fmt(val, 8)}</div>`;
+    root.appendChild(row);
+  });
+}
+
 function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
@@ -58,9 +71,15 @@ function renderSnapshot(s) {
   setText("lost-blocks", String(rx.lost_blocks_total ?? 0));
   setText("rms", fmt(f.rms, 6));
   setText("peak-freq", `${fmt(f.peak_freq, 2)} Hz`);
+  setText("peak-delta", `${fmt(f.peak_delta, 2)} Hz`);
+  setText("peak-theta", `${fmt(f.peak_theta, 2)} Hz`);
+  setText("peak-alpha", `${fmt(f.peak_alpha, 2)} Hz`);
+  setText("peak-beta", `${fmt(f.peak_beta, 2)} Hz`);
+  setText("peak-gamma", `${fmt(f.peak_gamma, 2)} Hz`);
   setText("dominant-band", f.dominant_band ?? "n/a");
   setText("alpha-beta", fmt(f.alpha_beta_ratio, 3));
   renderBands(f.bandpower_rel || {});
+  renderAbsBands(f.bandpower_abs || {});
 }
 
 async function loadInitial() {
