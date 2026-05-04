@@ -105,11 +105,7 @@ bool ADS1299Plus::configureDefaults()
     return false;
 
   // Lead-off sense en canales activos
-  uint8_t activeMask = 0xFF;
-  if (num_channels_ < 8)
-  {
-    activeMask = (1 << num_channels_) - 1;
-  }
+  const uint8_t activeMask = ADS_ClipMaskToChannels(0xFF, num_channels_);
   if (!enableLeadOffSenseP(activeMask))
     return false;
   if (!enableLeadOffSenseN(activeMask))
@@ -422,17 +418,17 @@ bool ADS1299Plus::configureLeadOff(uint8_t loffByte)
 
 bool ADS1299Plus::enableLeadOffSenseP(uint8_t chMask)
 {
-  return writeReg(ADS_REG_LOFF_SENSP, chMask);
+  return writeReg(ADS_REG_LOFF_SENSP, ADS_ClipMaskToChannels(chMask, num_channels_));
 }
 
 bool ADS1299Plus::enableLeadOffSenseN(uint8_t chMask)
 {
-  return writeReg(ADS_REG_LOFF_SENSN, chMask);
+  return writeReg(ADS_REG_LOFF_SENSN, ADS_ClipMaskToChannels(chMask, num_channels_));
 }
 
 bool ADS1299Plus::setLeadOffFlip(uint8_t chMask)
 {
-  return writeReg(ADS_REG_LOFF_FLIP, chMask);
+  return writeReg(ADS_REG_LOFF_FLIP, ADS_ClipMaskToChannels(chMask, num_channels_));
 }
 
 bool ADS1299Plus::setSingleShot(bool singleShot)
@@ -453,20 +449,20 @@ bool ADS1299Plus::enableLoffComparators(bool en)
   if (!readReg(ADS_REG_CONFIG4, cfg4))
     return false;
   if (en)
-    cfg4 &= ~ADS_CFG4_PD_LOFF_COMP;
+    cfg4 |= ADS_CFG4_LOFF_COMP_EN;
   else
-    cfg4 |= ADS_CFG4_PD_LOFF_COMP;
+    cfg4 &= ~ADS_CFG4_LOFF_COMP_EN;
   return writeReg(ADS_REG_CONFIG4, cfg4);
 }
 
 bool ADS1299Plus::setBiasDeriveP(uint8_t chMask)
 {
-  return writeReg(ADS_REG_BIAS_SENSP, chMask);
+  return writeReg(ADS_REG_BIAS_SENSP, ADS_ClipMaskToChannels(chMask, num_channels_));
 }
 
 bool ADS1299Plus::setBiasDeriveN(uint8_t chMask)
 {
-  return writeReg(ADS_REG_BIAS_SENSN, chMask);
+  return writeReg(ADS_REG_BIAS_SENSN, ADS_ClipMaskToChannels(chMask, num_channels_));
 }
 
 // ---- Lectura de frames ----

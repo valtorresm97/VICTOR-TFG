@@ -122,7 +122,7 @@ public:
   bool enableLeadOffSenseN(uint8_t chMask);            // 9.6.1.10
   bool setLeadOffFlip(uint8_t chMask);                 // 9.6.1.11
   bool setSingleShot(bool singleShot);                 // CONFIG4.SINGLE_SHOT
-  bool enableLoffComparators(bool en);                 // CONFIG4.PD_LOFF_COMP (en=true => bit=0)
+  bool enableLoffComparators(bool en);                 // CONFIG4.LOFF_COMP_EN (en=true => bit=1)
 
   // BIAS derivation (no usado por defecto, pero expuesto):
   bool setBiasDeriveP(uint8_t chMask);                 // BIAS_SENSP
