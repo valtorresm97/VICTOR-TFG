@@ -46,6 +46,7 @@ function renderSnapshot(s) {
   const rxFrameRate = rx.rx_frame_rate_hz ?? rx.rxFrameRateHz ?? 0;
   const rxBlockRate = rx.rx_block_rate_hz ?? rx.rxBlockRateHz ?? 0;
   setStateChip(state);
+  setText("state", state);
   setText("sample-rate", waiting ? "waiting for data" : `${fmt(rxFrameRate, 2)} Hz`);
   setText("block-rate", waiting ? "waiting for data" : `${fmt(rxBlockRate, 2)} Hz`);
   setText("last-idx", String(status.last_sample_idx ?? "n/a"));
