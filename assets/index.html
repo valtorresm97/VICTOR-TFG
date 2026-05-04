@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EEG WebUI</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>EEG Dashboard · WebUI</h1>
+    <section class="grid stats">
+      <div class="card"><h3>Estado</h3><p id="state">n/a</p></div>
+      <div class="card"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
+      <div class="card"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
+      <div class="card"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
+      <div class="card"><h3>Malformed</h3><p id="malformed">0</p></div>
+      <div class="card"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
+      <div class="card"><h3>RMS</h3><p id="rms">n/a</p></div>
+      <div class="card"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
+      <div class="card"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
+      <div class="card"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
+    </section>
+
+    <section class="card">
+      <h3>Bandpower relativo</h3>
+      <div id="bands"></div>
+    </section>
+  </main>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

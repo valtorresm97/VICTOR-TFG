@@ -1,7 +1,23 @@
 from __future__ import annotations
 
-from arduino.app_bricks.streamlit_ui import st
+import time
 
-from dashboard import render_dashboard
+from arduino.app_utils import App
 
-render_dashboard(st)
+from backend_service import create_backend_service
+from web_server import EEGWebServer
+
+backend = create_backend_service()
+web = EEGWebServer(backend=backend)
+web.start()
+
+
+def loop():
+    backend.step()
+    snap = backend.get_latest_snapshot()
+    if snap:
+        web.publish_snapshot(snap)
+    time.sleep(0.02)
+
+
+App.run(user_loop=loop)
