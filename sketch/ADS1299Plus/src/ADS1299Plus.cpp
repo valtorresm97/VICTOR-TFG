@@ -123,6 +123,34 @@ bool ADS1299Plus::configureDefaults()
   return true;
 }
 
+bool ADS1299Plus::configureDifferentialWithBiasLeadOff()
+{
+  cmdStop();
+  cmdSDATAC();
+
+  if (!writeReg(ADS_REG_CONFIG1, ADS_CFG1_250SPS)) return false;                   // 0x96
+  if (!writeReg(ADS_REG_CONFIG2, ADS_CFG2_TEST_OFF)) return false;                  // 0xC0
+  if (!writeReg(ADS_REG_CONFIG3, ADS_CFG3_INTREF_BIAS_ON_BIAS_LOFF)) return false; // 0xEE
+  if (!writeReg(ADS_REG_LOFF, ADS_LOFF_DCAC_24nA_31Hz_80pct)) return false;         // 0xA6
+
+  for (uint8_t ch = 1; ch <= num_channels_; ++ch) {
+    if (!setChannel(ch, ADS_CH_DEFAULT_GAIN24())) return false;                      // 0x60
+  }
+
+  const uint8_t activeMask = ADS_ClipMaskToChannels(0xFF, num_channels_);           // 0x0F en ADS1299-4
+  if (!setBiasDeriveP(activeMask)) return false;                                     // BIAS_SENSP=0x0F
+  if (!setBiasDeriveN(activeMask)) return false;                                     // BIAS_SENSN=0x0F
+  if (!enableLeadOffSenseP(activeMask)) return false;                                // LOFF_SENSP=0x0F
+  if (!enableLeadOffSenseN(activeMask)) return false;                                // LOFF_SENSN=0x0F
+  if (!setLeadOffFlip(0x00)) return false;                                           // LOFF_FLIP=0x00
+
+  if (!writeReg(ADS_REG_GPIO, ADS_GPIO_ALL_INPUTS)) return false;                    // GPIO=0x0F
+  if (!writeReg(ADS_REG_MISC1, 0x00)) return false;                                  // SRB1 OFF
+  if (!writeReg(ADS_REG_CONFIG4, ADS_CFG4_CONT_LOFF_ON)) return false;               // 0x02
+
+  return true;
+}
+
 void ADS1299Plus::end()
 {
   cmdStop();
@@ -516,4 +544,12 @@ bool ADS1299Plus::readDataOnDemand(uint32_t &status24, int32_t chOut[NUM_CHANNEL
 bool ADS1299Plus::readDeviceID(uint8_t &id)
 {
   return readReg(ADS_REG_ID, id);
+}
+
+bool ADS1299Plus::readBiasStatus(bool &biasOff)
+{
+  uint8_t cfg3 = 0;
+  if (!readReg(ADS_REG_CONFIG3, cfg3)) return false;
+  biasOff = (cfg3 & 0x01) != 0; // BIAS_STAT: 0=conectado, 1=lead-off/no conectado
+  return true;
 }

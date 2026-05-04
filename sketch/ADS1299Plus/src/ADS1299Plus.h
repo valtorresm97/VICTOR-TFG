@@ -73,6 +73,7 @@ public:
   // programa todos los registros con los valores por defecto de arriba
   // y verifica el ID (9.6.1.1). Llama a esto tras begin().
   bool configureDefaults();
+  bool configureDifferentialWithBiasLeadOff();
 
   // Para liberar pines/ISR si procede
   void end();
@@ -155,6 +156,7 @@ public:
 
   // Devuelve el ID crudo (registro 0x00) para logging/verificación
   bool readDeviceID(uint8_t& id);
+  bool readBiasStatus(bool& biasOff);
 
   // Acceso a pines (por si el usuario quiere controlar START/RESET manual)
   void pinStartHigh();

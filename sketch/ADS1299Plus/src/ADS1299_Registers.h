@@ -277,6 +277,10 @@ static constexpr uint8_t ADS_CFG2_TEST_OFF =
 // CONFIG3: referencia interna ON, bias OFF, sin medir bias, sin bias_loff_sens
 static constexpr uint8_t ADS_CFG3_INTREF_NO_BIAS =
   ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, false/*bias_on*/, false/*bias_loff_sens*/);
+static constexpr uint8_t ADS_CFG3_INTREF_BIAS_ON =
+  ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, true/*bias_on*/, false/*bias_loff_sens*/);
+static constexpr uint8_t ADS_CFG3_INTREF_BIAS_ON_BIAS_LOFF =
+  ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, true/*bias_on*/, true/*bias_loff_sens*/);
 
 // LOFF: DC+AC — I=24nA, F=31.2Hz, COMP_TH≈80–85% (ajusta según pruebas)
 static constexpr uint8_t ADS_LOFF_DCAC_24nA_31Hz_80pct =
