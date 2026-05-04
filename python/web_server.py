@@ -28,8 +28,8 @@ class EEGWebServer:
 
     def get_status(self):
         snap = self.backend.get_latest_snapshot() or read_snapshot(default={})
-        st = (snap.get("status", {}) if isinstance(snap, dict) else {}) or {}
-        return {"ok": True, "state": st.get("state", "unknown"), "window_ready": st.get("window_ready", False)}
+        state = (snap.get("status") if isinstance(snap, dict) else None) or "unknown"
+        return {"ok": True, "state": state}
 
     def get_latest(self):
         return self.backend.get_latest_snapshot() or read_snapshot(default={})
