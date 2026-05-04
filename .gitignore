@@ -20,3 +20,4 @@ dist/
 *.bak.*
 *.save
 README.local.bak
+state/
