@@ -53,6 +53,13 @@ static constexpr uint32_t DEBUG_EVERY_N = 500;
 // Benchmark / instrumentación
 static constexpr bool     BENCH_NOTIFY_ENABLED  = true;
 static constexpr uint32_t BENCH_REPORT_EVERY_MS = 5000;
+static constexpr uint8_t ADS_MODE_DEFAULT_NO_BIAS = 0;
+static constexpr uint8_t ADS_MODE_DIFFERENTIAL_BIAS_LOFF = 1;
+static constexpr uint8_t ADS_INPUT_MODE = ADS_MODE_DIFFERENTIAL_BIAS_LOFF;
+// Máscara de derivación BIAS:
+// 0x01 = solo CH1 contribuye al BIAS drive (modo depuración).
+// 0x0F = CH1..CH4 contribuyen al BIAS drive (modo normal multicanal).
+static constexpr uint8_t ADS_BIAS_DERIVE_MASK = 0x01;
 
 // ---------------------------
 // Handshake con Python (para no perder notifies)
@@ -276,9 +283,48 @@ void setup() {
   } else {
     Monitor.println("ERROR: no se pudo leer ADS1299 ID tras begin()");
   }
-    if (!ads.configureDefaults()) {
-    Monitor.println("ERROR: configureDefaults() fallo");
+  // Modo diferencial con BIAS:
+  // - INxP/INxN se mantienen como pares diferenciales de cada canal.
+  // - BIASOUT conduce el electrodo RLD/BIAS para estabilizar el modo común.
+  // - BIASIN solo se usa para medición/ruteo interno si la PCB lo conecta externamente.
+  // - No usamos MUX_BIAS_MEAS en adquisición normal.
+  bool ok = false;
+  if (ADS_INPUT_MODE == ADS_MODE_DIFFERENTIAL_BIAS_LOFF) {
+    Monitor.println("ADS mode: DIFFERENTIAL + BIAS DRIVE + BIAS LEAD-OFF");
+    Monitor.print("ADS bias derive mask=0x");
+    Monitor.println(ADS_BIAS_DERIVE_MASK, HEX);
+    ok = ads.configureDifferentialWithBiasLeadOff(ADS_BIAS_DERIVE_MASK);
+  } else {
+    Monitor.println("ADS mode: DEFAULT NO BIAS");
+    ok = ads.configureDefaults();
+  }
+  if (!ok) {
+    Monitor.println("ERROR: ADS1299 configuration failed");
     while (1) delay(1000);
+  }
+  {
+    uint8_t v = 0;
+    if (ads.readReg(ADS_REG_CONFIG1, v)) { Monitor.print("CONFIG1=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG2, v)) { Monitor.print("CONFIG2=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG3, v)) { Monitor.print("CONFIG3=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF, v)) { Monitor.print("LOFF=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CH1SET, v)) { Monitor.print("CH1SET=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CH2SET, v)) { Monitor.print("CH2SET=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CH3SET, v)) { Monitor.print("CH3SET=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CH4SET, v)) { Monitor.print("CH4SET=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_BIAS_SENSP, v)) { Monitor.print("BIAS_SENSP=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_BIAS_SENSN, v)) { Monitor.print("BIAS_SENSN=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF_SENSP, v)) { Monitor.print("LOFF_SENSP=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF_SENSN, v)) { Monitor.print("LOFF_SENSN=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_LOFF_FLIP, v)) { Monitor.print("LOFF_FLIP=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_GPIO, v)) { Monitor.print("GPIO=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_MISC1, v)) { Monitor.print("MISC1=0x"); Monitor.println(v, HEX); }
+    if (ads.readReg(ADS_REG_CONFIG4, v)) { Monitor.print("CONFIG4=0x"); Monitor.println(v, HEX); }
+    bool biasOff = false;
+    if (ads.readBiasStatus(biasOff)) {
+      Monitor.print("BIAS_STAT=");
+      Monitor.println(biasOff ? 1 : 0);
+    }
   }
 
   // Limpiar posibles interrupciones DRDY antiguas o espurias antes de arrancar adquisición

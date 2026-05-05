@@ -66,11 +66,12 @@ enum : uint8_t {
 //  CONFIG1 (0x01) — 9.6.1.2 // Construye el byte completo para CONFIG1. 
 // EJEMPLO: 
 // --> uint8_t config1 = ADS_CFG1_MAKE(false, false, ADS_DR_250);
-// --> config1 = 0b10000110 = 0x86
+// --> config1 = 0b10010110 = 0x96
 // =========================
-// [7]=1 (fix), [6]=DAISY_EN, [5]=CLK_EN, [2:0]=DR
+// [7]=1 (fix), [6]=DAISY_EN, [5]=CLK_EN, [4]=1 (fix), [3]=0 (fix), [2:0]=DR
 #define ADS_CFG1_DAISY_EN    0x40 // Si está en 1, el chip está en modo daisy-chain (permite conectar varios ADS1299 en serie usando un solo bus SPI). //En nuestro diseño no lo usamos (sólo un ADS1299), así que lo dejaremos en 0.
 #define ADS_CFG1_CLK_EN      0x20 // Si está en 1, la señal de reloj interno se copia al pin CLK (útil para sincronizar varios dispositivos). En nuestro caso desactivado.
+#define ADS_CFG1_RESERVED_BITS 0x90
 // DR data rate:  Define los valores válidos de Data Rate (DR bits [2:0]).
 enum : uint8_t {
   ADS_DR_16k   = 0b000,
@@ -82,7 +83,7 @@ enum : uint8_t {
   ADS_DR_250   = 0b110, // recomendado
   // 111 reservado
 };
-#define ADS_CFG1_MAKE(daisy_en, clk_en, dr) (uint8_t)(0x80 | ((daisy_en)?ADS_CFG1_DAISY_EN:0) | ((clk_en)?ADS_CFG1_CLK_EN:0) | ((dr)&0x07))
+#define ADS_CFG1_MAKE(daisy_en, clk_en, dr) (uint8_t)(ADS_CFG1_RESERVED_BITS | ((daisy_en)?ADS_CFG1_DAISY_EN:0) | ((clk_en)?ADS_CFG1_CLK_EN:0) | ((dr)&0x07))
 
 // =========================
 //  CONFIG2 (0x02) — 9.6.1.3 (Test tone) // Registro pensado para generar señales de prueba.
@@ -114,15 +115,16 @@ enum : uint8_t { // CAL_FREQ Esto configura los bits [1:0] (CAL_FREQ)
   // false   // biasLoffSens → lead-off no por bias
 // );
 // =========================
-// [7]=PD_REFBUF, [4]=BIAS_MEAS, [3]=BIASREF_INT, [2]=PD_BIAS, [1]=BIAS_LOFF_SENS, [0]=BIAS_STAT (R)
+// [7]=PD_REFBUF, [6:5]=11 (reservados, escribir 1), [4]=BIAS_MEAS, [3]=BIASREF_INT, [2]=PD_BIAS, [1]=BIAS_LOFF_SENS, [0]=BIAS_STAT (R)
 #define ADS_CFG3_PD_REFBUF     0x80 // Controla el buffer de referencia interna (4.5 V).
 #define ADS_CFG3_BIAS_MEAS     0x10 //Permite medir BIASIN respecto a BIASREF usando el MUX de canal. solo habilita la ruta de medida. Útil para debug.
 #define ADS_CFG3_BIASREF_INT   0x08 //Selecciona la referencia de BIAS: interna (≈ (AVDD+AVSS)/2) o externa (pin BIASREF).
 #define ADS_CFG3_PD_BIAS       0x04 // Controla el amplificador/driver BIAS (salida en BIASOUT).
 #define ADS_CFG3_BIAS_LOFF_SENS 0x02 // Habilita que el sensado de lead-off se haga a través del nodo BIAS (modo alternativo).
+#define ADS_CFG3_RESERVED_BITS 0x60
 // helper
 #define ADS_CFG3_MAKE(useIntRef, biasMeas, biasRefInt, biasOn, biasLoffSens) \
-  (uint8_t)((useIntRef?ADS_CFG3_PD_REFBUF:0) | (biasMeas?ADS_CFG3_BIAS_MEAS:0) | (biasRefInt?ADS_CFG3_BIASREF_INT:0) | (biasOn?ADS_CFG3_PD_BIAS:0) | (biasLoffSens?ADS_CFG3_BIAS_LOFF_SENS:0))
+  (uint8_t)(ADS_CFG3_RESERVED_BITS | (useIntRef?ADS_CFG3_PD_REFBUF:0) | (biasMeas?ADS_CFG3_BIAS_MEAS:0) | (biasRefInt?ADS_CFG3_BIASREF_INT:0) | (biasOn?ADS_CFG3_PD_BIAS:0) | (biasLoffSens?ADS_CFG3_BIAS_LOFF_SENS:0))
 
 
 
@@ -132,11 +134,14 @@ enum : uint8_t { // CAL_FREQ Esto configura los bits [1:0] (CAL_FREQ)
 // =========================
 // [7:5]=COMP_TH, [3:2]=ILEAD_OFF, [1:0]=FLEAD_OFF
 // Threshold comparador (ejemplos comunes; consulta tabla exacta de %) umbral del comparador
-#define ADS_LOFF_COMPTH_95   (0b000<<5)
-#define ADS_LOFF_COMPTH_90   (0b001<<5)
-#define ADS_LOFF_COMPTH_85   (0b010<<5)
-#define ADS_LOFF_COMPTH_80   (0b011<<5)
-#define ADS_LOFF_COMPTH_75   (0b100<<5)
+#define ADS_LOFF_COMPTH_95    (0b000<<5)
+#define ADS_LOFF_COMPTH_92_5  (0b001<<5)
+#define ADS_LOFF_COMPTH_90    (0b010<<5)
+#define ADS_LOFF_COMPTH_87_5  (0b011<<5)
+#define ADS_LOFF_COMPTH_85    (0b100<<5)
+#define ADS_LOFF_COMPTH_80    (0b101<<5)
+#define ADS_LOFF_COMPTH_75    (0b110<<5)
+#define ADS_LOFF_COMPTH_70    (0b111<<5)
 // Corriente lead-off
 #define ADS_LOFF_I_6nA       (0b00<<2)
 #define ADS_LOFF_I_24nA      (0b01<<2)
@@ -237,10 +242,11 @@ inline bool ADS_IsLeadOffN(uint8_t statN, uint8_t ch) {
 // =========================
 //  CONFIG4 (0x17) — 9.6.1.17
 // =========================
-// [3]=SINGLE_SHOT (1=single-shot, 0=continuo), [1]=PD_LOFF_COMP (0=ON, 1=PD?)*
-// Nota: algunos diagramas invierten semántica; verifica tu revisión de datasheet.
+// [3]=SINGLE_SHOT (1=single-shot, 0=continuo), [1]=LOFF_COMP_EN (1=comparadores lead-off ON)
 #define ADS_CFG4_SINGLE_SHOT   0x08
-#define ADS_CFG4_PD_LOFF_COMP  0x02
+#define ADS_CFG4_LOFF_COMP_EN  0x02
+// Alias de compatibilidad (nombre heredado en código anterior):
+#define ADS_CFG4_PD_LOFF_COMP  ADS_CFG4_LOFF_COMP_EN
 #define ADS_CFG4_CONT_CONV     0x00 // SINGLE_SHOT=0
 
 // =========================
@@ -271,6 +277,10 @@ static constexpr uint8_t ADS_CFG2_TEST_OFF =
 // CONFIG3: referencia interna ON, bias OFF, sin medir bias, sin bias_loff_sens
 static constexpr uint8_t ADS_CFG3_INTREF_NO_BIAS =
   ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, false/*bias_on*/, false/*bias_loff_sens*/);
+static constexpr uint8_t ADS_CFG3_INTREF_BIAS_ON =
+  ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, true/*bias_on*/, false/*bias_loff_sens*/);
+static constexpr uint8_t ADS_CFG3_INTREF_BIAS_ON_BIAS_LOFF =
+  ADS_CFG3_MAKE(true/*refbuf*/, false/*bias_meas*/, true/*biasref_int*/, true/*bias_on*/, true/*bias_loff_sens*/);
 
 // LOFF: DC+AC — I=24nA, F=31.2Hz, COMP_TH≈80–85% (ajusta según pruebas)
 static constexpr uint8_t ADS_LOFF_DCAC_24nA_31Hz_80pct =
@@ -285,6 +295,6 @@ inline uint8_t ADS_CH_DEFAULT_GAIN24() {
 static constexpr uint8_t ADS_GPIO_ALL_INPUTS =
   ADS_GPIO_MAKE(0x0, ADS_GPIO_DIR_IN_ALL);
 
-// CONFIG4: continuo y comparadores ON
+// CONFIG4: continuo y comparadores lead-off habilitados
 static constexpr uint8_t ADS_CFG4_CONT_LOFF_ON =
-  (ADS_CFG4_CONT_CONV /*0*/) /* PD_LOFF_COMP=0 → comparadores habilitados */;
+  (ADS_CFG4_CONT_CONV | ADS_CFG4_LOFF_COMP_EN);
