@@ -109,7 +109,7 @@ class EEGSignalProcessor:
             rms = float(np.sqrt(np.mean(x_uV * x_uV))) if x_uV.size else 0.0
             uniq = np.unique(np.round(x_uV, 3)).size
             flat = uniq <= 2
-            sat = np.mean(np.abs(x_uV) > SAT_UV_THRESHOLD) > SAT_FRACTION_THRESHOLD
+            sat = np.mean(np.abs(x_uV) > 2000.0) > 0.05
             loff_hits = np.mean((((loff_p >> ch) & 0x1) | ((loff_n >> ch) & 0x1)).astype(np.float32))
 
             feats = self.dsp.compute_features(x, psd_method=psd_method, include_spectrum=False, include_peaks=False, include_relative_bandpower=True)

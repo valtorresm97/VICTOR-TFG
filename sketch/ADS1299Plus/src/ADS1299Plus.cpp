@@ -141,6 +141,7 @@ bool ADS1299Plus::configureDifferentialWithBiasLeadOff(uint8_t biasDeriveMask)
   const uint8_t biasMask = ADS_ClipMaskToChannels(biasDeriveMask, num_channels_);
   if (!setBiasDeriveP(biasMask)) return false;                                       // BIAS_SENSP (p.ej. 0x01 o 0x0F)
   if (!setBiasDeriveN(biasMask)) return false;                                       // BIAS_SENSN (p.ej. 0x01 o 0x0F)
+
   if (!enableLeadOffSenseP(activeMask)) return false;                                // LOFF_SENSP=0x0F
   if (!enableLeadOffSenseN(activeMask)) return false;                                // LOFF_SENSN=0x0F
   if (!setLeadOffFlip(0x00)) return false;                                           // LOFF_FLIP=0x00
