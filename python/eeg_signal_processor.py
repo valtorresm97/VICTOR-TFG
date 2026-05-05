@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 SAMPLING_RATE = 250
 NUM_CHANNELS = 4
+SAT_UV_THRESHOLD = 3500.0
+SAT_FRACTION_THRESHOLD = 0.10
 
 
 class EEGSignalProcessor:

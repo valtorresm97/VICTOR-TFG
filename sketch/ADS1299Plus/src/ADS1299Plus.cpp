@@ -123,7 +123,7 @@ bool ADS1299Plus::configureDefaults()
   return true;
 }
 
-bool ADS1299Plus::configureDifferentialWithBiasLeadOff()
+bool ADS1299Plus::configureDifferentialWithBiasLeadOff(uint8_t biasDeriveMask)
 {
   cmdStop();
   cmdSDATAC();
@@ -138,8 +138,10 @@ bool ADS1299Plus::configureDifferentialWithBiasLeadOff()
   }
 
   const uint8_t activeMask = ADS_ClipMaskToChannels(0xFF, num_channels_);           // 0x0F en ADS1299-4
-  if (!setBiasDeriveP(activeMask)) return false;                                     // BIAS_SENSP=0x0F
-  if (!setBiasDeriveN(activeMask)) return false;                                     // BIAS_SENSN=0x0F
+  const uint8_t biasMask = ADS_ClipMaskToChannels(biasDeriveMask, num_channels_);
+  if (!setBiasDeriveP(biasMask)) return false;                                       // BIAS_SENSP (p.ej. 0x01 o 0x0F)
+  if (!setBiasDeriveN(biasMask)) return false;                                       // BIAS_SENSN (p.ej. 0x01 o 0x0F)
+
   if (!enableLeadOffSenseP(activeMask)) return false;                                // LOFF_SENSP=0x0F
   if (!enableLeadOffSenseN(activeMask)) return false;                                // LOFF_SENSN=0x0F
   if (!setLeadOffFlip(0x00)) return false;                                           // LOFF_FLIP=0x00

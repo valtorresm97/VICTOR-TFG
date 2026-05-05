@@ -73,7 +73,7 @@ public:
   // programa todos los registros con los valores por defecto de arriba
   // y verifica el ID (9.6.1.1). Llama a esto tras begin().
   bool configureDefaults();
-  bool configureDifferentialWithBiasLeadOff();
+  bool configureDifferentialWithBiasLeadOff(uint8_t biasDeriveMask = 0x0F);
 
   // Para liberar pines/ISR si procede
   void end();

@@ -56,6 +56,10 @@ static constexpr uint32_t BENCH_REPORT_EVERY_MS = 5000;
 static constexpr uint8_t ADS_MODE_DEFAULT_NO_BIAS = 0;
 static constexpr uint8_t ADS_MODE_DIFFERENTIAL_BIAS_LOFF = 1;
 static constexpr uint8_t ADS_INPUT_MODE = ADS_MODE_DIFFERENTIAL_BIAS_LOFF;
+// Máscara de derivación BIAS:
+// 0x01 = solo CH1 contribuye al BIAS drive (modo depuración).
+// 0x0F = CH1..CH4 contribuyen al BIAS drive (modo normal multicanal).
+static constexpr uint8_t ADS_BIAS_DERIVE_MASK = 0x01;
 
 // ---------------------------
 // Handshake con Python (para no perder notifies)
@@ -287,7 +291,9 @@ void setup() {
   bool ok = false;
   if (ADS_INPUT_MODE == ADS_MODE_DIFFERENTIAL_BIAS_LOFF) {
     Monitor.println("ADS mode: DIFFERENTIAL + BIAS DRIVE + BIAS LEAD-OFF");
-    ok = ads.configureDifferentialWithBiasLeadOff();
+    Monitor.print("ADS bias derive mask=0x");
+    Monitor.println(ADS_BIAS_DERIVE_MASK, HEX);
+    ok = ads.configureDifferentialWithBiasLeadOff(ADS_BIAS_DERIVE_MASK);
   } else {
     Monitor.println("ADS mode: DEFAULT NO BIAS");
     ok = ads.configureDefaults();
