@@ -9,6 +9,10 @@ from arduino.app_utils import Bridge
 from eeg_signal_processor import EEGSignalProcessor
 from receiver import EEGReceiver
 from app_state import publish_snapshot, clear_runtime_state
+from sonification_features import (
+    SonificationFeatureAdapter,
+    build_sonification_snapshot,
+)
 
 from sonification_features import (
     SonificationFeatureAdapter,
@@ -117,6 +121,8 @@ class BackendService:
         self.sonif_adapter = SonificationFeatureAdapter()
         self._last_sonification = None
 
+        self.sonif_adapter = SonificationFeatureAdapter()
+        self._last_sonification = None
         self._samples_since_feature = 0
         self._window_was_ready = False
 
@@ -269,6 +275,7 @@ class BackendService:
                 "live_enabled": MIDI_LIVE_ENABLED,
                 "lookahead_sec": MIDI_LOOKAHEAD_SEC,
             },
+            "sonification": build_sonification_snapshot(self._last_sonification),
         }
 
     # --------------------------------------------------------
@@ -432,6 +439,7 @@ class BackendService:
                         self._last_features
                     )
 
+                    self._last_sonification = self.sonif_adapter.update(self._last_features)
                     if not self._logged_features_ready:
                         logger.info("[DSP] features ready")
                         self._logged_features_ready = True
