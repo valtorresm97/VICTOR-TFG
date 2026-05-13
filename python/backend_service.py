@@ -9,6 +9,10 @@ from arduino.app_utils import Bridge
 from eeg_signal_processor import EEGSignalProcessor
 from receiver import EEGReceiver
 from app_state import publish_snapshot, clear_runtime_state
+from sonification_features import (
+    SonificationFeatureAdapter,
+    build_sonification_snapshot,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("EEG_BACKEND")
@@ -42,6 +46,8 @@ class BackendService:
         logger.info("[BRIDGE] registered eeg_block_uV")
 
         self._last_features: dict = {}
+        self.sonif_adapter = SonificationFeatureAdapter()
+        self._last_sonification = None
         self._samples_since_feature = 0
         self._window_was_ready = False
 
@@ -118,6 +124,7 @@ class BackendService:
                 "bandpower_rel": bp_rel,
                 "bandpower_abs": bp_abs,
             },
+            "sonification": build_sonification_snapshot(self._last_sonification),
         }
 
     def step(self):
@@ -145,6 +152,7 @@ class BackendService:
                 feats = self.proc.compute_live_features(channel_idx=0, window_sec=FEATURE_WINDOW_SEC, psd_method="multitaper")
                 if feats:
                     self._last_features = feats
+                    self._last_sonification = self.sonif_adapter.update(self._last_features)
                     if not self._logged_features_ready:
                         logger.info("[DSP] features ready")
                         self._logged_features_ready = True
