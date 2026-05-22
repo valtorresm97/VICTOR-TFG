@@ -50,6 +50,95 @@ function renderAbsBands(bp = {}) {
   });
 }
 
+function renderWarnings(s) {
+  const root = document.getElementById("warnings");
+  if (!root) return;
+  const sonif = s.sonification || {};
+  const midi = s.midi || {};
+  const transport = midi.transport || {};
+  const warnings = [];
+
+  if (!sonif.valid) warnings.push("No hay features de sonificación válidas.");
+  if (!midi.live_enabled) warnings.push("MIDI físico desactivado por seguridad.");
+  if (transport.enabled === false) warnings.push(`Handler MCU esperado: ${midi.mcu_handler || "midi_bytes"}.`);
+  if (Number(transport.failed_events_total || 0) > 0) warnings.push("Bridge/MIDI reporta eventos fallidos.");
+  if (Number(transport.dropped_events_total || 0) > 256) warnings.push("Hay muchos eventos MIDI descartados.");
+
+  root.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
+}
+
+function renderSonification(s) {
+  const sonif = s.sonification || {};
+  const music = s.music || {};
+  const midi = s.midi || {};
+  const scheduler = midi.scheduler || {};
+  const transport = midi.transport || {};
+
+  setText("sonif-activity", fmt(sonif.activity, 3));
+  setText("sonif-calmness", fmt(sonif.calmness, 3));
+  setText("sonif-tension", fmt(sonif.tension, 3));
+  setText("sonif-rhythmic-density", fmt(sonif.rhythmic_density, 3));
+  setText("sonif-register", fmt(sonif.register, 3));
+  setText("sonif-harmonic-stability", fmt(sonif.harmonic_stability, 3));
+  setText("sonif-velocity-factor", fmt(sonif.velocity_factor, 3));
+  setText("sonif-note-probability", fmt(sonif.note_probability, 3));
+
+  setText("music-rhythm-cadence", music.rhythm_cadence || "n/a");
+  setText("music-current-chord", (music.current_chord_notes || []).join(" · ") || "n/a");
+  setText("music-scale", `${music.root_note || "n/a"} ${music.scale_name || ""}`.trim());
+  setText("music-main-note", music.main_note || "n/a");
+
+  setText("midi-live-enabled", midi.live_enabled ? "enabled" : "disabled");
+  setText("midi-queued-events", String(scheduler.queued_events ?? 0));
+  setText("midi-active-notes", String(scheduler.active_notes ?? 0));
+  setText("midi-sent-events", String(transport.sent_events_total ?? 0));
+  setText("midi-dropped-events", String(transport.dropped_events_total ?? 0));
+  setText("midi-failed-events", String(transport.failed_events_total ?? 0));
+}
+
+function renderPianoRoll(s) {
+  const root = document.getElementById("piano-roll");
+  const empty = document.getElementById("piano-roll-empty");
+  if (!root || !empty) return;
+
+  const notes = ((s.music || {}).recent_notes || []).filter((n) => Number.isFinite(Number(n.abs_start)));
+  if (!notes.length) {
+    root.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+
+  empty.style.display = "none";
+  const now = Number(s.ts_monotonic || notes[notes.length - 1].abs_end || notes[notes.length - 1].abs_start);
+  const windowSec = Math.max(4, Number((s.performance || {}).recent_notes_window_sec || 20));
+  const startWindow = now - windowSec;
+  const pitches = notes.map((n) => Number(n.pitch_midi)).filter(Number.isFinite);
+  const minPitch = Math.min(...pitches, 48);
+  const maxPitch = Math.max(...pitches, 84);
+  const pitchSpan = Math.max(1, maxPitch - minPitch + 1);
+
+  const rows = [];
+  for (let p = maxPitch; p >= minPitch; p -= 1) {
+    const y = ((maxPitch - p) / pitchSpan) * 100;
+    rows.push(`<div class="piano-row" style="top:${y.toFixed(2)}%"></div>`);
+  }
+
+  const bars = notes.map((n) => {
+    const absStart = Number(n.abs_start);
+    const absEnd = Math.max(absStart + 0.04, Number(n.abs_end || absStart + 0.2));
+    const left = Math.max(0, Math.min(100, ((absStart - startWindow) / windowSec) * 100));
+    const right = Math.max(left + 0.8, Math.min(100, ((absEnd - startWindow) / windowSec) * 100));
+    const pitch = Number(n.pitch_midi);
+    const y = ((maxPitch - pitch) / pitchSpan) * 100;
+    const vel = Math.max(0, Math.min(127, Number(n.velocity || 0)));
+    const alpha = 0.35 + 0.65 * (vel / 127);
+    const label = `${n.note_name || pitch} · v${vel} · ch${n.channel ?? 0}`;
+    return `<div class="note-bar" title="${label}" style="left:${left.toFixed(2)}%;width:${(right - left).toFixed(2)}%;top:${y.toFixed(2)}%;opacity:${alpha.toFixed(2)}">${n.note_name || pitch}</div>`;
+  });
+
+  root.innerHTML = rows.join("") + bars.join("");
+}
+
 function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
@@ -77,6 +166,9 @@ function renderSnapshot(s) {
   setText("alpha-beta", fmt(f.alpha_beta_ratio, 3));
   renderBands(f.bandpower_rel || {});
   renderAbsBands(f.bandpower_abs || {});
+  renderWarnings(s);
+  renderSonification(s);
+  renderPianoRoll(s);
 }
 
 async function loadInitial() {

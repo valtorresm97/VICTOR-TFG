@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import threading
 import time
 
@@ -9,11 +10,6 @@ from arduino.app_utils import Bridge
 from eeg_signal_processor import EEGSignalProcessor
 from receiver import EEGReceiver
 from app_state import publish_snapshot, clear_runtime_state
-from sonification_features import (
-    SonificationFeatureAdapter,
-    build_sonification_snapshot,
-)
-
 from sonification_features import (
     SonificationFeatureAdapter,
     build_sonification_snapshot,
@@ -30,6 +26,15 @@ from midi_byte_transport import MidiByteTransport
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("EEG_BACKEND")
+
+
+_NOTE_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+
+def _midi_to_note_name(midi_note: int) -> str:
+    note = max(0, min(127, int(midi_note)))
+    octave = (note // 12) - 1
+    return f"{_NOTE_NAMES[note % 12]}{octave}"
 
 
 # ------------------------------------------------------------
@@ -64,10 +69,21 @@ MUSIC_MAIN_NOTE = "G4"
 MUSIC_SCALE_FAMILY = "Diatonic"
 MUSIC_SCALE_NAME = "Major (Ionian)"
 
+RECENT_NOTES_MAX = 96
+RECENT_NOTES_WINDOW_SEC = 20.0
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return bool(default)
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 # Importante:
-# - Déjalo en False hasta que el sketch Arduino exponga "midi_bytes".
-# - Ponlo True cuando el MCU ya pueda recibir bytes y sacarlos por D1/TX.
-MIDI_LIVE_ENABLED = False
+# - Por defecto queda en False aunque el handler "midi_bytes" exista.
+# - Actívalo con EEG_MIDI_LIVE_ENABLED=1 solo cuando la UART física esté verificada.
+MIDI_LIVE_ENABLED = _env_bool("EEG_MIDI_LIVE_ENABLED", False)
 
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02
@@ -120,9 +136,6 @@ class BackendService:
 
         self.sonif_adapter = SonificationFeatureAdapter()
         self._last_sonification = None
-
-        self.sonif_adapter = SonificationFeatureAdapter()
-        self._last_sonification = None
         self._samples_since_feature = 0
         self._window_was_ready = False
 
@@ -155,6 +168,10 @@ class BackendService:
         self._last_notes_count = 0
         self._last_midi_due_count = 0
         self._last_midi_sent_count = 0
+        self._last_rhythm_cadence = None
+        self._last_chord_root_midi = None
+        self._last_chord_pitches: list[int] = []
+        self._recent_notes: list[dict] = []
 
         self._music_generation_errors_total = 0
         self._midi_pump_errors_total = 0
@@ -179,6 +196,7 @@ class BackendService:
     def _build_snapshot(self) -> dict:
         """Construye el snapshot público consumido por WebUI/disco."""
         rxm = self.rx.get_window_metrics(reset=False)
+        now = time.monotonic()
 
         window_ready = self.proc.is_window_ready(FEATURE_WINDOW_SEC)
         rx_blocks_total = int(rxm.get("rx_blocks_total", 0) or 0)
@@ -215,7 +233,7 @@ class BackendService:
             )[0]
 
         return {
-            "ts_monotonic": time.monotonic(),
+            "ts_monotonic": now,
             "config": {
                 "fs_hz": FS_HZ,
                 "num_ch": NUM_CH,
@@ -263,7 +281,14 @@ class BackendService:
                 "main_note": MUSIC_MAIN_NOTE,
                 "scale_family": MUSIC_SCALE_FAMILY,
                 "scale_name": MUSIC_SCALE_NAME,
+                "rhythm_cadence": self._last_rhythm_cadence,
+                "current_chord_root_midi": self._last_chord_root_midi,
+                "current_chord_pitches": list(self._last_chord_pitches),
+                "current_chord_notes": [
+                    _midi_to_note_name(p) for p in self._last_chord_pitches
+                ],
                 "last_notes_count": self._last_notes_count,
+                "recent_notes": list(self._recent_notes),
                 "generation_errors_total": self._music_generation_errors_total,
             },
             "midi": {
@@ -274,13 +299,54 @@ class BackendService:
                 "pump_errors_total": self._midi_pump_errors_total,
                 "live_enabled": MIDI_LIVE_ENABLED,
                 "lookahead_sec": MIDI_LOOKAHEAD_SEC,
+                "mcu_handler": MIDI_BRIDGE_METHOD,
+                "enabled_source": "EEG_MIDI_LIVE_ENABLED",
             },
-            "sonification": build_sonification_snapshot(self._last_sonification),
+            "performance": {
+                "snapshot_publish_period_sec": SNAPSHOT_PUBLISH_PERIOD_SEC,
+                "disk_publish_period_sec": DISK_PUBLISH_PERIOD_SEC,
+                "midi_generate_period_sec": MIDI_GENERATE_PERIOD_SEC,
+                "recent_notes_window_sec": RECENT_NOTES_WINDOW_SEC,
+            },
+            "errors": {
+                "music_generation_errors_total": self._music_generation_errors_total,
+                "midi_pump_errors_total": self._midi_pump_errors_total,
+            },
         }
 
     # --------------------------------------------------------
     # Generación musical live
     # --------------------------------------------------------
+
+    def _remember_recent_notes(self, notes, time_origin: float) -> None:
+        """Guarda una ventana pequeña de notas para debug/piano roll UI."""
+        cutoff = float(time_origin) - RECENT_NOTES_WINDOW_SEC
+
+        recent = [
+            note
+            for note in self._recent_notes
+            if float(note.get("abs_end", 0.0) or 0.0) >= cutoff
+        ]
+
+        for note in notes:
+            abs_start = float(time_origin) + float(note.t_start)
+            abs_end = float(time_origin) + float(note.t_end)
+            recent.append(
+                {
+                    "abs_start": abs_start,
+                    "abs_end": abs_end,
+                    "t_start": float(note.t_start),
+                    "t_end": float(note.t_end),
+                    "pitch_midi": int(note.pitch_midi),
+                    "note_name": _midi_to_note_name(note.pitch_midi),
+                    "velocity": int(note.velocity),
+                    "channel": int(note.channel),
+                    "program": int(note.program),
+                }
+            )
+
+        recent.sort(key=lambda n: (n["abs_start"], n["pitch_midi"]))
+        self._recent_notes = recent[-RECENT_NOTES_MAX:]
 
     def _maybe_generate_music(self, now: float) -> None:
         """
@@ -314,6 +380,9 @@ class BackendService:
                 segment=music_segment,
                 index=0,
             )
+            self._last_rhythm_cadence = music_segment.rhythm_cadence.name
+            self._last_chord_root_midi = int(bar.chord_root_midi)
+            self._last_chord_pitches = [int(p) for p in bar.chord_pitches]
 
             notes = self.note_gen.generate_notes_for_bar(
                 segment=music_segment,
@@ -339,6 +408,7 @@ class BackendService:
             )
 
             self._last_notes_count = len(notes)
+            self._remember_recent_notes(notes, time_origin=now)
             self._last_music_t = now
 
             if not self._logged_first_music:
@@ -439,7 +509,6 @@ class BackendService:
                         self._last_features
                     )
 
-                    self._last_sonification = self.sonif_adapter.update(self._last_features)
                     if not self._logged_features_ready:
                         logger.info("[DSP] features ready")
                         self._logged_features_ready = True
@@ -481,6 +550,22 @@ class BackendService:
     def start(self):
         """Hook explícito de arranque para main.py."""
         return None
+
+    def send_panic(self) -> int:
+        """Envía All Sound Off / All Notes Off si el transporte MIDI está activo."""
+        try:
+            events = self.midi_scheduler.panic()
+            if not self.midi_transport.enabled:
+                return 0
+            return self.midi_transport.send_events(events)
+        except Exception as exc:
+            self._midi_pump_errors_total += 1
+            logger.exception("[MIDI] panic error: %s", exc)
+            return 0
+
+    def stop(self):
+        """Hook explícito de parada: evita notas colgadas si MIDI físico está activo."""
+        self.send_panic()
 
     def loop(self):
         """Alias semántico para App.run(user_loop=...)."""

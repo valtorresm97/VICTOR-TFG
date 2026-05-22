@@ -60,6 +60,49 @@ static constexpr uint32_t BENCH_REPORT_EVERY_MS = 5000;
 static bool mpu_ready = false;
 static uint32_t last_ready_check_ms = 0;
 
+// ---------------------------
+// MIDI OUT live
+// ---------------------------
+static constexpr uint32_t MIDI_BAUD = 31250;
+
+// Handler Bridge disponible para Python:
+//   Bridge.call("midi_bytes", n, b0, b1, b2)
+//
+// La UART física queda desactivada por defecto porque RouterBridge usa su
+// propio serial interno y hay que confirmar en placa qué objeto Arduino
+// corresponde realmente a D1/TX sin interferir con Bridge/Monitor.
+#ifndef MIDI_UART_ENABLED
+#define MIDI_UART_ENABLED 0
+#endif
+
+#if MIDI_UART_ENABLED
+#ifndef MIDI_SERIAL
+#error "Define MIDI_SERIAL as the hardware UART verified for D1/TX MIDI OUT."
+#endif
+#endif
+
+static bool midi_bytes(int n, int b0, int b1, int b2) {
+  if (n < 1 || n > 3) {
+    return false;
+  }
+
+  const uint8_t data[3] = {
+    static_cast<uint8_t>(b0 & 0xFF),
+    static_cast<uint8_t>(b1 & 0xFF),
+    static_cast<uint8_t>(b2 & 0xFF),
+  };
+
+#if MIDI_UART_ENABLED
+  for (int i = 0; i < n; ++i) {
+    MIDI_SERIAL.write(data[i]);
+  }
+  return true;
+#else
+  (void)data;
+  return false;
+#endif
+}
+
 static bool checkMpuReady() {
   bool ready = false;
   RpcCall c = Bridge.call("linux_started");
@@ -241,6 +284,19 @@ void setup() {
   delay(5000);
 
   Monitor.println("BOOT: EEG_MIDI");
+
+#if MIDI_UART_ENABLED
+  MIDI_SERIAL.begin(MIDI_BAUD);
+  Monitor.println("MIDI UART enabled at 31250 baud");
+#else
+  Monitor.println("MIDI UART disabled: midi_bytes handler registered for dry-run only");
+#endif
+
+  if (!Bridge.provide_safe("midi_bytes", midi_bytes)) {
+    Monitor.println("ERROR: no se pudo registrar handler midi_bytes");
+  } else {
+    Monitor.println("Bridge handler registered: midi_bytes");
+  }
 
   bench.report_last_ms = millis();
   bench.tx_queue_max_window = 0;
