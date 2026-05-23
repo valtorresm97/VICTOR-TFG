@@ -45,6 +45,23 @@ static constexpr float FS_HZ  = 250.0f;
 static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 
 // ---------------------------
+// Diagnóstico ADS1299 opcional
+// ---------------------------
+// 0 = captura real normal INxP-INxN
+// 1 = entradas internas en corto (ruido/offset interno)
+// 2 = señal de test interna ADS1299 (escala/ganancia/SPI)
+//
+// Mantener en 0 para capturas reales. Cambiar solo para compilar una prueba
+// diagnóstica temporal y volver a 0 después.
+#ifndef ADS_DIAGNOSTIC_MODE
+#define ADS_DIAGNOSTIC_MODE 0
+#endif
+
+#define ADS_DIAG_NORMAL 0
+#define ADS_DIAG_SHORTED_INPUTS 1
+#define ADS_DIAG_TEST_SIGNAL_INTERNAL 2
+
+// ---------------------------
 // Debug / rendimiento
 // ---------------------------
 static constexpr bool     DEBUG_MONITOR = true;
@@ -278,6 +295,45 @@ static void initFilters() {
   }
 }
 
+static bool applyAdsDiagnosticMode() {
+#if ADS_DIAGNOSTIC_MODE == ADS_DIAG_SHORTED_INPUTS
+  Monitor.println("ADS1299 DIAG: shorted_inputs (CH1-CH4 MUX=SHORT, lead-off sense off)");
+
+  // La prueba de entradas cortocircuitadas mide ruido/offset interno. Se
+  // desactiva lead-off para no inyectar corriente de comprobación durante la
+  // medida diagnóstica.
+  if (!ads.enableLeadOffSenseP(0x00)) return false;
+  if (!ads.enableLeadOffSenseN(0x00)) return false;
+  if (!ads.writeReg(ADS_REG_CONFIG2, ADS_CFG2_TEST_OFF)) return false;
+
+  for (uint8_t ch = 1; ch <= ADS1299Plus::NUM_CHANNELS; ++ch) {
+    if (!ads.setChannelMux(ch, ADS_MUX_SHORT)) return false;
+  }
+  return true;
+
+#elif ADS_DIAGNOSTIC_MODE == ADS_DIAG_TEST_SIGNAL_INTERNAL
+  Monitor.println("ADS1299 DIAG: test_signal_internal (CONFIG2 INT_CAL, CH1-CH4 MUX=TESTSIG)");
+
+  // Señal interna lenta (~fCLK/2^21) con amplitud 1x. Sirve para verificar
+  // escala, ganancia, reconstrucción 24-bit y streaming sin electrodos.
+  if (!ads.enableLeadOffSenseP(0x00)) return false;
+  if (!ads.enableLeadOffSenseN(0x00)) return false;
+  if (!ads.writeReg(ADS_REG_CONFIG2, ADS_CFG2_MAKE(true, false, ADS_CALF_CLK_2_21))) return false;
+
+  for (uint8_t ch = 1; ch <= ADS1299Plus::NUM_CHANNELS; ++ch) {
+    if (!ads.setChannelMux(ch, ADS_MUX_TESTSIG)) return false;
+  }
+  return true;
+
+#elif ADS_DIAGNOSTIC_MODE == ADS_DIAG_NORMAL
+  Monitor.println("ADS1299 DIAG: normal acquisition (INxP-INxN)");
+  return true;
+
+#else
+#error "ADS_DIAGNOSTIC_MODE must be 0 normal, 1 shorted_inputs, or 2 test_signal_internal"
+#endif
+}
+
 void setup() {
   Bridge.begin();
   Monitor.begin();
@@ -334,6 +390,11 @@ void setup() {
   }
     if (!ads.configureDefaults()) {
     Monitor.println("ERROR: configureDefaults() fallo");
+    while (1) delay(1000);
+  }
+
+  if (!applyAdsDiagnosticMode()) {
+    Monitor.println("ERROR: applyAdsDiagnosticMode() fallo");
     while (1) delay(1000);
   }
 

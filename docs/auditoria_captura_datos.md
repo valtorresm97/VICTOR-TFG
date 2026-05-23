@@ -256,9 +256,12 @@ No aplicar hasta tener capturas reales:
 
 | Propuesta | Registro/area | Motivo | Riesgo | Requiere aprobacion |
 | --- | --- | --- | --- | --- |
-| Modo test signal interno | CONFIG2 + CHnSET MUX test | Validar escala y SPI con senal conocida | Cambia entrada real | Si |
-| Modo shorted inputs | CHnSET MUX short | Medir ruido interno y offset | Cambia configuracion de canal | Si |
+| Modo test signal interno | CONFIG2 + CHnSET MUX test | Validar escala y SPI con senal conocida | Cambia entrada real | Implementado como modo opcional desactivado por defecto |
+| Modo shorted inputs | CHnSET MUX short | Medir ruido interno y offset | Cambia configuracion de canal | Implementado como modo opcional desactivado por defecto |
 | Ruta raw/unfiltered diagnostica | Firmware + receiver | Separar adquisicion real de filtros MCU | Cambia payload o agrega evento | Si |
 | BIAS/DRL | CONFIG3 + BIAS_SENSP/N | Reducir modo comun/50 Hz en cabeza real | Seguridad/conexion fisica | Si |
 | Revisar lead-off durante EEG | LOFF/LOFF_SENSP/N/CONFIG4 | Evitar inyeccion/artefacto si molesta | Puede afectar contacto/senal | Si |
 | Ajustar notch/LP/gamma | `filters.h`/DSP | Si datos muestran deformacion o ruido | Puede cambiar features | Si |
+
+Ver `docs/ads1299_diagnostic_modes.md` para ejecutar `shorted_inputs` y
+`test_signal_internal` sin alterar el modo EEG real por defecto.
