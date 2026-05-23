@@ -18,9 +18,9 @@ corregir o al menos discutir bits fijos de CONFIG1/CONFIG3.
 | Registro | Direccion | Codigo actual | Valor actual | Datasheet / expectativa | Riesgo | Estado |
 | --- | ---: | --- | ---: | --- | --- | --- |
 | ID | 0x00 | `readReg(ADS_REG_ID)` | observado `0x3C` | ADS1299-4 esperado, NU_CH=00 | Ninguno | OK |
-| CONFIG1 | 0x01 | `ADS_CFG1_MAKE(false,false,ADS_DR_250)` | `0x86` | Bit7=1, bits[4:3] fijos `10`, DR=110. Valor esperado conservador: `0x96` | Bit fijo [4] queda a 0; configuracion no preserva campos reservados/fijos | Incorrecto / corregir antes de BIAS |
+| CONFIG1 | 0x01 | `ADS_CFG1_MAKE(false,false,ADS_DR_250)` | antes `0x86`, corregido a `0x96` | Bit7=1, bits[4:3] fijos `10`, DR=110. Valor esperado conservador: `0x96` | Bit fijo [4] quedaba a 0; ya se preserva | Corregido |
 | CONFIG2 | 0x02 | `ADS_CFG2_TEST_OFF` | `0xC0` | Bits[7:6] fijos `11`; test off | OK para normal. Test interno usa `0xD0` con INT_CAL | OK |
-| CONFIG3 | 0x03 | `ADS_CFG3_INTREF_NO_BIAS` | `0x88` | Bits[6:5] fijos `11`; PD_REFBUF=1; BIASREF_INT=1; PD_BIAS=0. Valor esperado sin BIAS: `0xE8` | Bits fijos [6:5] quedan a 0. Activar BIAS con helper actual daria `0x8C`, deberia ser `0xEC` | Incorrecto / corregir antes de BIAS |
+| CONFIG3 | 0x03 | `ADS_CFG3_INTREF_NO_BIAS` | antes `0x88`, corregido a `0xE8` | Bits[6:5] fijos `11`; PD_REFBUF=1; BIASREF_INT=1; PD_BIAS=0. Valor esperado sin BIAS: `0xE8` | Bits fijos [6:5] quedaban a 0. Activar BIAS ahora dara `0xEC` | Corregido |
 | LOFF | 0x04 | `ADS_LOFF_DCAC_24nA_31Hz_80pct` | `0x66` | Lead-off 24 nA, 31.2 Hz, umbral 80% | Puede inyectar componente diagnostica; no deberia mezclarse con pruebas BIAS iniciales | Dudoso |
 | CH1SET | 0x05 | `ADS_CH_DEFAULT_GAIN24()` | `0x60` | ON, gain 24, MUX normal, SRB2 off | OK para Fp1-Fp2 diferencial | OK |
 | CH2SET | 0x06 | igual CH1 | `0x60` | ON, gain 24, normal | CH2-CH4 activos aunque no se analizan | OK |
@@ -42,7 +42,7 @@ corregir o al menos discutir bits fijos de CONFIG1/CONFIG3.
 ## Correcciones recomendadas antes de BIAS/DRL
 
 No son cambios de filtros ni de arquitectura; son preservacion de bits fijos del
-datasheet:
+datasheet. Ya aplicado en `sketch/ADS1299Plus/src/ADS1299_Registers.h`:
 
 ```cpp
 // CONFIG1: bit7=1, bits[4:3]=10, DR=250

@@ -82,7 +82,8 @@ enum : uint8_t {
   ADS_DR_250   = 0b110, // recomendado
   // 111 reservado
 };
-#define ADS_CFG1_MAKE(daisy_en, clk_en, dr) (uint8_t)(0x80 | ((daisy_en)?ADS_CFG1_DAISY_EN:0) | ((clk_en)?ADS_CFG1_CLK_EN:0) | ((dr)&0x07))
+#define ADS_CFG1_RESERVED_FIXED 0x90 // bit7=1 y bits[4:3]=10; datasheet 9.6.1.2, Table 13.
+#define ADS_CFG1_MAKE(daisy_en, clk_en, dr) (uint8_t)(ADS_CFG1_RESERVED_FIXED | ((daisy_en)?ADS_CFG1_DAISY_EN:0) | ((clk_en)?ADS_CFG1_CLK_EN:0) | ((dr)&0x07))
 
 // =========================
 //  CONFIG2 (0x02) — 9.6.1.3 (Test tone) // Registro pensado para generar señales de prueba.
@@ -121,8 +122,9 @@ enum : uint8_t { // CAL_FREQ Esto configura los bits [1:0] (CAL_FREQ)
 #define ADS_CFG3_PD_BIAS       0x04 // Controla el amplificador/driver BIAS (salida en BIASOUT).
 #define ADS_CFG3_BIAS_LOFF_SENS 0x02 // Habilita que el sensado de lead-off se haga a través del nodo BIAS (modo alternativo).
 // helper
+#define ADS_CFG3_RESERVED_FIXED 0x60 // bits[6:5]=11; datasheet 9.6.1.4, Table 15.
 #define ADS_CFG3_MAKE(useIntRef, biasMeas, biasRefInt, biasOn, biasLoffSens) \
-  (uint8_t)((useIntRef?ADS_CFG3_PD_REFBUF:0) | (biasMeas?ADS_CFG3_BIAS_MEAS:0) | (biasRefInt?ADS_CFG3_BIASREF_INT:0) | (biasOn?ADS_CFG3_PD_BIAS:0) | (biasLoffSens?ADS_CFG3_BIAS_LOFF_SENS:0))
+  (uint8_t)(ADS_CFG3_RESERVED_FIXED | (useIntRef?ADS_CFG3_PD_REFBUF:0) | (biasMeas?ADS_CFG3_BIAS_MEAS:0) | (biasRefInt?ADS_CFG3_BIASREF_INT:0) | (biasOn?ADS_CFG3_PD_BIAS:0) | (biasLoffSens?ADS_CFG3_BIAS_LOFF_SENS:0))
 
 
 
