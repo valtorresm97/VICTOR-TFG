@@ -44,6 +44,11 @@ ADC_FULL_SCALE_UV = 8388607.0 * LSB_V * 1e6
 RESTING_RMS_WARN_UV = 500.0
 RESTING_PTP_WARN_UV = 5000.0
 RESTING_OFFSET_WARN_UV = 250.0
+WINDOW_SEC = 2.0
+WINDOW_HOP_SEC = 1.0
+WINDOW_RMS_CLEAN_UV = 100.0
+WINDOW_RMS_ARTIFACT_UV = 200.0
+WINDOW_PTP_ARTIFACT_UV = 5000.0
 BANDS = {
     "delta": (0.5, 4.0),
     "theta": (4.0, 8.0),
@@ -117,6 +122,53 @@ def _peak_freq(freqs: np.ndarray, psd: np.ndarray, f_low: float, f_high: float) 
     return float(sub_freqs[int(np.argmax(sub_psd))])
 
 
+def _windowed_metrics(x: np.ndarray, fs_hz: float) -> dict:
+    """Summarize stable windows separately from full-capture transient artifacts."""
+    if x.size == 0 or fs_hz <= 0:
+        return {}
+    win = max(1, int(round(WINDOW_SEC * fs_hz)))
+    hop = max(1, int(round(WINDOW_HOP_SEC * fs_hz)))
+    if x.size < win:
+        return {}
+
+    rows = []
+    for start in range(0, x.size - win + 1, hop):
+        segment = x[start : start + win]
+        rms = float(np.sqrt(np.mean(segment ** 2)))
+        ptp = float(np.ptp(segment))
+        robust_ptp = float(np.percentile(segment, 95) - np.percentile(segment, 5))
+        rows.append((start / fs_hz, rms, ptp, robust_ptp))
+
+    arr = np.asarray(rows, dtype=float)
+    starts = arr[:, 0]
+    rms_values = arr[:, 1]
+    ptp_values = arr[:, 2]
+    robust_ptp_values = arr[:, 3]
+    artifact_mask = (rms_values > WINDOW_RMS_ARTIFACT_UV) | (ptp_values > WINDOW_PTP_ARTIFACT_UV)
+    best_idx = int(np.argmin(rms_values))
+    worst_idx = int(np.argmax(rms_values))
+
+    return {
+        "window_sec": WINDOW_SEC,
+        "hop_sec": WINDOW_HOP_SEC,
+        "window_count": int(arr.shape[0]),
+        "median_rms_uV": float(np.median(rms_values)),
+        "p90_rms_uV": float(np.percentile(rms_values, 90)),
+        "p95_rms_uV": float(np.percentile(rms_values, 95)),
+        "max_rms_uV": float(np.max(rms_values)),
+        "median_ptp_uV": float(np.median(ptp_values)),
+        "p95_ptp_uV": float(np.percentile(ptp_values, 95)),
+        "max_ptp_uV": float(np.max(ptp_values)),
+        "median_robust_ptp_uV": float(np.median(robust_ptp_values)),
+        "p95_robust_ptp_uV": float(np.percentile(robust_ptp_values, 95)),
+        "artifact_window_fraction": float(np.mean(artifact_mask)),
+        "best_window_start_sec": float(starts[best_idx]),
+        "best_window_rms_uV": float(rms_values[best_idx]),
+        "worst_window_start_sec": float(starts[worst_idx]),
+        "worst_window_rms_uV": float(rms_values[worst_idx]),
+    }
+
+
 def _channel_metrics(x: np.ndarray, sample_idx: np.ndarray, fs_hz: float) -> dict:
     if x.size == 0:
         return {}
@@ -153,6 +205,7 @@ def _channel_metrics(x: np.ndarray, sample_idx: np.ndarray, fs_hz: float) -> dic
         "peak_by_band_hz": {name: _peak_freq(freqs, psd, lo, hi) for name, (lo, hi) in BANDS.items()},
         "line_50_power": line_50,
         "line_50_ratio_1_50": float(line_50 / total_1_50) if total_1_50 > 0 else None,
+        "windowed": _windowed_metrics(x, fs_hz),
     }
 
 
@@ -171,6 +224,14 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
         recommendations.append("Check Bridge queue drops and MCU pending>1 DRDY events.")
 
     ch1 = report["channels"].get("ch1", {})
+    ch1_windowed = ch1.get("windowed", {}) or {}
+    artifact_fraction = float(ch1_windowed.get("artifact_window_fraction", 1.0))
+    median_window_rms = ch1_windowed.get("median_rms_uV")
+    stable_windows_clean = (
+        median_window_rms is not None
+        and float(median_window_rms) <= WINDOW_RMS_CLEAN_UV
+        and artifact_fraction < 0.25
+    )
     if is_shorted and not reasons:
         if ch1.get("rms_uV", 0.0) <= 5.0 and ch1.get("ptp_uV", 0.0) <= 100.0:
             return (
@@ -195,12 +256,14 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
     if apply_resting_limits and abs(ch1.get("mean_uV", 0.0)) > RESTING_OFFSET_WARN_UV:
         reasons.append("very large residual offset for a filtered resting EEG capture")
         recommendations.append("Check electrode contact, input bias/common-mode path, and ADS1299 scaling.")
-    if apply_resting_limits and ch1.get("rms_uV", 0.0) > RESTING_RMS_WARN_UV:
+    if apply_resting_limits and ch1.get("rms_uV", 0.0) > RESTING_RMS_WARN_UV and not stable_windows_clean:
         reasons.append("CH1 RMS is far above typical resting scalp EEG amplitude")
         recommendations.append("Treat this as transport-valid but physiologically suspicious; check gain/LSB, electrode placement, and BIAS/DRL strategy.")
-    if apply_resting_limits and ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV:
+    if apply_resting_limits and ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV and not stable_windows_clean:
         reasons.append("CH1 peak-to-peak amplitude is far above typical resting scalp EEG")
         recommendations.append("Look for motion, electrode polarization, missing reference/common-mode control, or scaling error.")
+    if apply_resting_limits and stable_windows_clean and ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV:
+        recommendations.append("Full-capture peak-to-peak is high, but most 2 s windows are stable; inspect transient movement/artifact periods instead of rejecting the whole capture.")
 
     if is_test_signal and not reasons:
         if ch1.get("rms_uV", 0.0) > 10.0 and ch1.get("ptp_uV", 0.0) > 100.0:
@@ -222,6 +285,12 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
 
     if reasons:
         return "dudosa", reasons, recommendations
+    if apply_resting_limits and 0.05 <= artifact_fraction < 0.25:
+        return (
+            "valida_preliminar_con_artefactos",
+            ["stable windows look physiologically plausible, with some transient artifacts"],
+            ["Use the clean/still intervals for EEG validation and repeat with better cable fixation to reduce transient jumps."],
+        )
     return "valida_preliminar", ["no automatic quality failure detected"], ["Compare eyes-open and eyes-closed alpha before accepting physiological validity."]
 
 
@@ -274,14 +343,32 @@ def _write_markdown(capture_dir: Path, report: dict) -> None:
             lines.append(f"- {key}: {value:.6g}")
         else:
             lines.append(f"- {key}: {value}")
+    windowed = ch1.get("windowed", {}) or {}
+    if windowed:
+        lines.extend(["", "## CH1 windowed stability", ""])
+        lines.append(f"- window_sec: {windowed.get('window_sec')}")
+        lines.append(f"- window_count: {windowed.get('window_count')}")
+        for key in (
+            "median_rms_uV",
+            "p95_rms_uV",
+            "best_window_rms_uV",
+            "best_window_start_sec",
+            "median_ptp_uV",
+            "p95_ptp_uV",
+            "artifact_window_fraction",
+        ):
+            lines.append(f"- {key}: {_fmt_md_number(windowed.get(key))}")
     lines.extend(["", "## Multichannel summary", ""])
-    lines.append("| Channel | RMS uV | Mean uV | PTP uV | Peak Hz | 50 Hz ratio |")
-    lines.append("| --- | ---: | ---: | ---: | ---: | ---: |")
+    lines.append("| Channel | RMS uV | Median win RMS uV | Artifact win % | Mean uV | PTP uV | Peak Hz | 50 Hz ratio |")
+    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
     for channel, metrics in sorted(report["channels"].items()):
+        win = metrics.get("windowed", {}) or {}
         lines.append(
-            "| {channel} | {rms:.6g} | {mean:.6g} | {ptp:.6g} | {peak} | {ratio} |".format(
+            "| {channel} | {rms:.6g} | {median_win} | {artifact_pct} | {mean:.6g} | {ptp:.6g} | {peak} | {ratio} |".format(
                 channel=channel,
                 rms=float(metrics.get("rms_uV", 0.0) or 0.0),
+                median_win=_fmt_md_number(win.get("median_rms_uV")),
+                artifact_pct=_fmt_md_number(100.0 * float(win.get("artifact_window_fraction", 0.0))) if win else "n/a",
                 mean=float(metrics.get("mean_uV", 0.0) or 0.0),
                 ptp=float(metrics.get("ptp_uV", 0.0) or 0.0),
                 peak=_fmt_md_number(metrics.get("peak_freq_hz")),

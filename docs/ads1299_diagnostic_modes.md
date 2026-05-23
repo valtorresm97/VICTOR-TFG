@@ -171,3 +171,84 @@ cat "$DIR/quality_report.md"
 
 Comparar la tabla multicanal del informe. CH2-CH4 deberian quedar apagados y no
 deben usarse para interpretar EEG.
+
+## Plan candidato: ear EEG CH1-only
+
+Las capturas realizadas indican que el modo mas prometedor, por ahora, es:
+
+- `ADS_DIAGNOSTIC_MODE=5` (`bias_ch1_only_loff_off`).
+- CH1P = mastoide/oreja izquierda.
+- CH1N = mastoide/oreja derecha.
+- `RLD_DRV` = muneca o antebrazo, no cuello/mastoide si aumenta 50 Hz.
+- CH2-CH4 apagados; no interpretar sus columnas como EEG.
+
+Motivo: `shorted_inputs` dio ruido interno muy bajo, asi que ADC/SPI/escala no
+parecen el problema principal. En cambio, las entradas sin electrodos y Fp1-Fp2
+mostraron amplitudes grandes y picos alrededor de 25 Hz. El montaje tipo
+ear-EEG con CH1 solo ha mostrado ventanas estables mucho mas limpias, y los
+movimientos de mandibula aumentan el artefacto, lo que apunta a EMG/contacto
+mas que a fallo digital.
+
+Configurar:
+
+```bash
+cd /home/arduino/ArduinoApps/eeg_midi
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
+```
+
+Compilar/subir desde Arduino App Lab y arrancar la app. Confirmar en Monitor:
+
+```text
+ADS1299 DIAG: bias_ch1_only_loff_off (CH1 active, CH2-CH4 powered down, BIAS CH1P+CH1N)
+status=0xC00000
+```
+
+Capturas recomendadas, una a una:
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition ear_eeg_ch1_only_still_30s --duration 30 --timeout-extra 120
+DIR=$(ls -td captures/*_ear_eeg_ch1_only_still_30s /app/captures/*_ear_eeg_ch1_only_still_30s 2>/dev/null | head -1)
+python3 python/tools/analyze_eeg_capture.py "$DIR"
+cat "$DIR/quality_report.md"
+```
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition ear_eeg_ch1_only_eyes_open_60s --duration 60 --timeout-extra 180
+OPEN_DIR=$(ls -td captures/*_ear_eeg_ch1_only_eyes_open_60s /app/captures/*_ear_eeg_ch1_only_eyes_open_60s 2>/dev/null | head -1)
+python3 python/tools/analyze_eeg_capture.py "$OPEN_DIR"
+cat "$OPEN_DIR/quality_report.md"
+```
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition ear_eeg_ch1_only_eyes_closed_60s --duration 60 --timeout-extra 180
+CLOSED_DIR=$(ls -td captures/*_ear_eeg_ch1_only_eyes_closed_60s /app/captures/*_ear_eeg_ch1_only_eyes_closed_60s 2>/dev/null | head -1)
+python3 python/tools/analyze_eeg_capture.py "$CLOSED_DIR"
+cat "$CLOSED_DIR/quality_report.md"
+```
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition ear_eeg_ch1_only_jaw_movement_30s --duration 30 --timeout-extra 120
+JAW_DIR=$(ls -td captures/*_ear_eeg_ch1_only_jaw_movement_30s /app/captures/*_ear_eeg_ch1_only_jaw_movement_30s 2>/dev/null | head -1)
+python3 python/tools/analyze_eeg_capture.py "$JAW_DIR"
+cat "$JAW_DIR/quality_report.md"
+```
+
+Comparar ojos abiertos/cerrados solo si ambas capturas tienen ventanas estables:
+
+```bash
+python3 python/tools/compare_eeg_captures.py --open "$OPEN_DIR" --closed "$CLOSED_DIR" --output captures/ear_eeg_ch1_only_open_closed_comparison.json
+cat captures/ear_eeg_ch1_only_open_closed_comparison.md
+```
+
+Criterio de avance:
+
+- `sample_gaps` = 0 e `invalid_status` = 0.
+- RMS global idealmente bajo, pero mirar tambien `CH1 windowed stability`.
+- `median_rms_uV` de ventanas cerca de 10-80 uV es una evidencia mejor que el
+  RMS global cuando hay algun golpe o movimiento.
+- `artifact_window_fraction` debe bajar al fijar cables y evitar mandibula.
+- El pico de 25 Hz en reposo no debe dominar; si aparece sobre todo en mandibula,
+  tratarlo como EMG/artefacto mecanico.
+
+No activar filtros nuevos ni cambiar ganancia para ocultar estos problemas hasta
+tener varias capturas estables comparables.
