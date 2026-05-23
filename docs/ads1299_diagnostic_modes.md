@@ -18,6 +18,7 @@ Modos disponibles en `sketch/sketch.ino`:
 | 2 | test_signal_internal | CONFIG2 test interno + MUX TESTSIG CH1-CH4 |
 | 3 | no_bias_loff_off | Entrada real diferencial, BIAS off, lead-off sense off |
 | 4 | bias_ch1pn_loff_off | Entrada real diferencial, BIAS on derivado de CH1P+CH1N, lead-off sense off |
+| 5 | bias_ch1_only_loff_off | CH1 activo, CH2-CH4 apagados, BIAS CH1P+CH1N, lead-off sense off |
 
 ## Prueba 1: entradas internas en corto
 
@@ -143,3 +144,30 @@ python3 python/tools/set_ads_diagnostic_mode.py normal
 ```
 
 Y compilar/subir de nuevo.
+
+## Prueba CH1 solo, CH2-CH4 apagados
+
+Objetivo: comprobar si canales no usados/flotantes contribuyen al artefacto de
+~25 Hz o a las métricas.
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
+```
+
+Compilar/subir desde Arduino App Lab. Mantener:
+
+- CH1P = electrodo positivo de la prueba.
+- CH1N = electrodo negativo de la prueba.
+- `RLD_DRV` = electrodo RLD dedicado.
+
+Captura sugerida:
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition bias_ch1_only_fp1_fp2_rld_left_mastoid --duration 60 --timeout-extra 180
+DIR=$(ls -td captures/*_bias_ch1_only_fp1_fp2_rld_left_mastoid /app/captures/*_bias_ch1_only_fp1_fp2_rld_left_mastoid 2>/dev/null | head -1)
+python3 python/tools/analyze_eeg_capture.py "$DIR"
+cat "$DIR/quality_report.md"
+```
+
+Comparar la tabla multicanal del informe. CH2-CH4 deberian quedar apagados y no
+deben usarse para interpretar EEG.

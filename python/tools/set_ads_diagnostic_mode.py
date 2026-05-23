@@ -14,6 +14,7 @@ MODES = {
     "test_signal_internal": 2,
     "no_bias_loff_off": 3,
     "bias_ch1pn_loff_off": 4,
+    "bias_ch1_only_loff_off": 5,
 }
 
 

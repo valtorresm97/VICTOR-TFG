@@ -243,6 +243,12 @@ def _write_spectral_csv(capture_dir: Path, report: dict) -> None:
                 )
 
 
+def _fmt_md_number(value) -> str:
+    if isinstance(value, (int, float)) and math.isfinite(float(value)):
+        return f"{float(value):.6g}"
+    return "n/a"
+
+
 def _write_markdown(capture_dir: Path, report: dict) -> None:
     lines = [
         "# EEG capture quality report",
@@ -268,6 +274,20 @@ def _write_markdown(capture_dir: Path, report: dict) -> None:
             lines.append(f"- {key}: {value:.6g}")
         else:
             lines.append(f"- {key}: {value}")
+    lines.extend(["", "## Multichannel summary", ""])
+    lines.append("| Channel | RMS uV | Mean uV | PTP uV | Peak Hz | 50 Hz ratio |")
+    lines.append("| --- | ---: | ---: | ---: | ---: | ---: |")
+    for channel, metrics in sorted(report["channels"].items()):
+        lines.append(
+            "| {channel} | {rms:.6g} | {mean:.6g} | {ptp:.6g} | {peak} | {ratio} |".format(
+                channel=channel,
+                rms=float(metrics.get("rms_uV", 0.0) or 0.0),
+                mean=float(metrics.get("mean_uV", 0.0) or 0.0),
+                ptp=float(metrics.get("ptp_uV", 0.0) or 0.0),
+                peak=_fmt_md_number(metrics.get("peak_freq_hz")),
+                ratio=_fmt_md_number(metrics.get("line_50_ratio_1_50")),
+            )
+        )
     (capture_dir / "quality_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

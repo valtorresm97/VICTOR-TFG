@@ -169,8 +169,10 @@ Criterio:
 2. Compilar normal, capturar baseline sin BIAS con LOFF sense off.
 3. Activar BIAS CH1P+CH1N.
 4. Capturar quiet/rest, eyes open, eyes closed.
-5. Comparar RMS, ptp, peak 21 Hz, alpha y 50 Hz.
-6. Solo probar CH1-CH4 si esos canales no estan flotantes.
+5. Revisar tabla multicanal de `quality_report.md`.
+6. Probar `bias_ch1_only_loff_off` para apagar CH2-CH4 y descartar entradas flotantes.
+7. Comparar RMS, ptp, peak 25 Hz, alpha y 50 Hz.
+8. Solo probar CH1-CH4 en BIAS si esos canales no estan flotantes.
 
 ## Decision pendiente
 
