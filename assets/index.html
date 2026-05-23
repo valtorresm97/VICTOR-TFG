@@ -57,6 +57,20 @@
     </section>
 
     <section class="section">
+      <h2 class="section-title">Calidad EEG / Diagnostico ADS1299</h2>
+      <div class="grid stats">
+        <div class="card metric"><h3>RMS CH1</h3><p id="diag-rms">n/a</p></div>
+        <div class="card metric"><h3>Pico-pico CH1</h3><p id="diag-ptp">n/a</p></div>
+        <div class="card metric"><h3>Offset CH1</h3><p id="diag-offset">n/a</p></div>
+        <div class="card metric"><h3>Ruido 50 Hz</h3><p id="diag-50hz">n/a</p></div>
+        <div class="card metric"><h3>Saturacion</h3><p id="diag-saturation">n/a</p></div>
+        <div class="card metric"><h3>Saltos bruscos</h3><p id="diag-jumps">n/a</p></div>
+      </div>
+      <div id="diag-warnings" class="warnings diag-warnings"></div>
+      <canvas id="diag-waveform" class="waveform" width="960" height="180"></canvas>
+    </section>
+
+    <section class="section">
       <h2 class="section-title">Sonificación Live</h2>
       <div id="warnings" class="warnings"></div>
       <div class="grid stats">

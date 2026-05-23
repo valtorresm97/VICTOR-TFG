@@ -353,6 +353,108 @@ class EEGSignalProcessor:
             include_relative_bandpower=True,
         )
 
+    def compute_quality_diagnostics(
+        self,
+        channel_idx: int = 0,
+        window_sec: float = 4.0,
+        waveform_sec: float = 2.0,
+    ) -> dict:
+        """
+        Metricas ligeras de calidad para diagnostico EEG en vivo.
+
+        No modifica la senal ni el pipeline DSP principal: solo observa la
+        ventana reciente que ya llega filtrada desde el MCU.
+        """
+        if channel_idx < 0 or channel_idx >= self.num_channels:
+            return {}
+
+        x_v = self.get_signal_window(channel_idx, window_sec)
+        if x_v.size == 0:
+            return {}
+
+        x_uv = x_v.astype(float) * 1e6
+        diffs = np.diff(x_uv) if x_uv.size >= 2 else np.array([], dtype=float)
+
+        rms_uv = float(np.sqrt(np.mean(x_uv ** 2)))
+        mean_uv = float(np.mean(x_uv))
+        median_uv = float(np.median(x_uv))
+        std_uv = float(np.std(x_uv))
+        min_uv = float(np.min(x_uv))
+        max_uv = float(np.max(x_uv))
+        ptp_uv = float(max_uv - min_uv)
+        p01_uv, p05_uv, p95_uv, p99_uv = [
+            float(v) for v in np.percentile(x_uv, [1, 5, 95, 99])
+        ]
+
+        # El escalado actual del firmware usa 2.235e-8 V/count.
+        adc_full_scale_uv = 8388607.0 * 2.235e-8 * 1e6
+        near_adc_limit = np.abs(x_uv) >= (0.98 * adc_full_scale_uv)
+        saturation_fraction = float(np.mean(near_adc_limit))
+
+        flatline = bool(std_uv < 0.05 or ptp_uv < 0.5)
+        jump_threshold_uv = max(100.0, 8.0 * std_uv)
+        abrupt_jumps = int(np.sum(np.abs(diffs) > jump_threshold_uv)) if diffs.size else 0
+
+        freqs, pxx = self.dsp.compute_psd(x_v, method="multitaper")
+        line_50_power = 0.0
+        total_1_50_power = 0.0
+        line_50_ratio = None
+        if freqs is not None and pxx is not None and len(freqs) == len(pxx):
+            freqs_arr = np.asarray(freqs)
+            pxx_arr = np.asarray(pxx)
+            total_mask = (freqs_arr >= 1.0) & (freqs_arr <= 50.0)
+            line_mask = (freqs_arr >= 49.0) & (freqs_arr <= 51.0)
+            if np.any(total_mask):
+                total_1_50_power = float(np.trapezoid(pxx_arr[total_mask], freqs_arr[total_mask]))
+            if np.any(line_mask):
+                line_50_power = float(np.trapezoid(pxx_arr[line_mask], freqs_arr[line_mask]))
+            if total_1_50_power > 0:
+                line_50_ratio = float(line_50_power / total_1_50_power)
+
+        wave_n = min(int(round(waveform_sec * self.fs)), x_uv.size)
+        waveform = x_uv[-wave_n:] if wave_n > 0 else np.array([], dtype=float)
+        max_points = 250
+        if waveform.size > max_points:
+            step = int(np.ceil(waveform.size / max_points))
+            waveform = waveform[::step]
+
+        warnings = []
+        if saturation_fraction > 0:
+            warnings.append("possible_adc_saturation")
+        if flatline:
+            warnings.append("flatline_or_frozen_signal")
+        if line_50_ratio is not None and line_50_ratio > 0.25:
+            warnings.append("high_50hz_power")
+        if abrupt_jumps > 0:
+            warnings.append("abrupt_jumps")
+        if abs(mean_uv) > 100.0:
+            warnings.append("large_offset_after_filters")
+
+        return {
+            "channel_idx": int(channel_idx),
+            "window_samples": int(x_uv.size),
+            "window_sec": float(x_uv.size / float(self.fs)),
+            "rms_uv": rms_uv,
+            "mean_uv": mean_uv,
+            "median_uv": median_uv,
+            "std_uv": std_uv,
+            "min_uv": min_uv,
+            "max_uv": max_uv,
+            "ptp_uv": ptp_uv,
+            "p01_uv": p01_uv,
+            "p05_uv": p05_uv,
+            "p95_uv": p95_uv,
+            "p99_uv": p99_uv,
+            "adc_full_scale_uv_est": float(adc_full_scale_uv),
+            "saturation_fraction": saturation_fraction,
+            "abrupt_jumps": abrupt_jumps,
+            "flatline": flatline,
+            "line_50_power": line_50_power,
+            "line_50_ratio": line_50_ratio,
+            "warnings": warnings,
+            "waveform_uV": [float(v) for v in waveform],
+        }
+
     def get_spectrogram(
         self,
         channel_idx: int,

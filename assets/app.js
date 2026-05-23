@@ -67,6 +67,51 @@ function renderWarnings(s) {
   root.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
 }
 
+function renderDiagnostics(s) {
+  const d = s.diagnostics || {};
+  setText("diag-rms", `${fmt(d.rms_uv, 2)} uV`);
+  setText("diag-ptp", `${fmt(d.ptp_uv, 2)} uV`);
+  setText("diag-offset", `${fmt(d.mean_uv, 2)} uV`);
+  const ratio = Number(d.line_50_ratio);
+  setText("diag-50hz", Number.isFinite(ratio) ? `${fmt(100 * ratio, 1)} %` : "n/a");
+  setText("diag-saturation", `${fmt(100 * (d.saturation_fraction || 0), 3)} %`);
+  setText("diag-jumps", String(d.abrupt_jumps ?? 0));
+
+  const warnRoot = document.getElementById("diag-warnings");
+  if (warnRoot) {
+    const warnings = d.warnings || [];
+    warnRoot.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
+  }
+
+  const canvas = document.getElementById("diag-waveform");
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext("2d");
+  const values = (d.waveform_uV || []).map(Number).filter(Number.isFinite);
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(8, 0, 18, 0.45)";
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.beginPath();
+  ctx.moveTo(0, h / 2);
+  ctx.lineTo(w, h / 2);
+  ctx.stroke();
+
+  if (values.length < 2) return;
+  const maxAbs = Math.max(1, ...values.map((v) => Math.abs(v)));
+  ctx.strokeStyle = "#59ffd4";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = (i / (values.length - 1)) * w;
+    const y = h / 2 - (v / maxAbs) * (h * 0.42);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
 function renderSonification(s) {
   const sonif = s.sonification || {};
   const music = s.music || {};
@@ -166,6 +211,7 @@ function renderSnapshot(s) {
   setText("alpha-beta", fmt(f.alpha_beta_ratio, 3));
   renderBands(f.bandpower_rel || {});
   renderAbsBands(f.bandpower_abs || {});
+  renderDiagnostics(s);
   renderWarnings(s);
   renderSonification(s);
   renderPianoRoll(s);

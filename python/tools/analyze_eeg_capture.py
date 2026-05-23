@@ -1,0 +1,288 @@
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import sys
+from pathlib import Path
+
+import numpy as np
+from scipy.signal import windows
+
+
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = PYTHON_DIR.parent
+if str(PYTHON_DIR) not in sys.path:
+    sys.path.insert(0, str(PYTHON_DIR))
+
+
+FS_HZ_DEFAULT = 250.0
+NUM_CH = 4
+STATUS_PREFIX = 0xC00000
+STATUS_MASK = 0xF00000
+LSB_V = 2.235e-8
+ADC_FULL_SCALE_UV = 8388607.0 * LSB_V * 1e6
+BANDS = {
+    "delta": (0.5, 4.0),
+    "theta": (4.0, 8.0),
+    "alpha": (8.0, 13.0),
+    "beta": (13.0, 30.0),
+    "gamma": (30.0, 50.0),
+}
+
+
+def _load_metadata(capture_dir: Path) -> dict:
+    path = capture_dir / "metadata.json"
+    if not path.exists():
+        return {}
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _load_timeseries(capture_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    path = capture_dir / "eeg_timeseries.csv"
+    if not path.exists():
+        raise FileNotFoundError(path)
+
+    sample_idx = []
+    statuses = []
+    channels = []
+
+    with path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            sample_idx.append(int(row["sample_idx"]))
+            statuses.append(int(row["status"]))
+            channels.append([float(row[f"ch{i}_uV"]) for i in range(1, NUM_CH + 1)])
+
+    return (
+        np.asarray(sample_idx, dtype=np.int64),
+        np.asarray(statuses, dtype=np.uint32),
+        np.asarray(channels, dtype=float),
+    )
+
+
+def _multitaper_psd(x_uv: np.ndarray, fs_hz: float, nw: float = 2.5) -> tuple[np.ndarray, np.ndarray]:
+    x = np.asarray(x_uv, dtype=float)
+    if x.size < 4:
+        return np.array([], dtype=float), np.array([], dtype=float)
+    x = x - np.mean(x)
+    n = x.size
+    kmax = max(1, int(2 * nw - 1))
+    tapers = windows.dpss(n, nw, Kmax=kmax, sym=False)
+    freqs = np.fft.rfftfreq(n, d=1.0 / fs_hz)
+    psd = np.zeros_like(freqs)
+    dt = 1.0 / fs_hz
+    for taper in tapers:
+        xf = np.fft.rfft(x * taper)
+        psd += (dt / n) * np.abs(xf) ** 2
+    return freqs, psd / kmax
+
+
+def _bandpower(freqs: np.ndarray, psd: np.ndarray, f_low: float, f_high: float) -> float:
+    mask = (freqs >= f_low) & (freqs <= f_high)
+    if not np.any(mask):
+        return 0.0
+    return float(np.trapezoid(psd[mask], freqs[mask]))
+
+
+def _peak_freq(freqs: np.ndarray, psd: np.ndarray, f_low: float, f_high: float) -> float | None:
+    mask = (freqs >= f_low) & (freqs <= f_high)
+    if not np.any(mask):
+        return None
+    sub_freqs = freqs[mask]
+    sub_psd = psd[mask]
+    return float(sub_freqs[int(np.argmax(sub_psd))])
+
+
+def _channel_metrics(x: np.ndarray, sample_idx: np.ndarray, fs_hz: float) -> dict:
+    if x.size == 0:
+        return {}
+    diffs = np.diff(x) if x.size >= 2 else np.array([], dtype=float)
+    near_adc = np.abs(x) >= 0.98 * ADC_FULL_SCALE_UV
+    std = float(np.std(x))
+    jump_threshold = max(100.0, 8.0 * std)
+    freqs, psd = _multitaper_psd(x, fs_hz)
+    total_1_50 = _bandpower(freqs, psd, 1.0, 50.0) if freqs.size else 0.0
+    line_50 = _bandpower(freqs, psd, 49.0, 51.0) if freqs.size else 0.0
+    band_abs = {name: _bandpower(freqs, psd, lo, hi) for name, (lo, hi) in BANDS.items()}
+    total_bands = sum(band_abs.values())
+    band_rel = {name: (value / total_bands if total_bands > 0 else 0.0) for name, value in band_abs.items()}
+
+    return {
+        "samples": int(x.size),
+        "mean_uV": float(np.mean(x)),
+        "median_uV": float(np.median(x)),
+        "std_uV": std,
+        "rms_uV": float(np.sqrt(np.mean(x ** 2))),
+        "min_uV": float(np.min(x)),
+        "max_uV": float(np.max(x)),
+        "ptp_uV": float(np.ptp(x)),
+        "p01_uV": float(np.percentile(x, 1)),
+        "p05_uV": float(np.percentile(x, 5)),
+        "p95_uV": float(np.percentile(x, 95)),
+        "p99_uV": float(np.percentile(x, 99)),
+        "near_adc_limit_fraction": float(np.mean(near_adc)),
+        "flatline": bool(std < 0.05 or np.ptp(x) < 0.5),
+        "abrupt_jumps": int(np.sum(np.abs(diffs) > jump_threshold)) if diffs.size else 0,
+        "bandpower_abs": band_abs,
+        "bandpower_rel": band_rel,
+        "peak_freq_hz": _peak_freq(freqs, psd, 0.5, 50.0),
+        "peak_by_band_hz": {name: _peak_freq(freqs, psd, lo, hi) for name, (lo, hi) in BANDS.items()},
+        "line_50_power": line_50,
+        "line_50_ratio_1_50": float(line_50 / total_1_50) if total_1_50 > 0 else None,
+    }
+
+
+def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
+    reasons = []
+    recommendations = []
+
+    if report["status"]["invalid_status_total"] > 0:
+        reasons.append("invalid ADS1299 status prefix observed")
+        recommendations.append("Check SPI framing, DRDY timing, and status prefix 0xC00000.")
+    if report["timing"]["sample_gaps_detected"] > 0:
+        reasons.append("sample index gaps detected")
+        recommendations.append("Check Bridge queue drops and MCU pending>1 DRDY events.")
+
+    ch1 = report["channels"].get("ch1", {})
+    if ch1.get("flatline"):
+        reasons.append("CH1 appears flat or frozen")
+        recommendations.append("Check electrodes, lead-off state, and whether the input is shorted.")
+    if ch1.get("near_adc_limit_fraction", 0.0) > 0:
+        reasons.append("samples close to ADC full-scale estimate")
+        recommendations.append("Check saturation/clipping, gain, electrode offset, and input range.")
+    if abs(ch1.get("mean_uV", 0.0)) > 100.0:
+        reasons.append("large residual offset after MCU filters")
+        recommendations.append("Inspect raw/unfiltered diagnostic capture before changing filters.")
+    ratio_50 = ch1.get("line_50_ratio_1_50")
+    if ratio_50 is not None and ratio_50 > 0.25:
+        reasons.append("high 50 Hz power ratio")
+        recommendations.append("Check electrode contact, cable routing, grounding, and notch effectiveness.")
+    if ch1.get("abrupt_jumps", 0) > max(3, 0.001 * ch1.get("samples", 0)):
+        reasons.append("abrupt jumps or motion artifacts")
+        recommendations.append("Repeat capture with still posture and verify electrode stability.")
+
+    if reasons:
+        return "dudosa", reasons, recommendations
+    return "valida_preliminar", ["no automatic quality failure detected"], ["Compare eyes-open and eyes-closed alpha before accepting physiological validity."]
+
+
+def _write_spectral_csv(capture_dir: Path, report: dict) -> None:
+    path = capture_dir / "spectral_summary.csv"
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["channel", "band", "bandpower_abs_uV2", "bandpower_rel", "peak_hz"])
+        for channel, metrics in report["channels"].items():
+            for band in BANDS:
+                writer.writerow(
+                    [
+                        channel,
+                        band,
+                        metrics["bandpower_abs"].get(band, 0.0),
+                        metrics["bandpower_rel"].get(band, 0.0),
+                        metrics["peak_by_band_hz"].get(band),
+                    ]
+                )
+
+
+def _write_markdown(capture_dir: Path, report: dict) -> None:
+    lines = [
+        "# EEG capture quality report",
+        "",
+        f"- Diagnosis: {report['diagnosis']['state']}",
+        f"- Duration observed: {report['timing']['duration_sec']:.2f} s",
+        f"- Effective sample rate: {report['timing']['effective_fs_hz']:.2f} Hz",
+        f"- Samples received: {report['timing']['samples_received']}",
+        f"- Sample gaps: {report['timing']['sample_gaps_detected']}",
+        f"- Invalid status: {report['status']['invalid_status_total']}",
+        "",
+        "## Reasons",
+        "",
+    ]
+    lines.extend(f"- {item}" for item in report["diagnosis"]["reasons"])
+    lines.extend(["", "## Recommendations", ""])
+    lines.extend(f"- {item}" for item in report["diagnosis"]["recommendations"])
+    lines.extend(["", "## CH1 summary", ""])
+    ch1 = report["channels"].get("ch1", {})
+    for key in ("rms_uV", "mean_uV", "ptp_uV", "line_50_ratio_1_50", "peak_freq_hz"):
+        value = ch1.get(key)
+        if isinstance(value, float) and math.isfinite(value):
+            lines.append(f"- {key}: {value:.6g}")
+        else:
+            lines.append(f"- {key}: {value}")
+    (capture_dir / "quality_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def analyze(capture_dir: Path) -> dict:
+    metadata = _load_metadata(capture_dir)
+    sample_idx, statuses, channels = _load_timeseries(capture_dir)
+    fs_hz = float(metadata.get("fs_hz_expected", FS_HZ_DEFAULT) or FS_HZ_DEFAULT)
+
+    if sample_idx.size > 1:
+        duration_by_index = (int(sample_idx[-1]) - int(sample_idx[0]) + 1) / fs_hz
+        effective_fs = float(sample_idx.size / duration_by_index) if duration_by_index > 0 else 0.0
+        gaps = np.diff(sample_idx)
+        sample_gaps = int(np.sum(np.maximum(gaps - 1, 0)))
+    else:
+        duration_by_index = 0.0
+        effective_fs = 0.0
+        sample_gaps = 0
+
+    invalid_status = int(np.sum((statuses & STATUS_MASK) != STATUS_PREFIX))
+    channels_report = {}
+    for ch in range(NUM_CH):
+        channels_report[f"ch{ch + 1}"] = _channel_metrics(channels[:, ch], sample_idx, fs_hz)
+
+    report = {
+        "metadata": metadata,
+        "timing": {
+            "fs_hz_expected": fs_hz,
+            "duration_sec": float(duration_by_index),
+            "samples_expected_from_duration": int(round(duration_by_index * fs_hz)),
+            "samples_received": int(sample_idx.size),
+            "effective_fs_hz": effective_fs,
+            "sample_gaps_detected": sample_gaps,
+            "first_sample_idx": int(sample_idx[0]) if sample_idx.size else None,
+            "last_sample_idx": int(sample_idx[-1]) if sample_idx.size else None,
+        },
+        "status": {
+            "status_prefix_expected": "0xC00000",
+            "invalid_status_total": invalid_status,
+            "invalid_status_fraction": float(invalid_status / sample_idx.size) if sample_idx.size else 0.0,
+        },
+        "channels": channels_report,
+    }
+    state, reasons, recommendations = _diagnose(report)
+    report["diagnosis"] = {
+        "state": state,
+        "reasons": reasons,
+        "recommendations": recommendations,
+    }
+    return report
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Analyze an EEG capture directory.")
+    parser.add_argument("capture_dir", help="Directory containing metadata.json and eeg_timeseries.csv.")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    capture_dir = Path(args.capture_dir)
+    report = analyze(capture_dir)
+
+    with (capture_dir / "quality_report.json").open("w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2, sort_keys=True)
+    _write_spectral_csv(capture_dir, report)
+    _write_markdown(capture_dir, report)
+
+    print(f"[analysis] diagnosis={report['diagnosis']['state']}")
+    print(f"[analysis] wrote {capture_dir / 'quality_report.json'}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

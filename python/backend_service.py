@@ -220,6 +220,11 @@ class BackendService:
         feats = self._last_features or {}
         bp_rel = feats.get("bandpower_rel", {}) or {}
         bp_abs = feats.get("bandpower_abs", {}) or {}
+        diagnostics = self.proc.compute_quality_diagnostics(
+            channel_idx=0,
+            window_sec=min(4.0, max(0.1, self.proc.available_seconds())),
+            waveform_sec=2.0,
+        )
 
         alpha_rel = float(bp_rel.get("alpha", 0.0) or 0.0)
         beta_rel = float(bp_rel.get("beta", 0.0) or 0.0)
@@ -270,6 +275,7 @@ class BackendService:
                 "bandpower_rel": bp_rel,
                 "bandpower_abs": bp_abs,
             },
+            "diagnostics": diagnostics,
             "sonification": build_sonification_snapshot(
                 self._last_sonification
             ),
