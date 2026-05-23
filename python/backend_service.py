@@ -10,6 +10,7 @@ from arduino.app_utils import Bridge
 from eeg_signal_processor import EEGSignalProcessor
 from receiver import EEGReceiver
 from app_state import publish_snapshot, clear_runtime_state
+from capture_manager import CaptureManager
 from sonification_features import (
     SonificationFeatureAdapter,
     build_sonification_snapshot,
@@ -121,6 +122,9 @@ class BackendService:
             fs_hz=FS_HZ,
             num_ch=NUM_CH,
             queue_max=512,
+        )
+        self.capture_manager = CaptureManager(
+            project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         )
 
         Bridge.provide("linux_started", self.rx.linux_started)
@@ -276,6 +280,7 @@ class BackendService:
                 "bandpower_abs": bp_abs,
             },
             "diagnostics": diagnostics,
+            "capture": self.capture_manager.get_status(),
             "sonification": build_sonification_snapshot(
                 self._last_sonification
             ),
@@ -477,10 +482,13 @@ class BackendService:
           5. Bombea MIDI live.
           6. Publica snapshot.
         """
+        self.capture_manager.poll_request()
         _, drained_frames = self.rx.drain_blocks_to_processor(
             self.proc,
             max_blocks=16,
+            block_sink=self.capture_manager.add_block,
         )
+        self.capture_manager.step()
 
         window_ready = self.proc.is_window_ready(
             window_sec=FEATURE_WINDOW_SEC

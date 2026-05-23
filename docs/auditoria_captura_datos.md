@@ -119,7 +119,11 @@ Riesgos pendientes:
 
 `python/tools/capture_eeg_quality.py`
 
-Escucha `Bridge.notify("eeg_block_uV")` y guarda:
+Desde el terminal normal de la UNO Q crea una peticion en `state/capture_request.json`.
+La app App Lab, mientras esta corriendo, escucha esa peticion y graba los bloques
+reales que recibe por `Bridge.notify("eeg_block_uV")`.
+
+Guarda:
 
 - `captures/<timestamp>_<condition>/metadata.json`
 - `captures/<timestamp>_<condition>/eeg_timeseries.csv`
@@ -191,23 +195,27 @@ python -m pip install -r python/requirements.txt
 Ejecutar app normal en App Lab para confirmar streaming y UI. Luego ejecutar capturas CLI desde la placa:
 
 ```bash
-python python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_open --duration 60
-python python/tools/analyze_eeg_capture.py captures/<capture_id>
+python3 python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_open --duration 60
+python3 python/tools/analyze_eeg_capture.py captures/<capture_id>
 ```
+
+Importante: `capture_eeg_quality.py` requiere que la app App Lab este corriendo en
+la misma rama, porque la recepcion Bridge vive dentro de `python/main.py`. El script
+CLI solo solicita la captura y espera a que la app la complete.
 
 Capturas recomendadas en orden:
 
 ```bash
-python python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_open --duration 60
-python python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_closed --duration 60
-python python/tools/capture_eeg_quality.py --condition blink_test --duration 60
-python python/tools/capture_eeg_quality.py --condition jaw_movement_test --duration 60
+python3 python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_open --duration 60
+python3 python/tools/capture_eeg_quality.py --condition head_fp1_fp2_eyes_closed --duration 60
+python3 python/tools/capture_eeg_quality.py --condition blink_test --duration 60
+python3 python/tools/capture_eeg_quality.py --condition jaw_movement_test --duration 60
 ```
 
 Analizar cada captura:
 
 ```bash
-python python/tools/analyze_eeg_capture.py captures/<capture_id>
+python3 python/tools/analyze_eeg_capture.py captures/<capture_id>
 ```
 
 Archivos que debes devolver/subir para analisis:

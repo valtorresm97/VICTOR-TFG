@@ -331,7 +331,7 @@ class EEGReceiver:
     # ============================================================
     # Consumo hacia el procesador
     # ============================================================
-    def drain_blocks_to_processor(self, proc, max_blocks: int = 16) -> tuple[int, int]:
+    def drain_blocks_to_processor(self, proc, max_blocks: int = 16, block_sink=None) -> tuple[int, int]:
         """
         Saca hasta max_blocks de la cola y los pasa al procesador.
         El procesador recibe directamente el BLOQUE.
@@ -349,6 +349,8 @@ class EEGReceiver:
 
             # Fase 2: consumo desacoplado por bloque
             proc.add_block_uV(samples)
+            if block_sink is not None:
+                block_sink(block_idx, first_sample_idx, sample_count, statuses, samples)
 
             n_blocks += 1
             n_frames += sample_count
