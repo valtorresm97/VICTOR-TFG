@@ -87,6 +87,12 @@ Capturas:
 - `head_fp1_fp2_no_bias_loff_off`.
 - `quiet_rest_fp1_fp2_no_bias_loff_off`.
 
+Modo firmware implementado:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py no_bias_loff_off
+```
+
 Criterio:
 
 - Si mV caen mucho solo corrigiendo bits fijos/LOFF off, BIAS no era la primera causa.
@@ -108,6 +114,12 @@ Capturas:
 - `head_fp1_fp2_bias_ch1pn_quiet_rest`.
 - `head_fp1_fp2_bias_ch1pn_eyes_open`.
 - `head_fp1_fp2_bias_ch1pn_eyes_closed`.
+
+Modo firmware implementado:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1pn_loff_off
+```
 
 Criterio de exito:
 

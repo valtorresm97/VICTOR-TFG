@@ -50,6 +50,8 @@ static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 // 0 = captura real normal INxP-INxN
 // 1 = entradas internas en corto (ruido/offset interno)
 // 2 = señal de test interna ADS1299 (escala/ganancia/SPI)
+// 3 = normal sin lead-off sense (baseline antes de BIAS/DRL)
+// 4 = BIAS/DRL activo derivado solo de CH1P+CH1N, sin lead-off sense
 //
 // Mantener en 0 para capturas reales. Cambiar solo para compilar una prueba
 // diagnóstica temporal y volver a 0 después.
@@ -60,6 +62,8 @@ static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 #define ADS_DIAG_NORMAL 0
 #define ADS_DIAG_SHORTED_INPUTS 1
 #define ADS_DIAG_TEST_SIGNAL_INTERNAL 2
+#define ADS_DIAG_NO_BIAS_LOFF_OFF 3
+#define ADS_DIAG_BIAS_CH1PN_LOFF_OFF 4
 
 // ---------------------------
 // Debug / rendimiento
@@ -325,12 +329,49 @@ static bool applyAdsDiagnosticMode() {
   }
   return true;
 
+#elif ADS_DIAGNOSTIC_MODE == ADS_DIAG_NO_BIAS_LOFF_OFF
+  Monitor.println("ADS1299 DIAG: no_bias_loff_off (normal inputs, BIAS off, lead-off sense off)");
+
+  // Baseline analogico antes de probar RLD/BIAS: misma entrada diferencial
+  // real, pero sin inyeccion lead-off y con BIAS derivation desactivada.
+  if (!ads.writeReg(ADS_REG_CONFIG2, ADS_CFG2_TEST_OFF)) return false;
+  if (!ads.writeReg(ADS_REG_CONFIG3, ADS_CFG3_INTREF_NO_BIAS)) return false;
+  if (!ads.setBiasDeriveP(0x00)) return false;
+  if (!ads.setBiasDeriveN(0x00)) return false;
+  if (!ads.enableLeadOffSenseP(0x00)) return false;
+  if (!ads.enableLeadOffSenseN(0x00)) return false;
+
+  for (uint8_t ch = 1; ch <= ADS1299Plus::NUM_CHANNELS; ++ch) {
+    if (!ads.setChannelMux(ch, ADS_MUX_NORMAL)) return false;
+  }
+  return true;
+
+#elif ADS_DIAGNOSTIC_MODE == ADS_DIAG_BIAS_CH1PN_LOFF_OFF
+  Monitor.println("ADS1299 DIAG: bias_ch1pn_loff_off (BIAS on, derive CH1P+CH1N, lead-off sense off)");
+
+  // Primera prueba RLD/BIAS segura para tu montaje Fp1-Fp2:
+  // - CH1P y CH1N derivan el common-mode.
+  // - BIASOUT/RLD_DRV se conecta a electrodo RLD dedicado.
+  // - CH2-CH4 no se incluyen para evitar canales flotantes en el lazo.
+  // - Lead-off sense queda off para no inyectar corriente diagnostica.
+  if (!ads.writeReg(ADS_REG_CONFIG2, ADS_CFG2_TEST_OFF)) return false;
+  if (!ads.writeReg(ADS_REG_CONFIG3, ADS_CFG3_MAKE(true, false, true, true, false))) return false;
+  if (!ads.setBiasDeriveP(ADS_MASK_CH1)) return false;
+  if (!ads.setBiasDeriveN(ADS_MASK_CH1)) return false;
+  if (!ads.enableLeadOffSenseP(0x00)) return false;
+  if (!ads.enableLeadOffSenseN(0x00)) return false;
+
+  for (uint8_t ch = 1; ch <= ADS1299Plus::NUM_CHANNELS; ++ch) {
+    if (!ads.setChannelMux(ch, ADS_MUX_NORMAL)) return false;
+  }
+  return true;
+
 #elif ADS_DIAGNOSTIC_MODE == ADS_DIAG_NORMAL
   Monitor.println("ADS1299 DIAG: normal acquisition (INxP-INxN)");
   return true;
 
 #else
-#error "ADS_DIAGNOSTIC_MODE must be 0 normal, 1 shorted_inputs, or 2 test_signal_internal"
+#error "ADS_DIAGNOSTIC_MODE must be 0 normal, 1 shorted_inputs, 2 test_signal_internal, 3 no_bias_loff_off, or 4 bias_ch1pn_loff_off"
 #endif
 }
 

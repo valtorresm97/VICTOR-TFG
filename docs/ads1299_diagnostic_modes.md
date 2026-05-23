@@ -16,6 +16,8 @@ Modos disponibles en `sketch/sketch.ino`:
 | 0 | normal | Captura real INxP-INxN, modo EEG actual |
 | 1 | shorted_inputs | MUX interno en corto CH1-CH4, lead-off sense desactivado |
 | 2 | test_signal_internal | CONFIG2 test interno + MUX TESTSIG CH1-CH4 |
+| 3 | no_bias_loff_off | Entrada real diferencial, BIAS off, lead-off sense off |
+| 4 | bias_ch1pn_loff_off | Entrada real diferencial, BIAS on derivado de CH1P+CH1N, lead-off sense off |
 
 ## Prueba 1: entradas internas en corto
 
@@ -86,3 +88,58 @@ Compilar/subir de nuevo antes de cualquier captura con electrodos.
 Estos modos no son mejoras permanentes de adquisicion. Son pruebas controladas.
 No deben mezclarse con capturas `head_fp1_fp2_*` porque desconectan la ruta real
 de electrodos a nivel de MUX interno del ADS1299.
+
+## Prueba BIAS/DRL CH1P+CH1N
+
+Usar solo si `RLD_DRV` esta conectado fisicamente al electrodo RLD/DRL mediante
+la red de proteccion/limitacion de corriente de la PCB.
+
+Primero baseline sin BIAS y sin lead-off:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py no_bias_loff_off
+```
+
+Compilar/subir desde Arduino App Lab. Arrancar la app y capturar:
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition head_fp1_fp2_no_bias_loff_off_quiet_rest --duration 60
+CAPTURE_DIR=$(ls -td captures/*_head_fp1_fp2_no_bias_loff_off_quiet_rest | head -1)
+python3 python/tools/analyze_eeg_capture.py "$CAPTURE_DIR"
+cat "$CAPTURE_DIR/quality_report.md"
+```
+
+Despues BIAS/DRL derivado solo de CH1P+CH1N:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1pn_loff_off
+```
+
+Compilar/subir desde Arduino App Lab. Conectar:
+
+- CH1P = Fp1.
+- CH1N = Fp2.
+- `RLD_DRV` = electrodo RLD/DRL dedicado.
+
+Capturar:
+
+```bash
+python3 python/tools/capture_eeg_quality.py --condition head_fp1_fp2_bias_ch1pn_loff_off_quiet_rest --duration 60
+CAPTURE_DIR=$(ls -td captures/*_head_fp1_fp2_bias_ch1pn_loff_off_quiet_rest | head -1)
+python3 python/tools/analyze_eeg_capture.py "$CAPTURE_DIR"
+cat "$CAPTURE_DIR/quality_report.md"
+```
+
+Criterio esperado:
+
+- RMS y pico-pico deben bajar mucho frente al baseline sin BIAS.
+- El pico persistente alrededor de 21 Hz debe reducirse o desaparecer.
+- `sample gaps` e `invalid status` deben seguir en 0.
+
+Al terminar, volver a:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py normal
+```
+
+Y compilar/subir de nuevo.

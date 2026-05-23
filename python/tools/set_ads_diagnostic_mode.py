@@ -12,6 +12,8 @@ MODES = {
     "normal": 0,
     "shorted_inputs": 1,
     "test_signal_internal": 2,
+    "no_bias_loff_off": 3,
+    "bias_ch1pn_loff_off": 4,
 }
 
 
