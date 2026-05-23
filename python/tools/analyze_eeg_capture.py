@@ -7,14 +7,32 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy.signal import windows
-
 
 PYTHON_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PYTHON_DIR.parent
 if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
+
+
+def _add_cached_site_packages() -> None:
+    """
+    App Lab installs numpy/scipy in .cache/.venv, but the venv executable can be
+    unusable from the board shell. Add its site-packages when running via
+    system python3.
+    """
+    lib_dir = PROJECT_ROOT / ".cache" / ".venv" / "lib"
+    if not lib_dir.exists():
+        return
+    for site_packages in lib_dir.glob("python*/site-packages"):
+        site_path = str(site_packages)
+        if site_path not in sys.path:
+            sys.path.insert(0, site_path)
+
+
+_add_cached_site_packages()
+
+import numpy as np
+from scipy.signal import windows
 
 
 FS_HZ_DEFAULT = 250.0
