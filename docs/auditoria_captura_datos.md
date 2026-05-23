@@ -160,6 +160,21 @@ Metricas:
 - PSD multitaper, bandpowers, picos, potencia 50 Hz y ratio 50 Hz / 1-50 Hz.
 - diagnostico preliminar y recomendaciones.
 
+El diagnostico distingue transporte valido de plausibilidad fisiologica. Una
+captura puede no tener gaps ni status invalidos y aun asi marcarse como dudosa
+si CH1 tiene amplitudes de milivoltios incompatibles con EEG de reposo.
+
+### Comparacion ojos abiertos/cerrados
+
+`python/tools/compare_eeg_captures.py`
+
+Compara dos capturas ya analizadas:
+
+- alpha absoluto ojos cerrados / ojos abiertos.
+- delta de alpha relativo.
+- RMS, pico-pico, pico espectral y ruido 50 Hz en CH1.
+- warnings de amplitud no fisiologica.
+
 ## UI diagnostica
 
 Se anadio seccion `Calidad EEG / Diagnostico ADS1299` con:
@@ -216,6 +231,15 @@ Analizar cada captura:
 
 ```bash
 python3 python/tools/analyze_eeg_capture.py captures/<capture_id>
+```
+
+Comparar ojos abiertos y cerrados:
+
+```bash
+OPEN_DIR=$(ls -td captures/*_head_fp1_fp2_eyes_open | head -1)
+CLOSED_DIR=$(ls -td captures/*_head_fp1_fp2_eyes_closed | head -1)
+python3 python/tools/compare_eeg_captures.py --open "$OPEN_DIR" --closed "$CLOSED_DIR"
+cat captures/eyes_open_closed_comparison.md
 ```
 
 Archivos que debes devolver/subir para analisis:

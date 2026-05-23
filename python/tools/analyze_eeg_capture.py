@@ -41,6 +41,9 @@ STATUS_PREFIX = 0xC00000
 STATUS_MASK = 0xF00000
 LSB_V = 2.235e-8
 ADC_FULL_SCALE_UV = 8388607.0 * LSB_V * 1e6
+RESTING_RMS_WARN_UV = 500.0
+RESTING_PTP_WARN_UV = 5000.0
+RESTING_OFFSET_WARN_UV = 250.0
 BANDS = {
     "delta": (0.5, 4.0),
     "theta": (4.0, 8.0),
@@ -174,6 +177,15 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
     if abs(ch1.get("mean_uV", 0.0)) > 100.0:
         reasons.append("large residual offset after MCU filters")
         recommendations.append("Inspect raw/unfiltered diagnostic capture before changing filters.")
+    if abs(ch1.get("mean_uV", 0.0)) > RESTING_OFFSET_WARN_UV:
+        reasons.append("very large residual offset for a filtered resting EEG capture")
+        recommendations.append("Check electrode contact, input bias/common-mode path, and ADS1299 scaling.")
+    if ch1.get("rms_uV", 0.0) > RESTING_RMS_WARN_UV:
+        reasons.append("CH1 RMS is far above typical resting scalp EEG amplitude")
+        recommendations.append("Treat this as transport-valid but physiologically suspicious; check gain/LSB, electrode placement, and BIAS/DRL strategy.")
+    if ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV:
+        reasons.append("CH1 peak-to-peak amplitude is far above typical resting scalp EEG")
+        recommendations.append("Look for motion, electrode polarization, missing reference/common-mode control, or scaling error.")
     ratio_50 = ch1.get("line_50_ratio_1_50")
     if ratio_50 is not None and ratio_50 > 0.25:
         reasons.append("high 50 Hz power ratio")
