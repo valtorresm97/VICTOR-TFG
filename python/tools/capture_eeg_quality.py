@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--condition", required=True, help="Condition label, for example head_fp1_fp2_eyes_open.")
     parser.add_argument("--duration", type=float, default=60.0, help="Capture duration in seconds.")
     parser.add_argument("--notes", default="", help="Free text notes stored in metadata.json.")
-    parser.add_argument("--timeout-extra", type=float, default=20.0, help="Extra seconds to wait after duration.")
+    parser.add_argument("--timeout-extra", type=float, default=90.0, help="Extra seconds to wait after duration.")
     parser.add_argument("--no-wait", action="store_true", help="Only write the request and exit.")
     return parser.parse_args()
 

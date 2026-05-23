@@ -159,6 +159,9 @@ def _channel_metrics(x: np.ndarray, sample_idx: np.ndarray, fs_hz: float) -> dic
 def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
     reasons = []
     recommendations = []
+    condition = str(report.get("metadata", {}).get("condition", "") or "").lower()
+    is_shorted = "shorted_inputs" in condition
+    is_test_signal = "test_signal_internal" in condition
 
     if report["status"]["invalid_status_total"] > 0:
         reasons.append("invalid ADS1299 status prefix observed")
@@ -168,26 +171,49 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
         recommendations.append("Check Bridge queue drops and MCU pending>1 DRDY events.")
 
     ch1 = report["channels"].get("ch1", {})
-    if ch1.get("flatline"):
+    if is_shorted and not reasons:
+        if ch1.get("rms_uV", 0.0) <= 5.0 and ch1.get("ptp_uV", 0.0) <= 100.0:
+            return (
+                "valida_diagnostica",
+                ["shorted-input noise/offset is low; ADC/SPI/scale path looks healthy"],
+                ["Use this result as evidence that the millivolt scalp captures are dominated by electrodes/common-mode/reference, not digital transport."],
+            )
+        reasons.append("shorted-input amplitude is higher than expected")
+        recommendations.append("Inspect ADS1299 configuration, board noise, filters, and scale before testing electrodes again.")
+
+    if ch1.get("flatline") and not is_shorted:
         reasons.append("CH1 appears flat or frozen")
         recommendations.append("Check electrodes, lead-off state, and whether the input is shorted.")
     if ch1.get("near_adc_limit_fraction", 0.0) > 0:
         reasons.append("samples close to ADC full-scale estimate")
         recommendations.append("Check saturation/clipping, gain, electrode offset, and input range.")
-    if abs(ch1.get("mean_uV", 0.0)) > 100.0:
+
+    apply_resting_limits = not (is_shorted or is_test_signal)
+    if apply_resting_limits and abs(ch1.get("mean_uV", 0.0)) > 100.0:
         reasons.append("large residual offset after MCU filters")
         recommendations.append("Inspect raw/unfiltered diagnostic capture before changing filters.")
-    if abs(ch1.get("mean_uV", 0.0)) > RESTING_OFFSET_WARN_UV:
+    if apply_resting_limits and abs(ch1.get("mean_uV", 0.0)) > RESTING_OFFSET_WARN_UV:
         reasons.append("very large residual offset for a filtered resting EEG capture")
         recommendations.append("Check electrode contact, input bias/common-mode path, and ADS1299 scaling.")
-    if ch1.get("rms_uV", 0.0) > RESTING_RMS_WARN_UV:
+    if apply_resting_limits and ch1.get("rms_uV", 0.0) > RESTING_RMS_WARN_UV:
         reasons.append("CH1 RMS is far above typical resting scalp EEG amplitude")
         recommendations.append("Treat this as transport-valid but physiologically suspicious; check gain/LSB, electrode placement, and BIAS/DRL strategy.")
-    if ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV:
+    if apply_resting_limits and ch1.get("ptp_uV", 0.0) > RESTING_PTP_WARN_UV:
         reasons.append("CH1 peak-to-peak amplitude is far above typical resting scalp EEG")
         recommendations.append("Look for motion, electrode polarization, missing reference/common-mode control, or scaling error.")
+
+    if is_test_signal and not reasons:
+        if ch1.get("rms_uV", 0.0) > 10.0 and ch1.get("ptp_uV", 0.0) > 100.0:
+            return (
+                "valida_diagnostica",
+                ["internal ADS1299 test signal was captured with stable status and sample timing"],
+                ["Use spectral_summary.csv and eeg_timeseries.csv to verify expected test-signal frequency and amplitude against the datasheet."],
+            )
+        reasons.append("internal test signal amplitude is unexpectedly small")
+        recommendations.append("Check CONFIG2 INT_CAL, CHnSET MUX=TESTSIG, and whether the sketch was recompiled after changing diagnostic mode.")
+
     ratio_50 = ch1.get("line_50_ratio_1_50")
-    if ratio_50 is not None and ratio_50 > 0.25:
+    if ratio_50 is not None and ratio_50 > 0.25 and ch1.get("rms_uV", 0.0) > 5.0:
         reasons.append("high 50 Hz power ratio")
         recommendations.append("Check electrode contact, cable routing, grounding, and notch effectiveness.")
     if ch1.get("abrupt_jumps", 0) > max(3, 0.001 * ch1.get("samples", 0)):
