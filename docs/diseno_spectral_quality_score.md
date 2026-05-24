@@ -203,6 +203,10 @@ Repetir protocolo mixto:
   deben atenuarse.
 - En recuperacion: `score` debe volver a subir.
 
+El script `python/tools/validate_spectral_features.py` tambien aplica este
+quality gate al recalcular `windowed_sonification_features.csv`, de modo que los
+informes offline son comparables con el comportamiento live del backend.
+
 ## 11. Decision de diseno
 
 Se implementa primero como una capa conservadora de seguridad, no como una

@@ -6,31 +6,31 @@
 - Window: 4.0 s
 - Hop: 0.256 s
 - Windows: 705
-- Median quality score: 0.75
-- Low-quality/artifact fraction: 0.06950354609929078
+- Median quality score: 0.9161084333181548
+- Low-quality/artifact fraction: 0.13333333333333333
 
 ## Band Decisions
 
 | Band | Median rel | P95 rel | Decision | Risk |
 | --- | ---: | ---: | --- | --- |
-| delta | 0.3658825994605139 | 0.5503431017865204 | USAR SOLO COMO APOYO | puede reflejar drift, parpadeo o movimiento |
-| theta | 0.10454123004462842 | 0.18052487703522357 | USAR SOLO COMO APOYO | puede reflejar drift, parpadeo o movimiento |
-| alpha | 0.04128879633333912 | 0.07811016361189406 | NECESITA MAS CAPTURAS | no validada solo por presencia; requiere open/closed robusto |
-| beta | 0.062030084245561314 | 0.19207374397465823 | USAR SOLO COMO APOYO | puede aumentar con mandibula/frente/EMG |
-| gamma | 0.38407011704553456 | 0.577485236123608 | NO USAR EN TIEMPO REAL | muy sensible a EMG y ruido en EEG superficial |
+| delta | 0.36588259946050733 | 0.5503431017865235 | USAR SOLO COMO APOYO | puede reflejar drift, parpadeo o movimiento |
+| theta | 0.1045412300446285 | 0.18052487703522768 | USAR SOLO COMO APOYO | puede reflejar drift, parpadeo o movimiento |
+| alpha | 0.041288796333341385 | 0.07811016361190203 | NECESITA MAS CAPTURAS | no validada solo por presencia; requiere open/closed robusto |
+| beta | 0.06203008424556241 | 0.19207374397467022 | USAR SOLO COMO APOYO | puede aumentar con mandibula/frente/EMG |
+| gamma | 0.3840701170455315 | 0.5774852361235886 | NO USAR EN TIEMPO REAL | muy sensible a EMG y ruido en EEG superficial |
 
 ## Sonification Controls
 
 | Control | Median | P05 | P95 |
 | --- | ---: | ---: | ---: |
-| activity | 0.43133167167381253 | 0.3126423901147682 | 0.5601852250569953 |
-| calmness | 0.016695649229192876 | 0.00819505836356445 | 0.03277585385349583 |
-| tension | 0.573409368179623 | 0.4469950915145079 | 0.6920467798014475 |
-| rhythmic_density | 0.47477589374184326 | 0.3878193002564432 | 0.5917530362969967 |
-| register | 0.30640934675368753 | 0.2620795339206042 | 0.3604652070861908 |
-| harmonic_stability | 0.15913405248882678 | 0.11372777139509832 | 0.21418350196899757 |
-| velocity_factor | 0.6019321701716689 | 0.5188496730803378 | 0.6921296575398966 |
-| note_probability | 0.5298207149934747 | 0.46025544020515463 | 0.6234024290375975 |
+| activity | 0.3735737496515487 | 0.12757451330025185 | 0.52945535234729 |
+| calmness | 0.018766488435102754 | 0.008525086577582846 | 0.3548644612577022 |
+| tension | 0.554927791933098 | 0.4481983958245333 | 0.6749281664980507 |
+| rhythmic_density | 0.41121044200129736 | 0.13983042346646893 | 0.5948566977447408 |
+| register | 0.31495192992984133 | 0.2649989832735662 | 0.43745969307809474 |
+| harmonic_stability | 0.20668183517577277 | 0.124042535901731 | 0.3952714705204291 |
+| velocity_factor | 0.5615016247560842 | 0.38930215931017637 | 0.6706187466431031 |
+| note_probability | 0.47896835360103795 | 0.2618643387731752 | 0.6258853581957928 |
 
 ## Interpretation
 

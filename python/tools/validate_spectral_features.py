@@ -35,6 +35,7 @@ if not hasattr(np, "trapezoid"):
 
 from analyze_eeg_capture import BANDS, analyze
 from dsp_core import DSPCore
+from spectral_quality import compute_spectral_quality
 from sonification_features import SonificationFeatureAdapter
 
 
@@ -300,13 +301,28 @@ def validate_capture(
         expected_step_ok = True
         if sample_idx.size >= stop and start > 0:
             expected_step_ok = bool(sample_idx[start] - sample_idx[start - 1] == 1)
-        quality, quality_warnings = _quality_score(
-            rms_uv=rms_uv,
-            ptp_uv=ptp_uv,
-            line_50_ratio=line_50_ratio,
-            finite_features=finite_features,
-            sample_gap=not expected_step_ok,
+        quality_obj = compute_spectral_quality(
+            features,
+            {
+                "rms_uv": rms_uv,
+                "ptp_uv": ptp_uv,
+                "line_50_ratio": line_50_ratio,
+                "abrupt_jumps": 0,
+                "flatline": False,
+                "saturation_fraction": 0.0,
+            },
+            {
+                "lost_frames_delta": 1 if not expected_step_ok else 0,
+                "lost_blocks_delta": 0,
+                "queue_drops_frames_delta": 0,
+                "queue_drops_blocks_delta": 0,
+                "malformed_blocks_delta": 0,
+                "invalid_status_delta": 0,
+            },
+            window_ready=finite_features,
         )
+        quality = quality_obj.score
+        quality_warnings = quality_obj.warnings
 
         band_abs = features.get("bandpower_abs", {}) or {}
         band_rel = features.get("bandpower_rel", {}) or {}
@@ -341,7 +357,7 @@ def validate_capture(
         features_for_sonif = dict(features)
         features_for_sonif.pop("freqs", None)
         features_for_sonif.pop("psd", None)
-        sonif = adapter.update(features_for_sonif).to_dict()
+        sonif = adapter.update(features_for_sonif, quality=quality_obj.to_dict()).to_dict()
         sonif_rows.append(
             {
                 "capture": capture_dir.name,
@@ -349,6 +365,8 @@ def validate_capture(
                 "channel": channel,
                 "window_start_sec": row["window_start_sec"],
                 "quality_score": quality,
+                "quality_gate": sonif.get("quality_gate"),
+                "quality_state": sonif.get("quality_state"),
                 **{
                     key: sonif.get(key)
                     for key in (
