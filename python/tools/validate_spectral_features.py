@@ -30,6 +30,9 @@ _add_cached_site_packages()
 
 import numpy as np
 
+if not hasattr(np, "trapezoid"):
+    np.trapezoid = np.trapz
+
 from analyze_eeg_capture import BANDS, analyze
 from dsp_core import DSPCore
 from sonification_features import SonificationFeatureAdapter

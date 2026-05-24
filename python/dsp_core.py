@@ -111,6 +111,9 @@ class DSPCore:
         max_val = np.max(x)
         min_val = np.min(x)
 
+        if np.isclose(max_val, min_val, atol=1e-9):
+            return False
+
         atol = 1e-9
         n_max = np.sum(np.isclose(x, max_val, atol=atol))
         n_min = np.sum(np.isclose(x, min_val, atol=atol))
