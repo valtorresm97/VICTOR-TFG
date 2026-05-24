@@ -1,0 +1,6 @@
+band,range,median_rel_final_capture,p95_rel_final_capture,evidence,artifact_risk,robustness,decision
+delta,0.5-4 Hz,0.366,0.504,captura final con quality gate,"puede reflejar drift, parpadeo o movimiento",media-baja,USAR SOLO COMO APOYO
+theta,4-8 Hz,0.108,0.187,captura final con quality gate,"puede reflejar drift, parpadeo o movimiento",media-baja,USAR SOLO COMO APOYO
+alpha,8-13 Hz,0.041,0.086,captura final con quality gate,no validada solo por presencia; requiere open/closed robusto,media en ear-EEG; baja en Fp1-Fp2,NECESITA MAS CAPTURAS
+beta,13-30 Hz,0.078,0.228,captura final con quality gate,puede aumentar con mandibula/frente/EMG,media con quality gate,USAR SOLO COMO APOYO
+gamma,30-45 Hz (cautela),0.379,0.545,captura final con quality gate,muy sensible a EMG y ruido en EEG superficial,baja,NO USAR EN TIEMPO REAL

@@ -1,0 +1,6 @@
+musical_parameter,recommended_feature,evidence,risk,treatment
+Densidad rítmica,activity + RMS normalizado + quality gate,cambia con energía de señal; el gate reduce ventanas malas,puede aumentar con EMG/movimiento,"suavizado, histéresis y atenuación por calidad"
+Calma,alpha_rel / alpha_beta_ratio,alpha validado mejor en ear-EEG que en Fp1-Fp2,alpha no siempre robusto en montaje frontal,usar con suavizado y normalización por sesión
+Tensión,beta_rel con apoyo de fast_power,"beta varía, pero puede contener EMG",mandíbula/frente contaminan beta/gamma,no usar sin quality gate; peso moderado
+Registro,peak_freq estable + bandas relativas,peak_freq puede cambiar entre condiciones,picos espurios por artefacto o 50 Hz,limitar rango y suavizar
+Probabilidad de nota,rhythmic_density atenuada por calidad,ventanas bad se bloquean en captura final,repetición excesiva de eventos,gate + duración mínima + lógica musical posterior

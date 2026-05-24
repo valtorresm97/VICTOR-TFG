@@ -1,0 +1,3 @@
+test,capture,fs_hz,sample_gaps,invalid_status,rms_uV,ptp_uV,result
+shorted_inputs,20260523-175959_post_configfix_shorted_inputs,250.0,0,0,0.115,4.000,valida_diagnostica
+test_signal_internal,pendiente en rama actual,pendiente,pendiente,pendiente,pendiente,pendiente,"descrito en conversación, CSV no versionado en esta rama"
