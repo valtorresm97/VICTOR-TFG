@@ -24,6 +24,8 @@ from music_bar import BarGenerator
 from music_note import NoteGenerator
 from midi_live import MidiScheduler
 from midi_byte_transport import MidiByteTransport
+from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
+from led_matrix_transport import LedMatrixTransport
 
 
 logging.basicConfig(level=logging.INFO)
@@ -176,6 +178,23 @@ class BackendService:
         self.midi_transport = MidiByteTransport(
             bridge_method=MIDI_BRIDGE_METHOD,
             enabled=MIDI_LIVE_ENABLED,
+        )
+
+        self.led_matrix_config = LedMatrixConfig.from_env(
+            default_pitch_center=self.music_main_note_midi
+        )
+        self.led_matrix_transport = LedMatrixTransport(
+            bridge_method=self.led_matrix_config.bridge_method,
+            enabled=self.led_matrix_config.enabled,
+            width=self.led_matrix_config.width,
+            height=self.led_matrix_config.height,
+        )
+        self._last_led_frame_t = 0.0
+        self._last_led_frame: dict = build_led_matrix_frame(
+            [],
+            now=time.monotonic(),
+            window_sec=RECENT_NOTES_WINDOW_SEC,
+            config=self.led_matrix_config,
         )
 
         self._last_music_t = 0.0
@@ -350,11 +369,19 @@ class BackendService:
                 "mcu_handler": MIDI_BRIDGE_METHOD,
                 "enabled_source": "EEG_MIDI_LIVE_ENABLED",
             },
+            "led_matrix": {
+                "config": self.led_matrix_config.to_dict(),
+                "transport": self.led_matrix_transport.get_status(),
+                "frame": self._last_led_frame,
+                "enabled_source": "EEG_LED_MATRIX_ENABLED",
+                "mcu_handler": self.led_matrix_config.bridge_method,
+            },
             "performance": {
                 "snapshot_publish_period_sec": SNAPSHOT_PUBLISH_PERIOD_SEC,
                 "disk_publish_period_sec": DISK_PUBLISH_PERIOD_SEC,
                 "midi_generate_period_sec": MIDI_GENERATE_PERIOD_SEC,
                 "recent_notes_window_sec": RECENT_NOTES_WINDOW_SEC,
+                "led_matrix_refresh_rate_hz": self.led_matrix_config.refresh_rate_hz,
             },
             "errors": {
                 "music_generation_errors_total": self._music_generation_errors_total,
@@ -469,6 +496,32 @@ class BackendService:
         except Exception as exc:
             self._music_generation_errors_total += 1
             logger.exception("[MUSIC] generation error: %s", exc)
+
+    # --------------------------------------------------------
+    # LED matrix piano scroll
+    # --------------------------------------------------------
+
+    def _maybe_update_led_matrix(self, now: float) -> None:
+        """
+        Calcula y, si esta activado, envia un frame LED desde recent_notes.
+
+        Usa exactamente la misma lista que consume el piano roll web para que
+        la matriz fisica sea una vista compacta, no otro pipeline musical.
+        """
+        period = 1.0 / max(1.0, float(self.led_matrix_config.refresh_rate_hz))
+        if (float(now) - self._last_led_frame_t) < period:
+            return
+
+        frame = build_led_matrix_frame(
+            self._recent_notes,
+            now=float(now),
+            window_sec=RECENT_NOTES_WINDOW_SEC,
+            config=self.led_matrix_config,
+        )
+        self._last_led_frame = frame
+        self._last_led_frame_t = float(now)
+
+        self.led_matrix_transport.send_frame(frame)
 
     # --------------------------------------------------------
     # MIDI pump
@@ -588,6 +641,7 @@ class BackendService:
         # compás nuevo cuando ha pasado MUSIC_GENERATE_PERIOD_SEC.
         self._maybe_generate_music(now=now)
         self._pump_midi(now=now)
+        self._maybe_update_led_matrix(now=now)
 
         if (now - self._last_snapshot_t) >= SNAPSHOT_PUBLISH_PERIOD_SEC:
             snap = self._build_snapshot()

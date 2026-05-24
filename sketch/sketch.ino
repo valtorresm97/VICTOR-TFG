@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <math.h>
+#include <vector>
 
 #include <ADS1299Plus.h>
 #include <ADS1299_SafeSPI.h>
@@ -12,6 +13,15 @@
 
 // UNO Q: comunicación MCU<->MPU (Qualcomm) vía Bridge (MsgPack RPC) + Monitor
 #include <Arduino_RouterBridge.h>
+
+#ifndef LED_MATRIX_ENABLED
+#define LED_MATRIX_ENABLED 0
+#endif
+
+#if LED_MATRIX_ENABLED
+#include <Arduino_LED_Matrix.h>
+Arduino_LED_Matrix ledMatrix;
+#endif
 
 // Prueba sintética
 #define USE_SYNTHETIC 0
@@ -122,6 +132,29 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
   return true;
 #else
   (void)data;
+  return false;
+#endif
+}
+
+// Handler Bridge compatible con el LED Matrix Painter:
+//   Bridge.call("led_matrix_frame", frame_bytes)
+//
+// frame_bytes es row-major 8x13 con brillo 0..7. El backend Python calcula
+// el piano scroll desde recent_notes y el MCU solo dibuja un frame compacto.
+static bool led_matrix_frame(std::vector<uint8_t> frame) {
+  static constexpr size_t LED_MATRIX_WIDTH = 13;
+  static constexpr size_t LED_MATRIX_HEIGHT = 8;
+  static constexpr size_t LED_MATRIX_BYTES = LED_MATRIX_WIDTH * LED_MATRIX_HEIGHT;
+
+  if (frame.size() != LED_MATRIX_BYTES) {
+    return false;
+  }
+
+#if LED_MATRIX_ENABLED
+  ledMatrix.draw(frame.data());
+  return true;
+#else
+  (void)frame;
   return false;
 #endif
 }
@@ -402,6 +435,15 @@ void setup() {
 
   Monitor.println("BOOT: EEG_MIDI");
 
+#if LED_MATRIX_ENABLED
+  ledMatrix.begin();
+  ledMatrix.setGrayscaleBits(3);
+  ledMatrix.clear();
+  Monitor.println("LED matrix enabled: Arduino_LED_Matrix 13x8 grayscale 0..7");
+#else
+  Monitor.println("LED matrix disabled: led_matrix_frame handler registered for dry-run only");
+#endif
+
 #if MIDI_UART_ENABLED
   MIDI_SERIAL.begin(MIDI_BAUD);
   Monitor.println("MIDI UART enabled at 31250 baud");
@@ -413,6 +455,12 @@ void setup() {
     Monitor.println("ERROR: no se pudo registrar handler midi_bytes");
   } else {
     Monitor.println("Bridge handler registered: midi_bytes");
+  }
+
+  if (!Bridge.provide_safe("led_matrix_frame", led_matrix_frame)) {
+    Monitor.println("ERROR: no se pudo registrar handler led_matrix_frame");
+  } else {
+    Monitor.println("Bridge handler registered: led_matrix_frame");
   }
 
   bench.report_last_ms = millis();
