@@ -190,12 +190,6 @@ class BackendService:
             height=self.led_matrix_config.height,
         )
         self._last_led_frame_t = 0.0
-        self._last_led_frame: dict = build_led_matrix_frame(
-            [],
-            now=time.monotonic(),
-            window_sec=RECENT_NOTES_WINDOW_SEC,
-            config=self.led_matrix_config,
-        )
 
         self._last_music_t = 0.0
         self._program_change_sent = False
@@ -372,7 +366,6 @@ class BackendService:
             "led_matrix": {
                 "config": self.led_matrix_config.to_dict(),
                 "transport": self.led_matrix_transport.get_status(),
-                "frame": self._last_led_frame,
                 "enabled_source": "EEG_LED_MATRIX_ENABLED",
                 "mcu_handler": self.led_matrix_config.bridge_method,
             },
@@ -508,6 +501,9 @@ class BackendService:
         Usa exactamente la misma lista que consume el piano roll web para que
         la matriz fisica sea una vista compacta, no otro pipeline musical.
         """
+        if not self.led_matrix_transport.enabled:
+            return
+
         period = 1.0 / max(1.0, float(self.led_matrix_config.refresh_rate_hz))
         if (float(now) - self._last_led_frame_t) < period:
             return
@@ -518,7 +514,6 @@ class BackendService:
             window_sec=RECENT_NOTES_WINDOW_SEC,
             config=self.led_matrix_config,
         )
-        self._last_led_frame = frame
         self._last_led_frame_t = float(now)
 
         self.led_matrix_transport.send_frame(frame)

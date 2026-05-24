@@ -66,8 +66,8 @@ class LedMatrixConfig:
     """
     Configuracion del piano scroll LED.
 
-    La matriz fisica queda desactivada por defecto. El frame se calcula de
-    todos modos para snapshot, pruebas y preview UI sin tocar hardware.
+    La matriz fisica queda desactivada por defecto. Cuando se activa, el frame
+    se calcula en Python y se envia al MCU como bytes row-major 13x8.
     """
 
     enabled: bool = False
@@ -76,7 +76,7 @@ class LedMatrixConfig:
     pitch_center: int = 67
     dynamic_pitch_center: bool = False
     visible_pitch_span: int = 8
-    refresh_rate_hz: float = 12.0
+    refresh_rate_hz: float = 8.0
     brightness: int = 7
     max_points: int = 24
     clip_mode: str = "ignore"
@@ -105,7 +105,7 @@ class LedMatrixConfig:
             ),
             dynamic_pitch_center=_env_bool("EEG_LED_MATRIX_DYNAMIC_CENTER", False),
             visible_pitch_span=_env_int("EEG_LED_MATRIX_VISIBLE_PITCH_SPAN", 8, lo=1, hi=64),
-            refresh_rate_hz=_env_float("EEG_LED_MATRIX_REFRESH_HZ", 12.0, lo=1.0, hi=30.0),
+            refresh_rate_hz=_env_float("EEG_LED_MATRIX_REFRESH_HZ", 8.0, lo=1.0, hi=30.0),
             brightness=_env_int("EEG_LED_MATRIX_BRIGHTNESS", 7, lo=1, hi=7),
             max_points=_env_int("EEG_LED_MATRIX_MAX_POINTS", 24, lo=1, hi=64),
             clip_mode=clip_mode,

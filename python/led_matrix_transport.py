@@ -34,9 +34,11 @@ class LedMatrixTransport:
         self.sent_frames_total = 0
         self.failed_frames_total = 0
         self.dropped_frames_total = 0
+        self.skipped_unchanged_frames_total = 0
         self.sent_bytes_total = 0
         self.last_error = ""
         self.last_point_count = 0
+        self._last_payload: bytes | None = None
         self._log_first_frames = int(log_first_frames)
 
     def set_enabled(self, enabled: bool) -> None:
@@ -70,7 +72,12 @@ class LedMatrixTransport:
 
         try:
             payload = self._frame_to_bytes(frame)
+            if payload == self._last_payload:
+                self.skipped_unchanged_frames_total += 1
+                return True
+
             Bridge.call(self.bridge_method, payload)
+            self._last_payload = payload
             self.sent_frames_total += 1
             self.sent_bytes_total += len(payload)
             self.last_error = ""
@@ -98,6 +105,7 @@ class LedMatrixTransport:
             "sent_frames_total": self.sent_frames_total,
             "failed_frames_total": self.failed_frames_total,
             "dropped_frames_total": self.dropped_frames_total,
+            "skipped_unchanged_frames_total": self.skipped_unchanged_frames_total,
             "sent_bytes_total": self.sent_bytes_total,
             "last_error": self.last_error,
             "last_point_count": self.last_point_count,

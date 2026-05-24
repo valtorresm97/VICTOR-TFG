@@ -64,10 +64,6 @@ function renderWarnings(s) {
   if (Number(transport.failed_events_total || 0) > 0) warnings.push("Bridge/MIDI reporta eventos fallidos.");
   if (Number(transport.dropped_events_total || 0) > 256) warnings.push("Hay muchos eventos MIDI descartados.");
 
-  const led = s.led_matrix || {};
-  const ledTransport = led.transport || {};
-  if (ledTransport.failed_frames_total > 0) warnings.push("Bridge/LED matrix reporta frames fallidos.");
-
   root.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
 }
 
@@ -188,45 +184,6 @@ function renderPianoRoll(s) {
   root.innerHTML = rows.join("") + bars.join("");
 }
 
-function renderLedMatrix(s) {
-  const led = s.led_matrix || {};
-  const config = led.config || {};
-  const transport = led.transport || {};
-  const frame = led.frame || {};
-  const rows = Array.isArray(frame.rows) ? frame.rows : [];
-
-  setText("led-enabled", config.enabled ? "enabled" : "disabled");
-  setText("led-frames-sent", String(transport.sent_frames_total ?? 0));
-  setText("led-frames-failed", String(transport.failed_frames_total ?? 0));
-  setText("led-points", String(frame.point_count ?? transport.last_point_count ?? 0));
-
-  const errorRoot = document.getElementById("led-last-error");
-  if (errorRoot) {
-    const err = transport.last_error || "";
-    errorRoot.innerHTML = err ? `<div class="warning">${err}</div>` : "";
-  }
-
-  const preview = document.getElementById("led-preview");
-  if (!preview) return;
-
-  const width = Math.max(1, Number(config.width || 13));
-  const height = Math.max(1, Number(config.height || 8));
-  preview.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
-  preview.innerHTML = "";
-
-  for (let y = 0; y < height; y += 1) {
-    const row = Array.isArray(rows[y]) ? rows[y] : [];
-    for (let x = 0; x < width; x += 1) {
-      const value = Math.max(0, Math.min(7, Number(row[x] || 0)));
-      const cell = document.createElement("span");
-      cell.className = "led-cell";
-      cell.style.opacity = value > 0 ? String(0.25 + 0.75 * (value / 7)) : "0.16";
-      cell.dataset.on = value > 0 ? "1" : "0";
-      preview.appendChild(cell);
-    }
-  }
-}
-
 function renderSnapshot(s) {
   const rx = s.rx || {};
   const status = s.status || {};
@@ -258,7 +215,6 @@ function renderSnapshot(s) {
   renderWarnings(s);
   renderSonification(s);
   renderPianoRoll(s);
-  renderLedMatrix(s);
 }
 
 async function loadInitial() {

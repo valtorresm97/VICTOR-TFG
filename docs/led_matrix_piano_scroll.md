@@ -83,6 +83,7 @@ Por defecto:
 - `visible_pitch_span = 8`.
 - `clip_mode = ignore`: notas fuera del rango vertical no se dibujan.
 - `brightness = 7`: compatible con `Arduino_LED_Matrix` en 3 bits.
+- `refresh_rate_hz = 8`: tasa conservadora para no cargar Bridge/backend.
 
 Tambien existe `clip_mode=saturate` para fijar notas extremas al borde.
 
@@ -95,7 +96,10 @@ Motivos:
 - Sincronia directa con la Web UI: ambas vistas usan `recent_notes`.
 - Carga MCU minima: no calcula pitch, tiempo ni historial.
 - Bridge limitado: 13x8 = 104 bytes por frame a una tasa configurable.
-- Depuracion sencilla: el snapshot incluye `led_matrix.frame.rows`.
+- El transporte evita reenviar frames identicos, reduciendo trafico cuando no
+  cambia la representacion musical.
+- Depuracion ligera: el snapshot mantiene solo configuracion y contadores LED,
+  no el framebuffer completo.
 - Activacion segura: si `EEG_LED_MATRIX_ENABLED=0`, no se llama al Bridge.
 
 Alternativas descartadas para esta version minima:
@@ -116,7 +120,7 @@ EEG_LED_MATRIX_HEIGHT=8
 EEG_LED_MATRIX_PITCH_CENTER=67
 EEG_LED_MATRIX_DYNAMIC_CENTER=0
 EEG_LED_MATRIX_VISIBLE_PITCH_SPAN=8
-EEG_LED_MATRIX_REFRESH_HZ=12
+EEG_LED_MATRIX_REFRESH_HZ=8
 EEG_LED_MATRIX_BRIGHTNESS=7
 EEG_LED_MATRIX_CLIP_MODE=ignore
 EEG_LED_MATRIX_NOTE_MODE=point
@@ -155,10 +159,10 @@ El snapshot añade:
 - `led_matrix.transport.sent_frames_total`
 - `led_matrix.transport.failed_frames_total`
 - `led_matrix.transport.last_error`
-- `led_matrix.frame.rows`
-- `led_matrix.frame.points`
 
-La Web UI muestra estado, frames enviados, errores y un preview 13x8.
+La Web UI no renderiza preview ni estado LED para no penalizar la pagina. La
+observabilidad queda disponible en el snapshot JSON/logs si se necesita
+depurar.
 
 ## Limitaciones
 
