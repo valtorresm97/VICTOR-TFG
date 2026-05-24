@@ -1,0 +1,311 @@
+{
+  "channels": {
+    "ch1": {
+      "abrupt_jumps": 46,
+      "bandpower_abs": {
+        "alpha": 0.1926799151835934,
+        "beta": 0.5342339598895713,
+        "delta": 0.14293292751533007,
+        "gamma": 0.386574562613093,
+        "theta": 0.11750821593320641
+      },
+      "bandpower_rel": {
+        "alpha": 0.14024002236304559,
+        "beta": 0.38883649295062267,
+        "delta": 0.1040322076749195,
+        "gamma": 0.28136417464263525,
+        "theta": 0.08552710236877697
+      },
+      "flatline": false,
+      "line_50_power": 0.014617005808090541,
+      "line_50_ratio_1_50": 0.010793535939317722,
+      "max_uV": 15616.0,
+      "mean_uV": 30.921994773519163,
+      "median_uV": 29.0,
+      "min_uV": -51197.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -290.0,
+      "p05_uV": -33.0,
+      "p95_uV": 165.0,
+      "p99_uV": 565.0,
+      "peak_by_band_hz": {
+        "alpha": 10.1698606271777,
+        "beta": 18.281794425087107,
+        "delta": 2.4771341463414633,
+        "gamma": 31.190113240418114,
+        "theta": 7.6273954703832745
+      },
+      "peak_freq_hz": 10.1698606271777,
+      "ptp_uV": 66813.0,
+      "rms_uV": 596.7487190327663,
+      "samples": 45920,
+      "std_uV": 595.9470311248087,
+      "windowed": {
+        "artifact_window_fraction": 0.09340659340659341,
+        "best_window_rms_uV": 37.15416531157711,
+        "best_window_start_sec": 91.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 60766.0,
+        "max_rms_uV": 4067.3529082193004,
+        "median_ptp_uV": 1042.0,
+        "median_rms_uV": 71.89499184868494,
+        "median_robust_ptp_uV": 73.6499999999999,
+        "p90_rms_uV": 150.13482790004207,
+        "p95_ptp_uV": 17675.749999999825,
+        "p95_rms_uV": 1047.7801856126666,
+        "p95_robust_ptp_uV": 631.4274999999986,
+        "window_count": 182,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 4067.3529082193004,
+        "worst_window_start_sec": 2.0
+      }
+    },
+    "ch2": {
+      "abrupt_jumps": 40,
+      "bandpower_abs": {
+        "alpha": 1.2540416451957404,
+        "beta": 2.5145683075853027,
+        "delta": 0.6021218999767433,
+        "gamma": 1.692407878198272,
+        "theta": 0.4161900998855973
+      },
+      "bandpower_rel": {
+        "alpha": 0.1935449618919681,
+        "beta": 0.3880908015541885,
+        "delta": 0.09292965718624768,
+        "gamma": 0.2612010689967346,
+        "theta": 0.06423351037086111
+      },
+      "flatline": false,
+      "line_50_power": 0.007188057355962167,
+      "line_50_ratio_1_50": 0.0011246107139497596,
+      "max_uV": 68198.0,
+      "mean_uV": -2.6433797909407666,
+      "median_uV": 0.0,
+      "min_uV": -88306.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -231.81,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 278.61999999999534,
+      "peak_by_band_hz": {
+        "alpha": 9.554660278745644,
+        "beta": 20.606489547038326,
+        "delta": 1.4862804878048779,
+        "gamma": 32.60561846689895,
+        "theta": 7.523954703832752
+      },
+      "peak_freq_hz": 20.606489547038326,
+      "ptp_uV": 156504.0,
+      "rms_uV": 1065.2068251142757,
+      "samples": 45920,
+      "std_uV": 1065.203545250069,
+      "windowed": {
+        "artifact_window_fraction": 0.054945054945054944,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 6.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 104195.0,
+        "max_rms_uV": 6217.182902730143,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 5.821134330921432,
+        "p95_ptp_uV": 13498.399999999867,
+        "p95_rms_uV": 788.078394062824,
+        "p95_robust_ptp_uV": 300.9099999999995,
+        "window_count": 182,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 6217.182902730143,
+        "worst_window_start_sec": 57.0
+      }
+    },
+    "ch3": {
+      "abrupt_jumps": 32,
+      "bandpower_abs": {
+        "alpha": 0.2522427490632061,
+        "beta": 0.782284099311654,
+        "delta": 0.15767416082036467,
+        "gamma": 0.4631914165037768,
+        "theta": 0.19676814357565442
+      },
+      "bandpower_rel": {
+        "alpha": 0.13618838088211194,
+        "beta": 0.4223630025867641,
+        "delta": 0.0851298550654888,
+        "gamma": 0.250081674444226,
+        "theta": 0.1062370870214092
+      },
+      "flatline": false,
+      "line_50_power": 0.0013921753813295058,
+      "line_50_ratio_1_50": 0.0007599727292592936,
+      "max_uV": 39663.0,
+      "mean_uV": 0.7308797909407666,
+      "median_uV": 0.0,
+      "min_uV": -35796.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -160.81,
+      "p05_uV": -1.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 12.249564459930312,
+        "beta": 17.492378048780488,
+        "delta": 3.2447735191637626,
+        "gamma": 30.49869337979094,
+        "theta": 6.995862369337979
+      },
+      "peak_freq_hz": 12.249564459930312,
+      "ptp_uV": 75459.0,
+      "rms_uV": 476.10025932054174,
+      "samples": 45920,
+      "std_uV": 476.09969831939435,
+      "windowed": {
+        "artifact_window_fraction": 0.04945054945054945,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 5.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 53711.0,
+        "max_rms_uV": 2772.5411820205663,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 0.1451206394693748,
+        "p95_ptp_uV": 1192.39999999999,
+        "p95_rms_uV": 172.37146620962318,
+        "p95_robust_ptp_uV": 220.6874999999996,
+        "window_count": 182,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 2772.5411820205663,
+        "worst_window_start_sec": 57.0
+      }
+    },
+    "ch4": {
+      "abrupt_jumps": 33,
+      "bandpower_abs": {
+        "alpha": 0.2304180658665994,
+        "beta": 0.7449197719780112,
+        "delta": 0.15195746745185193,
+        "gamma": 0.42758177693254473,
+        "theta": 0.18459461322988058
+      },
+      "bandpower_rel": {
+        "alpha": 0.13246439506209562,
+        "beta": 0.4282448365918911,
+        "delta": 0.08735840189211255,
+        "gamma": 0.24581128744365394,
+        "theta": 0.1061210790102468
+      },
+      "flatline": false,
+      "line_50_power": 0.0015534978978078793,
+      "line_50_ratio_1_50": 0.0009024398809043208,
+      "max_uV": 18673.0,
+      "mean_uV": 0.00043554006968641115,
+      "median_uV": 0.0,
+      "min_uV": -43627.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -27.810000000000002,
+      "p05_uV": 0.0,
+      "p95_uV": 1.0,
+      "p99_uV": 189.80999999999767,
+      "peak_by_band_hz": {
+        "alpha": 9.903092334494772,
+        "beta": 13.115200348432055,
+        "delta": 1.6060540069686409,
+        "gamma": 32.85605400696864,
+        "theta": 5.629355400696864
+      },
+      "peak_freq_hz": 9.903092334494772,
+      "ptp_uV": 62300.0,
+      "rms_uV": 476.5239651610633,
+      "samples": 45920,
+      "std_uV": 476.52396516086424,
+      "windowed": {
+        "artifact_window_fraction": 0.06593406593406594,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 51709.0,
+        "max_rms_uV": 3024.04635546481,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 4.517379776673893,
+        "p95_ptp_uV": 12936.149999999969,
+        "p95_rms_uV": 780.3791150936039,
+        "p95_robust_ptp_uV": 376.6299999999983,
+        "window_count": 182,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 3024.04635546481,
+        "worst_window_start_sec": 13.0
+      }
+    }
+  },
+  "diagnosis": {
+    "reasons": [
+      "abrupt jumps or motion artifacts"
+    ],
+    "recommendations": [
+      "Full-capture peak-to-peak is high, but most 2 s windows are stable; inspect transient movement/artifact periods instead of rejecting the whole capture.",
+      "Repeat capture with still posture and verify electrode stability."
+    ],
+    "state": "dudosa"
+  },
+  "metadata": {
+    "ads1299": {
+      "bias_drl_used": false,
+      "channels_streamed": 4,
+      "expected_device": "ADS1299-4PAG",
+      "expected_id": "0x3C",
+      "lead_off_impedance_measured": false,
+      "lsb_v_firmware": 2.235e-08,
+      "pga_gain_assumed": 24,
+      "status_mask": "0xF00000",
+      "status_prefix_expected": "0xC00000",
+      "vref_v_assumed_from_lsb_gain": 4.499648794800001
+    },
+    "block_samples_expected": 8,
+    "bridge_event": "eeg_block_uV",
+    "condition": "diag_atenuacion_mixed_states_ear_eeg",
+    "created_at_utc": "2026-05-24T11:52:02.871688+00:00",
+    "duration_observed_sec": 191.62254618200006,
+    "duration_requested_sec": 190.0,
+    "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",
+    "fs_hz_expected": 250,
+    "git": {
+      "branch": null,
+      "commit": null,
+      "dirty": false
+    },
+    "notes": "",
+    "num_channels": 4,
+    "raw_counts_available": false,
+    "rx_summary": {
+      "block_gaps_total": 0,
+      "invalid_status_total": 0,
+      "last_block_idx": 11383,
+      "last_sample_idx": 93488,
+      "malformed_blocks_total": 0,
+      "rx_blocks_total": 5740,
+      "rx_samples_total": 45920,
+      "sample_gaps_total": 0
+    },
+    "started_unix": 1779623331.2491202,
+    "value_units": "microvolts"
+  },
+  "status": {
+    "invalid_status_fraction": 0.0,
+    "invalid_status_total": 0,
+    "status_prefix_expected": "0xC00000"
+  },
+  "timing": {
+    "duration_sec": 183.68,
+    "effective_fs_hz": 250.0,
+    "first_sample_idx": 47569,
+    "fs_hz_expected": 250.0,
+    "last_sample_idx": 93488,
+    "sample_gaps_detected": 0,
+    "samples_expected_from_duration": 45920,
+    "samples_received": 45920
+  }
+}
