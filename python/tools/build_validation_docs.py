@@ -4,6 +4,8 @@ import argparse
 import csv
 import json
 import math
+import subprocess
+import sys
 import statistics
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,6 +17,24 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams.update(
+    {
+        "font.size": 16,
+        "axes.titlesize": 22,
+        "axes.labelsize": 20,
+        "xtick.labelsize": 16,
+        "ytick.labelsize": 16,
+        "legend.fontsize": 13,
+        "figure.titlesize": 22,
+    }
+)
+
+PYTHON_DIR = Path(__file__).resolve().parents[1]
+if str(PYTHON_DIR) not in sys.path:
+    sys.path.insert(0, str(PYTHON_DIR))
+
+from dsp_core import DSPCore
+
 
 BANDS = ("delta", "theta", "alpha", "beta", "gamma")
 BAND_RANGES = {
@@ -23,6 +43,26 @@ BAND_RANGES = {
     "alpha": "8-13 Hz",
     "beta": "13-30 Hz",
     "gamma": "30-45 Hz (cautela)",
+}
+
+FINAL_TIMELINE = [
+    ("ojos_abiertos_reposo", 0.0, 30.0, "Ojos abiertos"),
+    ("ojos_cerrados_reposo_1", 30.0, 60.0, "Ojos cerrados"),
+    ("mandibula", 60.0, 80.0, "Mandíbula"),
+    ("recuperacion_1", 80.0, 110.0, "Recuperación"),
+    ("parpadeo_frente", 110.0, 130.0, "Parpadeo/frente"),
+    ("recuperacion_2", 130.0, 160.0, "Recuperación"),
+    ("ojos_cerrados_reposo_2", 160.0, 190.0, "Ojos cerrados"),
+]
+
+STATE_COLORS = {
+    "ojos_abiertos_reposo": "#d8f3dc",
+    "ojos_cerrados_reposo_1": "#cfe8ff",
+    "mandibula": "#ffd6a5",
+    "recuperacion_1": "#e9ecef",
+    "parpadeo_frente": "#ffccd5",
+    "recuperacion_2": "#e9ecef",
+    "ojos_cerrados_reposo_2": "#bde0fe",
 }
 
 
@@ -178,6 +218,46 @@ def _write_md_table(path: Path, headers: list[str], rows: list[list[Any]]) -> No
     path.write_text(_markdown_table(headers, rows) + "\n", encoding="utf-8")
 
 
+def apply_tfg_plot_style(ax, xlabel: str | None = None, ylabel: str | None = None, title: str | None = None) -> None:
+    ax.set_xlabel(xlabel or "", fontsize=20)
+    ax.set_ylabel(ylabel or "", fontsize=20)
+    ax.set_title(title or "", fontsize=22, pad=14)
+    ax.tick_params(axis="both", labelsize=16)
+    ax.grid(True, alpha=0.28)
+    legend = ax.get_legend()
+    if legend is not None:
+        for text in legend.get_texts():
+            text.set_fontsize(13)
+
+
+def _shade_timeline(ax, timeline: list[tuple[str, float, float, str]] = FINAL_TIMELINE, y_text: float = 0.96) -> None:
+    ymin, ymax = ax.get_ylim()
+    for state, start, stop, label in timeline:
+        ax.axvspan(start, stop, color=STATE_COLORS.get(state, "#eeeeee"), alpha=0.23, linewidth=0)
+        ax.text(
+            (start + stop) / 2.0,
+            ymin + (ymax - ymin) * y_text,
+            label,
+            ha="center",
+            va="top",
+            fontsize=10,
+            rotation=0,
+            alpha=0.85,
+        )
+    ax.set_ylim(ymin, ymax)
+
+
+def _savefig(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    plt.tight_layout()
+    plt.savefig(path, dpi=180)
+    try:
+        plt.savefig(path.with_suffix(".pdf"))
+    except Exception:
+        pass
+    plt.close()
+
+
 def _read_timeseries(capture: CaptureSummary, max_samples: int | None = None) -> tuple[np.ndarray, np.ndarray]:
     path = capture.path / "eeg_timeseries.csv"
     if not path.exists():
@@ -201,6 +281,10 @@ def _read_timeseries(capture: CaptureSummary, max_samples: int | None = None) ->
         t0 = t[0]
         t = [x - t0 for x in t]
     return np.asarray(t), np.asarray(ch1)
+
+
+def load_timeseries_csv(capture: CaptureSummary, max_samples: int | None = None) -> tuple[np.ndarray, np.ndarray]:
+    return _read_timeseries(capture, max_samples=max_samples)
 
 
 def _read_psd(capture: CaptureSummary) -> tuple[np.ndarray, np.ndarray]:
@@ -236,6 +320,41 @@ def _read_windowed_bandpowers(capture: CaptureSummary) -> list[dict[str, float]]
     return rows
 
 
+def load_windowed_bandpowers(capture: CaptureSummary) -> list[dict[str, float]]:
+    return _read_windowed_bandpowers(capture)
+
+
+def load_spectral_validation(capture: CaptureSummary) -> dict[str, Any]:
+    return _read_json(capture.path / "spectral_validation_report.json")
+
+
+def infer_or_load_state_timeline(capture: CaptureSummary) -> list[tuple[str, float, float, str]]:
+    if "mixed_states" in capture.name.lower() or "mixed_states" in capture.condition.lower():
+        return FINAL_TIMELINE
+    return []
+
+
+def _segment_signal(capture: CaptureSummary, start_sec: float, stop_sec: float) -> np.ndarray:
+    _, x = _read_timeseries(capture)
+    if x.size == 0:
+        return np.array([])
+    fs = capture.fs_hz or 250.0
+    start = max(0, int(round(start_sec * fs)))
+    stop = min(x.size, int(round(stop_sec * fs)))
+    return x[start:stop].astype(float) * 1e-6
+
+
+def _compute_psd_for_segment(capture: CaptureSummary, start_sec: float, stop_sec: float, method: str) -> tuple[np.ndarray, np.ndarray]:
+    x_v = _segment_signal(capture, start_sec, stop_sec)
+    if x_v.size < 16:
+        return np.array([]), np.array([])
+    dsp = DSPCore(fs=capture.fs_hz or 250.0, window_sec=min(4.0, max(1.0, x_v.size / (capture.fs_hz or 250.0))))
+    freqs, pxx = dsp.compute_psd(x_v, method=method)
+    if freqs is None or pxx is None:
+        return np.array([]), np.array([])
+    return np.asarray(freqs), np.asarray(pxx)
+
+
 def _select(captures: list[CaptureSummary], contains: str) -> CaptureSummary | None:
     contains_l = contains.lower()
     for cap in captures:
@@ -244,11 +363,92 @@ def _select(captures: list[CaptureSummary], contains: str) -> CaptureSummary | N
     return None
 
 
-def _savefig(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    plt.tight_layout()
-    plt.savefig(path, dpi=160)
-    plt.close()
+def _git_lines(args: list[str]) -> list[str]:
+    try:
+        result = subprocess.run(["git", *args], cwd=Path.cwd(), text=True, capture_output=True, check=True)
+    except Exception:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def _git_text(args: list[str]) -> str:
+    try:
+        result = subprocess.run(["git", *args], cwd=Path.cwd(), text=True, capture_output=True, check=True)
+    except Exception:
+        return ""
+    return result.stdout
+
+
+def _candidate_branches() -> list[str]:
+    branches = []
+    for line in _git_lines(["branch", "-a", "--format", "%(refname:short)"]):
+        if line.startswith("remotes/origin/HEAD"):
+            continue
+        if line.startswith("origin/"):
+            line = line[len("origin/") :]
+        if line not in branches:
+            branches.append(line)
+    preferred = [
+        "captura-datos",
+        "captura-datos-dsp",
+        "diagnosis/sonificacion-con-artefactos",
+        "diagnosis/sonificacion-atenuacion-artefactos",
+        "sonification-pianoscrollui",
+        "SONIFICATION-webPIANOROLL",
+        "python-spectral-dashboard",
+    ]
+    ordered = [b for b in preferred if b in branches]
+    ordered.extend(b for b in branches if b not in ordered)
+    return ordered
+
+
+def discover_captures_all_branches() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for branch in _candidate_branches():
+        commit = _git_text(["rev-parse", "--short", branch]).strip()
+        files = [p for p in _git_lines(["ls-tree", "-r", "--name-only", branch]) if p.startswith("captures/")]
+        grouped: dict[str, list[str]] = {}
+        for file in files:
+            parts = file.split("/")
+            if len(parts) < 3 or parts[1] == "comparisons":
+                continue
+            grouped.setdefault(parts[1], []).append(file)
+        for capture_name, paths in sorted(grouped.items()):
+            meta = _read_git_json(branch, f"captures/{capture_name}/metadata.json")
+            quality = _read_git_json(branch, f"captures/{capture_name}/quality_report.json")
+            qmeta = quality.get("metadata") or {}
+            timing = quality.get("timing") or {}
+            status = quality.get("status") or {}
+            condition = meta.get("condition") or qmeta.get("condition") or capture_name
+            rows.append(
+                {
+                    "branch": branch,
+                    "commit": commit,
+                    "capture_name": capture_name,
+                    "capture_path": f"captures/{capture_name}",
+                    "condition": condition,
+                    "duration_sec": _fmt(meta.get("duration_observed_sec") or qmeta.get("duration_observed_sec") or timing.get("duration_sec")),
+                    "fs_hz": _fmt(meta.get("fs_hz_expected") or qmeta.get("fs_hz_expected") or timing.get("effective_fs_hz")),
+                    "samples": timing.get("samples_received") or (meta.get("rx_summary") or {}).get("rx_samples_total") or (qmeta.get("rx_summary") or {}).get("rx_samples_total") or "",
+                    "available_files": ";".join(sorted(Path(p).name for p in paths)),
+                    "has_eeg_timeseries_csv": str(any(p.endswith("eeg_timeseries.csv") for p in paths)),
+                    "has_quality_report": str(any("quality_report" in p for p in paths)),
+                    "has_spectral_report": str(any("spectral_validation_report" in p for p in paths)),
+                    "used_in_docs": "yes" if Path("captures", capture_name).exists() else "no",
+                    "reason_if_not_used": "" if Path("captures", capture_name).exists() else "not present in current branch worktree",
+                }
+            )
+    return rows
+
+
+def _read_git_json(branch: str, path: str) -> dict[str, Any]:
+    text = _git_text(["show", f"{branch}:{path}"])
+    if not text:
+        return {}
+    try:
+        return json.loads(text)
+    except Exception:
+        return {}
 
 
 def generate_figures(captures: list[CaptureSummary], figures_dir: Path) -> dict[str, str]:
@@ -399,12 +599,343 @@ def generate_figures(captures: list[CaptureSummary], figures_dir: Path) -> dict[
                 figs["quality_states"] = "fig_11_quality_state_distribution.png"
                 _savefig(figures_dir / figs["quality_states"])
 
+    if final_cap:
+        figs.update(plot_final_capture_rms_timeline(final_cap, figures_dir))
+        figs.update(plot_final_capture_band_timeline(final_cap, figures_dir))
+        figs.update(plot_final_capture_quality_timeline(final_cap, figures_dir))
+        figs.update(plot_state_timeseries_and_psd(final_cap, figures_dir))
+        figs.update(plot_periodogram_by_state(final_cap, figures_dir))
+        figs.update(plot_multitaper_by_state(final_cap, figures_dir))
+        figs.update(plot_spectrogram_with_state_bar(final_cap, figures_dir))
+        figs.update(plot_periodogram_vs_multitaper(final_cap, figures_dir))
+
+    figs.update(plot_mounting_comparison(captures, figures_dir))
+    figs.update(plot_band_stats_fp1fp2_vs_eareeg(captures, figures_dir))
+
     return figs
+
+
+def plot_final_capture_rms_timeline(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    rows = _read_windowed_bandpowers(capture)
+    if not rows:
+        return {}
+    t = np.asarray([r.get("window_start_sec", 0.0) for r in rows])
+    rms = np.asarray([r.get("rms_uV", np.nan) for r in rows])
+    fig, ax = plt.subplots(figsize=(12, 4.5))
+    ax.plot(t, rms, color="#1f77b4", linewidth=1.3, label="RMS por ventana")
+    _shade_timeline(ax, infer_or_load_state_timeline(capture), y_text=0.94)
+    ax.legend(loc="upper right")
+    apply_tfg_plot_style(ax, xlabel=r"$t\,(\mathrm{s})$", ylabel=r"RMS ($\mu V$)", title="RMS por ventanas en la captura final")
+    name = "fig_00_final_capture_rms_timeline.png"
+    _savefig(figures_dir / name)
+    return {"final_rms_timeline": name}
+
+
+def plot_final_capture_band_timeline(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    rows = _read_windowed_bandpowers(capture)
+    if not rows:
+        return {}
+    t = [r.get("window_start_sec", 0.0) for r in rows]
+    fig, ax = plt.subplots(figsize=(12, 4.8))
+    for band in BANDS:
+        ax.plot(t, [r.get(f"{band}_rel", np.nan) for r in rows], linewidth=1.1, label=band)
+    _shade_timeline(ax, infer_or_load_state_timeline(capture), y_text=0.94)
+    ax.legend(ncol=5, loc="upper center", bbox_to_anchor=(0.5, 1.18))
+    apply_tfg_plot_style(ax, xlabel=r"$t\,(\mathrm{s})$", ylabel="Potencia relativa", title="Evolución temporal de bandas EEG")
+    name = "fig_00_final_capture_bands_timeline.png"
+    _savefig(figures_dir / name)
+    return {"final_bands_timeline": name}
+
+
+def plot_final_capture_quality_timeline(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    rows = _read_windowed_bandpowers(capture)
+    if not rows:
+        return {}
+    t = np.asarray([r.get("window_start_sec", 0.0) for r in rows])
+    q = np.asarray([r.get("quality_score", np.nan) for r in rows])
+    fig, ax = plt.subplots(figsize=(12, 4.5))
+    ax.plot(t, q, color="#2ca02c", linewidth=1.3, label="spectral_quality_score")
+    ax.axhline(0.85, color="#2ca02c", linestyle="--", linewidth=1, label="clean")
+    ax.axhline(0.70, color="#ffbf00", linestyle="--", linewidth=1, label="caution")
+    ax.axhline(0.50, color="#d62728", linestyle="--", linewidth=1, label="bad threshold")
+    ax.set_ylim(-0.05, 1.05)
+    _shade_timeline(ax, infer_or_load_state_timeline(capture), y_text=0.90)
+    ax.legend(ncol=4, loc="lower center")
+    apply_tfg_plot_style(ax, xlabel=r"$t\,(\mathrm{s})$", ylabel="Score", title="Calidad espectral por ventana")
+    name = "fig_00_final_capture_quality_timeline.png"
+    _savefig(figures_dir / name)
+    return {"final_quality_timeline": name}
+
+
+def plot_mounting_comparison(captures: list[CaptureSummary], figures_dir: Path) -> dict[str, str]:
+    selected = [c for c in captures if c.median_rms_uv is not None and any(k in c.condition.lower() for k in ("ear", "fp1", "final", "mixed", "jaw", "blink", "frente"))]
+    if not selected:
+        return {}
+    metrics = [
+        ("median_rms_uv", "fig_02_mounting_rms_comparison.png", r"RMS mediano ($\mu V$)", "RMS por montaje/condición"),
+        ("p95_ptp_uv", "fig_02_mounting_ptp_comparison.png", r"PTP p95 ($\mu V$)", "Pico-pico p95 por montaje/condición"),
+        ("line_50_ratio", "fig_02_mounting_50hz_comparison.png", "Ratio 50 Hz", "Ruido de red por montaje/condición"),
+        ("artifact_fraction", "fig_02_mounting_artifact_fraction.png", "Fracción", "Fracción de ventanas artefactadas"),
+        ("spectral_quality_median", "fig_02_mounting_quality_score.png", "Score", "Calidad espectral mediana"),
+    ]
+    out = {}
+    labels = [c.condition[:34] for c in selected]
+    for attr, name, xlabel, title in metrics:
+        vals = [getattr(c, attr) if getattr(c, attr) is not None else 0.0 for c in selected]
+        fig, ax = plt.subplots(figsize=(12, max(5, 0.45 * len(selected))))
+        ax.barh(labels, vals, color="#4c78a8")
+        apply_tfg_plot_style(ax, xlabel=xlabel, ylabel="", title=title)
+        _savefig(figures_dir / name)
+        out[Path(name).stem] = name
+    return out
+
+
+def compute_state_stats(capture: CaptureSummary) -> list[dict[str, Any]]:
+    rows = _read_windowed_bandpowers(capture)
+    if not rows:
+        return []
+    out: list[dict[str, Any]] = []
+    for state, start, stop, label in infer_or_load_state_timeline(capture):
+        subset = [r for r in rows if start <= r.get("window_start_sec", -1.0) < stop]
+        if not subset:
+            continue
+        def vals(key: str) -> list[float]:
+            return [float(r[key]) for r in subset if key in r and math.isfinite(float(r[key]))]
+        band_medians = {band: _median(vals(f"{band}_rel")) for band in BANDS}
+        dominant = max(BANDS, key=lambda b: band_medians.get(b) or -1.0)
+        out.append(
+            {
+                "state": state,
+                "label": label,
+                "start_sec": start,
+                "stop_sec": stop,
+                "duration_sec": stop - start,
+                "window_count": len(subset),
+                "median_rms_uV": _median(vals("rms_uV")),
+                "p95_rms_uV": _percentile(vals("rms_uV"), 95),
+                "median_ptp_uV": _median(vals("ptp_uV")),
+                "p95_ptp_uV": _percentile(vals("ptp_uV"), 95),
+                "median_50hz_ratio": _median(vals("line_50_ratio_1_50")),
+                "artifact_fraction": sum(1 for r in subset if r.get("quality_score", 1.0) < 0.70) / len(subset),
+                "spectral_quality_median": _median(vals("quality_score")),
+                "delta_rel_median": band_medians["delta"],
+                "theta_rel_median": band_medians["theta"],
+                "alpha_rel_median": band_medians["alpha"],
+                "beta_rel_median": band_medians["beta"],
+                "gamma_rel_median": band_medians["gamma"],
+                "peak_freq_median": _median(vals("peak_freq")),
+                "dominant_band": dominant,
+                "diagnosis": _state_diagnosis(subset),
+            }
+        )
+    return out
+
+
+def _median(values: list[float]) -> float | None:
+    clean = [float(v) for v in values if math.isfinite(float(v))]
+    return statistics.median(clean) if clean else None
+
+
+def _percentile(values: list[float], p: float) -> float | None:
+    clean = [float(v) for v in values if math.isfinite(float(v))]
+    return float(np.percentile(clean, p)) if clean else None
+
+
+def _state_diagnosis(rows: list[dict[str, float]]) -> str:
+    if not rows:
+        return "pendiente"
+    low = sum(1 for r in rows if r.get("quality_score", 1.0) < 0.70) / len(rows)
+    if low == 0:
+        return "estable"
+    if low < 0.15:
+        return "usable con artefactos leves"
+    if low < 0.40:
+        return "artefactos moderados"
+    return "artefacto dominante"
+
+
+def plot_state_timeseries_and_psd(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    out: dict[str, str] = {}
+    state_map = {
+        "ojos_abiertos_reposo": "rest",
+        "mandibula": "jaw",
+        "parpadeo_frente": "blink",
+    }
+    fs = capture.fs_hz or 250.0
+    for state, start, stop, label in infer_or_load_state_timeline(capture):
+        if state not in state_map:
+            continue
+        x_v = _segment_signal(capture, start, stop)
+        if x_v.size < 16:
+            continue
+        t = np.arange(x_v.size) / fs
+        key = state_map[state]
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(t, x_v * 1e6, linewidth=0.9)
+        apply_tfg_plot_style(ax, xlabel=r"$t\,(\mathrm{s})$", ylabel=r"CH1 ($\mu V$)", title=f"Señal temporal: {label}")
+        name = f"fig_03_state_{key}_timeseries.png"
+        _savefig(figures_dir / name)
+        out[f"state_{key}_timeseries"] = name
+
+        f, p = _compute_psd_for_segment(capture, start, stop, "multitaper")
+        if f.size:
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.semilogy(f, np.maximum(p, 1e-20), linewidth=1.2)
+            ax.set_xlim(0.5, 45)
+            apply_tfg_plot_style(ax, xlabel=r"$f\,(\mathrm{Hz})$", ylabel=r"PSD ($V^2/Hz$)", title=f"PSD multitaper: {label}")
+            name = f"fig_03_state_{key}_psd.png"
+            _savefig(figures_dir / name)
+            out[f"state_{key}_psd"] = name
+    return out
+
+
+def plot_periodogram_by_state(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plotted = False
+    for state, start, stop, label in infer_or_load_state_timeline(capture):
+        f, p = _compute_psd_for_segment(capture, start, stop, "periodogram")
+        if f.size:
+            ax.semilogy(f, np.maximum(p, 1e-20), linewidth=1.0, label=label)
+            plotted = True
+    if not plotted:
+        plt.close()
+        return {}
+    ax.set_xlim(0.5, 45)
+    ax.legend(ncol=2)
+    apply_tfg_plot_style(ax, xlabel=r"$f\,(\mathrm{Hz})$", ylabel=r"PSD ($V^2/Hz$)", title="Periodograma por estado")
+    name = "fig_04_periodogram_by_state.png"
+    _savefig(figures_dir / name)
+    return {"periodogram_by_state": name}
+
+
+def plot_multitaper_by_state(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plotted = False
+    for state, start, stop, label in infer_or_load_state_timeline(capture):
+        f, p = _compute_psd_for_segment(capture, start, stop, "multitaper")
+        if f.size:
+            ax.semilogy(f, np.maximum(p, 1e-20), linewidth=1.2, label=label)
+            plotted = True
+    if not plotted:
+        plt.close()
+        return {}
+    ax.set_xlim(0.5, 45)
+    ax.legend(ncol=2)
+    apply_tfg_plot_style(ax, xlabel=r"$f\,(\mathrm{Hz})$", ylabel=r"PSD ($V^2/Hz$)", title="PSD multitaper por estado")
+    name = "fig_04_multitaper_psd_by_state.png"
+    _savefig(figures_dir / name)
+    return {"multitaper_by_state": name}
+
+
+def plot_periodogram_vs_multitaper(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    out = {}
+    for state, label_key in (("ojos_abiertos_reposo", "rest"), ("mandibula", "artifact")):
+        match = next((item for item in infer_or_load_state_timeline(capture) if item[0] == state), None)
+        if not match:
+            continue
+        _, start, stop, label = match
+        f1, p1 = _compute_psd_for_segment(capture, start, stop, "periodogram")
+        f2, p2 = _compute_psd_for_segment(capture, start, stop, "multitaper")
+        if not f1.size or not f2.size:
+            continue
+        fig, ax = plt.subplots(figsize=(10, 4.5))
+        ax.semilogy(f1, np.maximum(p1, 1e-20), label="Periodograma", alpha=0.75)
+        ax.semilogy(f2, np.maximum(p2, 1e-20), label="Multitaper", linewidth=1.5)
+        ax.set_xlim(0.5, 45)
+        ax.legend()
+        apply_tfg_plot_style(ax, xlabel=r"$f\,(\mathrm{Hz})$", ylabel=r"PSD ($V^2/Hz$)", title=f"Periodograma vs multitaper: {label}")
+        name = f"fig_04_periodogram_vs_multitaper_{label_key}.png"
+        _savefig(figures_dir / name)
+        out[f"periodogram_vs_multitaper_{label_key}"] = name
+    return out
+
+
+def plot_spectrogram_with_state_bar(capture: CaptureSummary, figures_dir: Path) -> dict[str, str]:
+    t, x = _read_timeseries(capture)
+    if x.size < 1024:
+        return {}
+    fs = capture.fs_hz or 250.0
+    x_v = x.astype(float) * 1e-6
+    nperseg = int(4 * fs)
+    hop = 64
+    starts = range(0, max(1, x_v.size - nperseg + 1), hop)
+    spectra = []
+    times = []
+    dsp = DSPCore(fs=fs, window_sec=4.0)
+    for start in starts:
+        seg = x_v[start:start + nperseg]
+        if seg.size < nperseg:
+            continue
+        f, p = dsp.compute_psd(seg, method="multitaper")
+        if f is None or p is None:
+            continue
+        mask = (f >= 0.5) & (f <= 45)
+        spectra.append(10 * np.log10(np.maximum(p[mask], 1e-20)))
+        times.append(start / fs)
+    if not spectra:
+        return {}
+    freqs = f[mask]
+    spec = np.asarray(spectra).T
+    fig, ax = plt.subplots(figsize=(12, 5))
+    im = ax.pcolormesh(times, freqs, spec, shading="auto", cmap="viridis")
+    _shade_timeline(ax, infer_or_load_state_timeline(capture), y_text=0.98)
+    fig.colorbar(im, ax=ax, label="PSD (dB)")
+    apply_tfg_plot_style(ax, xlabel=r"$t\,(\mathrm{s})$", ylabel=r"$f\,(\mathrm{Hz})$", title="Espectrograma multitaper con estados")
+    name = "fig_04_spectrogram_with_state_bar.png"
+    _savefig(figures_dir / name)
+    return {"spectrogram_state_bar": name}
+
+
+def plot_band_stats_fp1fp2_vs_eareeg(captures: list[CaptureSummary], figures_dir: Path) -> dict[str, str]:
+    rows = compute_band_stats_fp1fp2_vs_eareeg(captures)
+    if not rows:
+        return {}
+    labels = [f"{r['mounting']} {r['condition_label']}" for r in rows]
+    out = {}
+    x = np.arange(len(rows))
+    width = 0.15
+    fig, ax = plt.subplots(figsize=(12, 5))
+    for i, band in enumerate(BANDS):
+        ax.bar(x + (i - 2) * width, [float(r[f"{band}_rel_median"]) for r in rows], width, label=band)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=20, ha="right")
+    ax.legend(ncol=5)
+    apply_tfg_plot_style(ax, xlabel="", ylabel="Potencia relativa mediana", title="Bandpowers relativos por montaje")
+    name = "fig_05_relative_bandpowers_by_mounting.png"
+    _savefig(figures_dir / name)
+    out["relative_bandpowers_by_mounting"] = name
+
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+    ax.bar(labels, [float(r["alpha_beta_ratio_median"]) for r in rows], color="#72b7b2")
+    ax.set_xticks(np.arange(len(labels)))
+    ax.set_xticklabels(labels, rotation=20, ha="right")
+    apply_tfg_plot_style(ax, xlabel="", ylabel="Alpha/Beta", title="Comparación alpha/beta por montaje")
+    name = "fig_05_alpha_beta_ratio_comparison.png"
+    _savefig(figures_dir / name)
+    out["alpha_beta_ratio_comparison"] = name
+
+    matrix = np.asarray([[float(r[f"{band}_rel_median"]) for band in BANDS] for r in rows])
+    fig, ax = plt.subplots(figsize=(9, 5))
+    im = ax.imshow(matrix, aspect="auto", cmap="magma")
+    ax.set_xticks(np.arange(len(BANDS)))
+    ax.set_xticklabels(BANDS)
+    ax.set_yticks(np.arange(len(labels)))
+    ax.set_yticklabels(labels)
+    fig.colorbar(im, ax=ax, label="Potencia relativa")
+    apply_tfg_plot_style(ax, xlabel="Banda", ylabel="Condición", title="Mapa de robustez relativa de bandas")
+    name = "fig_05_feature_robustness_heatmap.png"
+    _savefig(figures_dir / name)
+    out["feature_robustness_heatmap"] = name
+    return out
 
 
 def generate_tables(captures: list[CaptureSummary], tables_dir: Path) -> dict[str, str]:
     tables_dir.mkdir(parents=True, exist_ok=True)
     table_files: dict[str, str] = {}
+
+    all_branch_rows = discover_captures_all_branches()
+    _write_csv(tables_dir / "table_00_capture_inventory_all_branches.csv", all_branch_rows)
+    table_files["capture_inventory_all_branches"] = "table_00_capture_inventory_all_branches.csv"
 
     inventory_rows = []
     for c in captures:
@@ -540,7 +1071,78 @@ def generate_tables(captures: list[CaptureSummary], tables_dir: Path) -> dict[st
     ]
     _write_csv(tables_dir / "table_05_sonification_feature_decisions.csv", sonif_rows)
     table_files["sonification_decisions"] = "table_05_sonification_feature_decisions.csv"
+
+    final_cap = _select(captures, "final_atenuacion") or _select(captures, "live_dsp")
+    if final_cap:
+        state_rows = compute_state_stats(final_cap)
+        _write_csv(tables_dir / "table_03_mixed_state_stats.csv", [_format_state_row(row) for row in state_rows])
+        table_files["mixed_state_stats"] = "table_03_mixed_state_stats.csv"
+
+    band_stats = compute_band_stats_fp1fp2_vs_eareeg(captures)
+    _write_csv(tables_dir / "table_05_band_stats_fp1fp2_vs_eareeg.csv", band_stats)
+    table_files["band_stats_fp1fp2_vs_eareeg"] = "table_05_band_stats_fp1fp2_vs_eareeg.csv"
     return table_files
+
+
+def _format_state_row(row: dict[str, Any]) -> dict[str, Any]:
+    out = dict(row)
+    for key, value in list(out.items()):
+        if isinstance(value, float):
+            out[key] = _fmt(value)
+    return out
+
+
+def compute_band_stats_fp1fp2_vs_eareeg(captures: list[CaptureSummary]) -> list[dict[str, Any]]:
+    targets = [
+        ("ear-EEG", "eyes_open", _select(captures, "ear_eeg_ch1_only_eyes_open")),
+        ("ear-EEG", "eyes_closed", _select(captures, "ear_eeg_ch1_only_eyes_closed")),
+        ("Fp1-Fp2", "eyes_open", _select(captures, "fp1_fp2_ch1_only_eyes_open")),
+        ("Fp1-Fp2", "eyes_closed", _select(captures, "fp1_fp2_ch1_only_eyes_closed")),
+        ("ear-EEG", "jaw_movement", _select(captures, "ear_eeg_ch1_only_jaw_movement")),
+        ("Fp1-Fp2", "forehead_blink", _select(captures, "fp1_fp2_ch1_only_forehead")),
+    ]
+    rows: list[dict[str, Any]] = []
+    for mounting, condition_label, cap in targets:
+        if not cap:
+            continue
+        window_rows = _read_windowed_bandpowers(cap)
+        if not window_rows:
+            continue
+        row: dict[str, Any] = {
+            "mounting": mounting,
+            "condition_label": condition_label,
+            "capture": cap.name,
+            "spectral_quality_median": _fmt(cap.spectral_quality_median),
+            "artifact_fraction": _percent(cap.spectral_low_quality_fraction or cap.artifact_fraction),
+        }
+        for band in BANDS:
+            abs_values = [r.get(f"{band}_abs") for r in window_rows if f"{band}_abs" in r]
+            rel_values = [r.get(f"{band}_rel") for r in window_rows if f"{band}_rel" in r]
+            row[f"{band}_abs_median"] = _fmt(_median(abs_values))
+            row[f"{band}_abs_p95"] = _fmt(_percentile(abs_values, 95))
+            row[f"{band}_rel_median"] = _fmt(_median(rel_values))
+            row[f"{band}_rel_p95"] = _fmt(_percentile(rel_values, 95))
+        alpha = _median([r.get("alpha_rel", np.nan) for r in window_rows])
+        beta = _median([r.get("beta_rel", np.nan) for r in window_rows])
+        theta = _median([r.get("theta_rel", np.nan) for r in window_rows])
+        row["alpha_beta_ratio_median"] = _fmt((alpha or 0.0) / max(beta or 0.0, 1e-12))
+        row["beta_over_alpha_beta_median"] = _fmt((beta or 0.0) / max((alpha or 0.0) + (beta or 0.0), 1e-12))
+        row["theta_alpha_ratio_median"] = _fmt((theta or 0.0) / max(alpha or 0.0, 1e-12))
+        row["peak_alpha_median"] = _fmt(_median([r.get("peak_alpha", np.nan) for r in window_rows]))
+        row["peak_beta_median"] = _fmt(_median([r.get("peak_beta", np.nan) for r in window_rows]))
+        row["conclusion"] = _band_stats_conclusion(mounting, condition_label, cap)
+        rows.append(row)
+    return rows
+
+
+def _band_stats_conclusion(mounting: str, condition_label: str, cap: CaptureSummary) -> str:
+    if "jaw" in condition_label or "blink" in condition_label:
+        return "condición de artefacto; usar para rechazo/gate"
+    if mounting == "ear-EEG":
+        return "más estable para validación de reposo"
+    if mounting == "Fp1-Fp2":
+        return "útil pero más sensible a frente/parpadeo"
+    return "evidencia complementaria"
 
 
 def _classify_use(c: CaptureSummary) -> str:
@@ -615,6 +1217,7 @@ def _doc_header(title: str) -> str:
 
 def generate_docs(captures: list[CaptureSummary], output_dir: Path, figs: dict[str, str], tables: dict[str, str]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
+    globals()["_LAST_FIGS"] = figs
     final_cap = _select(captures, "final_atenuacion") or _select(captures, "live_dsp")
     shorted = _select(captures, "shorted_inputs")
     ear_open = _select(captures, "ear_eeg_ch1_only_eyes_open")
@@ -665,7 +1268,39 @@ def _doc_00(captures: list[CaptureSummary], final_cap: CaptureSummary | None) ->
         )
     text += _markdown_table(["Bloque validado", "Pruebas realizadas", "Resultado", "Estado final"], rows)
     text += "\n\nQueda fuera del alcance de estos documentos el diseño sonoro definitivo. La evidencia aquí recogida sirve como base para esa fase posterior.\n"
+    if final_cap:
+        metric_rows = [
+            ["Duración", f"{_fmt(final_cap.duration_sec)} s", "captura larga suficiente para observar estados y transitorios"],
+            ["Frecuencia efectiva", f"{_fmt(final_cap.fs_hz)} Hz", "coincide con el objetivo de adquisición"],
+            ["Muestras", final_cap.samples, "stream completo de la sesión"],
+            ["Sample gaps", final_cap.sample_gaps, "sin discontinuidades temporales detectadas"],
+            ["Invalid status", final_cap.invalid_status, "sin errores de estado ADS1299"],
+            ["RMS global", f"{_fmt(final_cap.rms_uv)} µV", "afectado por transitorios de artefacto"],
+            ["RMS mediano por ventana", f"{_fmt(final_cap.median_rms_uv)} µV", "representa mejor los tramos estables"],
+            ["RMS p95", f"{_fmt(final_cap.p95_rms_uv)} µV", "cuantifica ventanas altas"],
+            ["Best window RMS", f"{_fmt(final_cap.best_window_rms_uv)} µV", "referencia de tramo limpio"],
+            ["PTP global", f"{_fmt(final_cap.ptp_uv)} µV", "detecta artefactos extremos"],
+            ["PTP mediano", f"{_fmt(final_cap.median_ptp_uv)} µV", "amplitud típica por ventana"],
+            ["PTP p95", f"{_fmt(final_cap.p95_ptp_uv)} µV", "transitorios altos"],
+            ["Ratio 50 Hz", _fmt(final_cap.line_50_ratio), "ruido de red no dominante globalmente"],
+            ["Artifact windows", _percent(final_cap.artifact_fraction), "ventanas artefactadas según quality_report"],
+            ["Spectral quality mediana", _fmt(final_cap.spectral_quality_median), "score offline/live comparable"],
+            ["Low-quality spectral", _percent(final_cap.spectral_low_quality_fraction), "ventanas atenuadas o bloqueadas"],
+            ["Diagnóstico", final_cap.diagnosis, "resultado automático del análisis"],
+        ]
+        text += "\n## Captura final válida y evolución temporal\n\n"
+        text += (
+            f"La captura `{final_cap.name}` se usa como evidencia final de la fase de adquisición/DSP con atenuación de artefactos. "
+            "La línea temporal mostrada en las figuras procede del protocolo de captura usado en la placa: ojos abiertos, ojos cerrados, mandíbula, recuperación, parpadeo/frente, recuperación y ojos cerrados. "
+            "Como los estados no están embebidos muestra a muestra en `metadata.json`, se documentan como timeline asumida desde el protocolo ejecutado.\n\n"
+        )
+        text += _markdown_table(["Métrica", "Valor", "Interpretación"], metric_rows)
+        text += "\n\n"
+        for key in ("final_rms_timeline", "final_bands_timeline", "final_quality_timeline"):
+            if key in globals().get("_LAST_FIGS", {}):
+                text += f"![{key}](figures/{_LAST_FIGS[key]})\n\n"
     text += "\nTabla de inventario: [`tables/table_01_capture_summary.csv`](tables/table_01_capture_summary.csv).\n"
+    text += "Inventario all-branches: [`tables/table_00_capture_inventory_all_branches.csv`](tables/table_00_capture_inventory_all_branches.csv).\n"
     text += "\nLa evolución de ramas, commits y decisiones de esta conversación se documenta en [`08_historial_ramas_y_cambios.md`](08_historial_ramas_y_cambios.md).\n"
     return text
 
@@ -688,11 +1323,19 @@ def _doc_01(shorted: CaptureSummary | None, figs: dict[str, str]) -> str:
         )
     else:
         text += "No se dispone en esta rama de una captura `shorted_inputs`; este punto queda pendiente en los artefactos versionados.\n\n"
-    text += "La prueba `test_signal_internal` se usó durante la conversación para confirmar el test interno del ADS1299, pero su CSV no está versionado en esta rama; se marca como evidencia descrita y pendiente de incorporar si se necesita trazabilidad completa.\n\n"
+    text += (
+        "Durante esta actualización se exploraron las ramas locales y remotas disponibles mediante `git branch -a` y `git ls-tree`. "
+        "No se localizó un CSV versionado de `test_signal_internal` en las ramas inspeccionadas; por tanto, se conserva como prueba realizada durante la conversación, "
+        "pero pendiente de incorporar si se desea trazabilidad completa mediante `eeg_timeseries.csv`, `metadata.json` y `quality_report.*`.\n\n"
+    )
     for key in ("shorted_timeseries", "shorted_psd"):
         if key in figs:
             text += f"![{key}](figures/{figs[key]})\n\n"
+    for key in ("rms_comparison", "line50_comparison"):
+        if key in figs:
+            text += f"![{key}](figures/{figs[key]})\n\n"
     text += "Tabla resumen: [`tables/table_03_ads1299_validation_summary.csv`](tables/table_03_ads1299_validation_summary.csv).\n"
+    text += "Inventario all-branches: [`tables/table_00_capture_inventory_all_branches.csv`](tables/table_00_capture_inventory_all_branches.csv).\n"
     text += "\nConclusión: bajo las capturas versionadas, la ruta ADC/SPI/Bridge/Python queda razonablemente validada; los problemas posteriores no se explican por gaps, status inválido ni fallo de streaming.\n"
     return text
 
@@ -705,7 +1348,24 @@ def _doc_02(captures: list[CaptureSummary], figs: dict[str, str]) -> str:
         "La evidencia versionada muestra dos familias útiles: Fp1-Fp2, más expresiva frente a parpadeo/frente pero menos robusta, y ear-EEG/mastoides, más estable para validación de reposo y cambios de estado. "
         "El montaje final de diagnóstico usa CH1 activo, BIAS derivado de CH1P+CH1N y lead-off desactivado.\n\n"
     )
+    text += _markdown_table(
+        ["Montaje", "Configuración física", "Configuración ADS1299", "Objetivo", "Resultado", "Decisión"],
+        [
+            ["Shorted inputs", "entradas cortocircuitadas internamente", "MUX=SHORT", "aislar ADC/SPI/escala", "ruido interno bajo", "mantener como prueba diagnóstica"],
+            ["Test interno ADS1299", "sin electrodos", "señal interna ADS1299", "verificar ruta de escala/frecuencia", "CSV no localizado en ramas", "pendiente de incorporar"],
+            ["Fp1-Fp2 sin BIAS/RLD", "frontal Fp1-Fp2", "BIAS desactivado", "prueba inicial real", "amplitudes altas y común inestable", "descartado como montaje final"],
+            ["Fp1-Fp2 con BIAS/RLD", "frontal con electrodo RLD", "BIAS CH1P+CH1N", "reducir común", "mejora pero sensible a frente/parpadeo", "útil para artefactos frontales"],
+            ["RLD mastoide izquierda/derecha", "RLD detrás de oreja", "BIAS activo", "comparar posición de referencia", "variabilidad entre pruebas", "no elegido como único montaje"],
+            ["RLD muñeca/antebrazo", "RLD distal", "BIAS activo", "estabilizar común corporal", "buenas ventanas en ear-EEG", "opción práctica"],
+            ["Ear-EEG/mastoides", "IN1P/IN1N en mastoides/oreja", "CH1-only, CH2-CH4 apagados", "buscar señal estable", "capturas más robustas", "montaje final de validación"],
+            ["Mandíbula/frente", "gestos controlados", "CH1-only", "provocar artefactos", "quality gate detecta ventanas malas", "usar para validar rechazo"],
+        ],
+    )
+    text += "\n\n"
     for key in ("rms_comparison", "ptp_comparison", "line50_comparison", "final_timeseries"):
+        if key in figs:
+            text += f"![{key}](figures/{figs[key]})\n\n"
+    for key in ("fig_02_mounting_rms_comparison", "fig_02_mounting_ptp_comparison", "fig_02_mounting_50hz_comparison", "fig_02_mounting_artifact_fraction", "fig_02_mounting_quality_score"):
         if key in figs:
             text += f"![{key}](figures/{figs[key]})\n\n"
     text += "Comparación de montajes: [`tables/table_02_mounting_comparison.csv`](tables/table_02_mounting_comparison.csv).\n\n"
@@ -733,7 +1393,29 @@ def _doc_03(captures: list[CaptureSummary], final_cap: CaptureSummary | None, fi
             f"lo que indica que el valor global está influido por transitorios. La fracción de ventanas artefactadas fue {_percent(final_cap.artifact_fraction)} "
             f"y la calidad espectral mediana fue {_fmt(final_cap.spectral_quality_median)}.\n\n"
         )
+        state_rows = compute_state_stats(final_cap)
+        if state_rows:
+            text += "La siguiente tabla usa la timeline asumida desde el protocolo ejecutado en la placa.\n\n"
+            text += _markdown_table(
+                ["Estado", "RMS mediano", "PTP mediano", "50 Hz", "Calidad", "Banda dominante", "Diagnóstico"],
+                [
+                    [
+                        row["label"],
+                        _fmt(row["median_rms_uV"]),
+                        _fmt(row["median_ptp_uV"]),
+                        _fmt(row["median_50hz_ratio"]),
+                        _fmt(row["spectral_quality_median"]),
+                        row["dominant_band"],
+                        row["diagnosis"],
+                    ]
+                    for row in state_rows
+                ],
+            )
+            text += "\n\nTabla CSV: [`tables/table_03_mixed_state_stats.csv`](tables/table_03_mixed_state_stats.csv).\n\n"
     for key in ("final_timeseries", "jaw_timeseries", "jaw_psd", "quality_states"):
+        if key in figs:
+            text += f"![{key}](figures/{figs[key]})\n\n"
+    for key in ("final_rms_timeline", "final_quality_timeline", "state_rest_timeseries", "state_rest_psd", "state_jaw_timeseries", "state_jaw_psd", "state_blink_timeseries", "state_blink_psd"):
         if key in figs:
             text += f"![{key}](figures/{figs[key]})\n\n"
     text += "Inventario completo: [`tables/table_01_capture_summary.csv`](tables/table_01_capture_summary.csv).\n"
@@ -755,7 +1437,15 @@ def _doc_04(final_cap: CaptureSummary | None, figs: dict[str, str]) -> str:
             f"En `{final_cap.name}`, el informe espectral produjo { _fmt(final_cap.spectral_quality_median) } de calidad mediana y "
             f"{_percent(final_cap.spectral_low_quality_fraction)} de ventanas de baja calidad/artefacto.\n\n"
         )
+        text += (
+            "Las figuras por estado comparan periodograma y multitaper sobre los mismos segmentos del protocolo. "
+            "El periodograma conserva más variabilidad y leakage; multitaper suaviza la estimación al promediar tapers DPSS, "
+            "lo que ayuda a obtener bandpowers más estables para control musical. El espectrograma resume la evolución temporal y permite localizar artefactos.\n\n"
+        )
     for key in ("windowed_bandpowers", "quality_states"):
+        if key in figs:
+            text += f"![{key}](figures/{figs[key]})\n\n"
+    for key in ("periodogram_by_state", "multitaper_by_state", "periodogram_vs_multitaper_rest", "periodogram_vs_multitaper_artifact", "spectrogram_state_bar"):
         if key in figs:
             text += f"![{key}](figures/{figs[key]})\n\n"
     text += "Conclusión: el DSP queda validado para extracción de características bajo ventanas limpias o controladas; las ventanas artefactadas deben atenuarse o excluirse.\n"
@@ -773,13 +1463,38 @@ def _doc_05(final_cap: CaptureSummary | None, ear_open: CaptureSummary | None, e
         text += f"Ear-EEG disponible: `{ear_open.name}` y `{ear_closed.name}`.\n\n"
     if fp_open and fp_closed:
         text += f"Fp1-Fp2 disponible: `{fp_open.name}` y `{fp_closed.name}`.\n\n"
+    rows = compute_band_stats_fp1fp2_vs_eareeg(load_captures(Path("captures")))
+    if rows:
+        text += _markdown_table(
+            ["Montaje", "Condición", "Delta", "Theta", "Alpha", "Beta", "Gamma", "Alpha/Beta", "Calidad", "Conclusión"],
+            [
+                [
+                    row["mounting"],
+                    row["condition_label"],
+                    row["delta_rel_median"],
+                    row["theta_rel_median"],
+                    row["alpha_rel_median"],
+                    row["beta_rel_median"],
+                    row["gamma_rel_median"],
+                    row["alpha_beta_ratio_median"],
+                    row["spectral_quality_median"],
+                    row["conclusion"],
+                ]
+                for row in rows
+            ],
+        )
+        text += "\n\nTabla CSV completa: [`tables/table_05_band_stats_fp1fp2_vs_eareeg.csv`](tables/table_05_band_stats_fp1fp2_vs_eareeg.csv).\n\n"
     for key in ("alpha_open_closed", "windowed_bandpowers"):
+        if key in figs:
+            text += f"![{key}](figures/{figs[key]})\n\n"
+    for key in ("relative_bandpowers_by_mounting", "alpha_beta_ratio_comparison", "feature_robustness_heatmap"):
         if key in figs:
             text += f"![{key}](figures/{figs[key]})\n\n"
     text += "Tabla de decisión por banda: [`tables/table_04_spectral_band_validation.csv`](tables/table_04_spectral_band_validation.csv).\n\n"
     text += (
-        "Decisiones principales: delta/theta se usan solo como apoyo por sensibilidad a drift y parpadeo; alpha requiere normalización y comparación por sesión; "
-        "beta puede aportar tensión con cautela; gamma no debe controlar directamente la sonificación en tiempo real por riesgo EMG.\n"
+        "Conclusiones principales: alpha fue más útil en ear-EEG que en Fp1-Fp2 para la validación disponible; Fp1-Fp2 queda más expuesto a parpadeo/frente; "
+        "beta y gamma deben tratarse como riesgo EMG; delta/theta son útiles solo como apoyo por sensibilidad a drift y movimiento; "
+        "para sonificación se recomiendan bandas relativas, suavizado, normalización por sesión y `quality gate`.\n"
     )
     return text
 
@@ -967,6 +1682,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build TFG validation documentation from EEG captures.")
     parser.add_argument("--captures", type=Path, default=Path("captures"))
     parser.add_argument("--output", type=Path, default=Path("docs/validacion_tfg"))
+    parser.add_argument("--scan-branches", action="store_true", help="Scan Git branches for capture inventory.")
+    parser.add_argument("--final-capture", default="", help="Reserved for selecting a specific final capture by name.")
+    parser.add_argument("--make-spectrograms", action="store_true", help="Generate spectrogram figures when possible.")
+    parser.add_argument("--export-pdf", action="store_true", help="PDF export is enabled by default when supported.")
     parser.add_argument("--only-figures", action="store_true", help="Accepted for compatibility; currently rebuilds all outputs.")
     parser.add_argument("--only-docs", action="store_true", help="Accepted for compatibility; currently rebuilds all outputs.")
     parser.add_argument("--include-long-sessions", action="store_true", help="Reserved for future filtering.")

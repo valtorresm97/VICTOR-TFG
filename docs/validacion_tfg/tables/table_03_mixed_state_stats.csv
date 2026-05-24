@@ -1,0 +1,8 @@
+state,label,start_sec,stop_sec,duration_sec,window_count,median_rms_uV,p95_rms_uV,median_ptp_uV,p95_ptp_uV,median_50hz_ratio,artifact_fraction,spectral_quality_median,delta_rel_median,theta_rel_median,alpha_rel_median,beta_rel_median,gamma_rel_median,peak_freq_median,dominant_band,diagnosis
+ojos_abiertos_reposo,Ojos abiertos,0.000,30.00,30.00,118,76.76,88.70,1272,1390,0.259,0.017,0.987,0.407,0.098,0.049,0.086,0.341,1.000,delta,usable con artefactos leves
+ojos_cerrados_reposo_1,Ojos cerrados,30.00,60.00,30.00,117,80.01,4691,1226,98868,0.268,0.154,0.922,0.382,0.105,0.038,0.089,0.380,0.750,delta,artefactos moderados
+mandibula,Mandíbula,60.00,80.00,20.00,78,69.72,110.7,1217,1285,0.322,0.013,0.893,0.337,0.112,0.039,0.086,0.408,1.750,gamma,usable con artefactos leves
+recuperacion_1,Recuperación,80.00,110.0,30.00,117,80.44,94.83,1275,1366,0.226,0.000,1.000,0.425,0.116,0.038,0.065,0.331,0.750,delta,estable
+parpadeo_frente,Parpadeo/frente,110.0,130.0,20.00,78,94.22,113.3,1558,1770,0.364,0.141,0.823,0.335,0.092,0.040,0.063,0.455,49.50,gamma,usable con artefactos leves
+recuperacion_2,Recuperación,130.0,160.0,30.00,117,109.8,118.6,1701,1828,0.346,0.060,0.856,0.348,0.110,0.049,0.064,0.438,49.50,gamma,usable con artefactos leves
+ojos_cerrados_reposo_2,Ojos cerrados,160.0,190.0,30.00,77,175.4,3137,1725,71124,0.188,0.558,0.621,0.227,0.109,0.044,0.147,0.360,49.50,gamma,artefacto dominante
