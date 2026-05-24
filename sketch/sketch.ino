@@ -57,7 +57,7 @@ static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 // Mantener en 0 para capturas reales. Cambiar solo para compilar una prueba
 // diagnóstica temporal y volver a 0 después.
 #ifndef ADS_DIAGNOSTIC_MODE
-#define ADS_DIAGNOSTIC_MODE 0
+#define ADS_DIAGNOSTIC_MODE 5
 #endif
 
 #define ADS_DIAG_NORMAL 0
