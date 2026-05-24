@@ -215,6 +215,10 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
     condition = str(report.get("metadata", {}).get("condition", "") or "").lower()
     is_shorted = "shorted_inputs" in condition
     is_test_signal = "test_signal_internal" in condition
+    is_artifact_control = any(
+        token in condition
+        for token in ("artifact", "blink", "jaw", "forehead", "movement", "cable")
+    )
 
     if report["status"]["invalid_status_total"] > 0:
         reasons.append("invalid ADS1299 status prefix observed")
@@ -285,6 +289,18 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
 
     if reasons:
         return "dudosa", reasons, recommendations
+    if apply_resting_limits and artifact_fraction >= 0.25:
+        if is_artifact_control:
+            return (
+                "artefacto_confirmado",
+                ["artifact-control capture produced many high-artifact windows"],
+                ["Use this as a positive control for blink, forehead, jaw, cable, or movement artifact detection."],
+            )
+        return (
+            "dudosa_por_artefacto",
+            ["many 2 s windows contain movement/EMG-like artifacts"],
+            ["Repeat resting capture with still posture, relaxed jaw/forehead, and better cable fixation."],
+        )
     if apply_resting_limits and 0.05 <= artifact_fraction < 0.25:
         return (
             "valida_preliminar_con_artefactos",
