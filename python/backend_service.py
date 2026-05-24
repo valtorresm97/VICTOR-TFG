@@ -15,6 +15,7 @@ from sonification_features import (
     SonificationFeatureAdapter,
     build_sonification_snapshot,
 )
+from spectral_quality import compute_spectral_quality
 
 from scale_registry import build_scale_config
 from music_utils import note_name_to_midi
@@ -140,6 +141,17 @@ class BackendService:
 
         self.sonif_adapter = SonificationFeatureAdapter()
         self._last_sonification = None
+        self._last_quality_rx_totals: dict[str, int] = {}
+        self._last_spectral_quality: dict = {
+            "score": 0.0,
+            "state": "no_features",
+            "gate_factor": 0.0,
+            "valid_for_sonification": False,
+            "freeze_recommended": True,
+            "warnings": ["no_features"],
+            "penalties": {},
+            "inputs": {},
+        }
         self._samples_since_feature = 0
         self._window_was_ready = False
 
@@ -196,6 +208,30 @@ class BackendService:
     # --------------------------------------------------------
     # Snapshot
     # --------------------------------------------------------
+
+    def _build_quality_rx_delta_metrics(self, rxm: dict) -> dict[str, int]:
+        """Calcula eventos RX desde la ultima ventana de features."""
+        total_keys = (
+            "invalid_status_total",
+            "lost_frames_total",
+            "lost_blocks_total",
+            "queue_drops_frames_total",
+            "queue_drops_blocks_total",
+            "malformed_blocks_total",
+        )
+        out: dict[str, int] = {}
+        next_totals: dict[str, int] = {}
+
+        for key in total_keys:
+            current = int(rxm.get(key, 0) or 0)
+            previous = self._last_quality_rx_totals.get(key, current)
+            delta_key = key.replace("_total", "_delta")
+            out[delta_key] = max(0, current - previous)
+            out[key] = current
+            next_totals[key] = current
+
+        self._last_quality_rx_totals = next_totals
+        return out
 
     def _build_snapshot(self) -> dict:
         """Construye el snapshot público consumido por WebUI/disco."""
@@ -280,6 +316,7 @@ class BackendService:
                 "bandpower_abs": bp_abs,
             },
             "diagnostics": diagnostics,
+            "spectral_quality": self._last_spectral_quality,
             "capture": self.capture_manager.get_status(),
             "sonification": build_sonification_snapshot(
                 self._last_sonification
@@ -519,8 +556,23 @@ class BackendService:
 
                 if feats:
                     self._last_features = feats
+                    diagnostics = self.proc.compute_quality_diagnostics(
+                        channel_idx=0,
+                        window_sec=FEATURE_WINDOW_SEC,
+                        waveform_sec=2.0,
+                    )
+                    rxm = self.rx.get_window_metrics(reset=False)
+                    quality_rxm = self._build_quality_rx_delta_metrics(rxm)
+                    quality = compute_spectral_quality(
+                        self._last_features,
+                        diagnostics,
+                        quality_rxm,
+                        window_ready=True,
+                    )
+                    self._last_spectral_quality = quality.to_dict()
                     self._last_sonification = self.sonif_adapter.update(
-                        self._last_features
+                        self._last_features,
+                        quality=self._last_spectral_quality,
                     )
 
                     if not self._logged_features_ready:

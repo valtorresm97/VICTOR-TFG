@@ -51,6 +51,9 @@ class SonificationFeatures:
     """
 
     valid: bool
+    quality_score: float
+    quality_gate: float
+    quality_state: str | None
 
     activity: float
     calmness: float
@@ -172,6 +175,9 @@ def _has_valid_features(features: Dict[str, Any]) -> bool:
 
 def build_raw_sonification_features(
     features: Dict[str, Any],
+    quality_score: float | None = None,
+    quality_gate: float | None = None,
+    quality_state: str | None = None,
 ) -> SonificationFeatures:
     """
     Convierte el dict DSP en features musicales crudas.
@@ -182,6 +188,10 @@ def build_raw_sonification_features(
     """
 
     valid = _has_valid_features(features)
+    q_score = 1.0 if quality_score is None else _clamp01(_safe_float(quality_score, 0.0))
+    q_gate = 1.0 if quality_gate is None else _clamp01(_safe_float(quality_gate, 0.0))
+    if q_score < 0.50:
+        valid = False
 
     bp_rel = _get_bandpower_rel(features)
     bp_abs = _get_bandpower_abs(features)
@@ -234,6 +244,9 @@ def build_raw_sonification_features(
 
     return SonificationFeatures(
         valid=valid,
+        quality_score=q_score,
+        quality_gate=q_gate,
+        quality_state=quality_state,
         activity=activity,
         calmness=calmness,
         tension=tension,
@@ -291,29 +304,45 @@ class SonificationFeatureAdapter:
         self._last = None
         self._rms_baseline_uV = None
 
-    def update(self, features: Dict[str, Any]) -> SonificationFeatures:
+    def update(
+        self,
+        features: Dict[str, Any],
+        quality: Dict[str, Any] | None = None,
+    ) -> SonificationFeatures:
         """
         Entrada principal.
 
         Recibe directamente self._last_features del BackendService.
         """
-        raw = build_raw_sonification_features(features)
+        quality = quality or {}
+        quality_score = _safe_float(quality.get("score", 1.0), 1.0)
+        quality_gate = _safe_float(quality.get("gate_factor", 1.0), 1.0)
+        quality_state = quality.get("state")
 
-        if raw.valid:
-            rms_norm = self._update_rms_norm(raw.rms_uV)
+        raw = build_raw_sonification_features(
+            features,
+            quality_score=quality_score,
+            quality_gate=quality_gate,
+            quality_state=str(quality_state) if quality_state is not None else None,
+        )
+
+        if _has_valid_features(features):
+            rms_norm = self._update_rms_norm(raw.rms_uV, update_baseline=quality_score >= 0.70)
             raw = self._apply_rms_norm(raw, rms_norm)
+
+        raw = self._apply_quality_gate(raw)
 
         smoothed = self._smooth(raw)
         self._last = smoothed
         return smoothed
 
-    def _update_rms_norm(self, rms_uV: float) -> float:
+    def _update_rms_norm(self, rms_uV: float, update_baseline: bool = True) -> float:
         """Actualiza baseline lento de RMS y devuelve RMS normalizado."""
         rms = max(0.0, float(rms_uV))
 
         if self._rms_baseline_uV is None:
             self._rms_baseline_uV = max(self.min_rms_baseline_uV, rms)
-        else:
+        elif update_baseline:
             a = self.rms_baseline_alpha
             self._rms_baseline_uV = _ema(self._rms_baseline_uV, rms, a)
 
@@ -331,6 +360,20 @@ class SonificationFeatureAdapter:
         raw.velocity_factor = _clamp01(0.30 + 0.70 * raw.activity)
         raw.rhythmic_density = _clamp01(0.65 * raw.activity + 0.35 * raw.tension)
         raw.note_probability = _clamp01(0.15 + 0.80 * raw.rhythmic_density)
+        return raw
+
+    def _apply_quality_gate(self, raw: SonificationFeatures) -> SonificationFeatures:
+        """Atenua controles musicales sensibles cuando la calidad espectral baja."""
+        gate = _clamp01(raw.quality_gate)
+        if gate >= 0.999:
+            return raw
+
+        raw.activity = _clamp01(raw.activity * gate)
+        raw.tension = _clamp01(0.50 * (1.0 - gate) + raw.tension * gate)
+        raw.rhythmic_density = _clamp01(raw.rhythmic_density * gate)
+        raw.velocity_factor = _clamp01(0.30 + (raw.velocity_factor - 0.30) * gate)
+        raw.note_probability = _clamp01(0.15 + (raw.note_probability - 0.15) * gate)
+        raw.harmonic_stability = _clamp01(0.50 * (1.0 - gate) + raw.harmonic_stability * gate)
         return raw
 
     def _smooth(self, raw: SonificationFeatures) -> SonificationFeatures:
