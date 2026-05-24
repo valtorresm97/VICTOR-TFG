@@ -24,6 +24,7 @@ from music_bar import BarGenerator
 from music_note import NoteGenerator
 from midi_live import MidiScheduler
 from midi_byte_transport import MidiByteTransport
+from led_matrix_transport import LedMatrixTransport
 
 
 logging.basicConfig(level=logging.INFO)
@@ -90,6 +91,9 @@ MIDI_LIVE_ENABLED = _env_bool("EEG_MIDI_LIVE_ENABLED", False)
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02
 MIDI_GENERATE_PERIOD_SEC = MUSIC_BAR_SEC
+
+LED_MATRIX_NOTES_ENABLED = _env_bool("EEG_LED_MATRIX_NOTES_ENABLED", True)
+LED_MATRIX_BRIDGE_METHOD = "led_note"
 
 
 class BackendService:
@@ -176,6 +180,10 @@ class BackendService:
         self.midi_transport = MidiByteTransport(
             bridge_method=MIDI_BRIDGE_METHOD,
             enabled=MIDI_LIVE_ENABLED,
+        )
+        self.led_matrix_transport = LedMatrixTransport(
+            bridge_method=LED_MATRIX_BRIDGE_METHOD,
+            enabled=LED_MATRIX_NOTES_ENABLED,
         )
 
         self._last_music_t = 0.0
@@ -350,6 +358,12 @@ class BackendService:
                 "mcu_handler": MIDI_BRIDGE_METHOD,
                 "enabled_source": "EEG_MIDI_LIVE_ENABLED",
             },
+            "led_matrix": {
+                "transport": self.led_matrix_transport.get_status(),
+                "enabled": LED_MATRIX_NOTES_ENABLED,
+                "mcu_handler": LED_MATRIX_BRIDGE_METHOD,
+                "enabled_source": "EEG_LED_MATRIX_NOTES_ENABLED",
+            },
             "performance": {
                 "snapshot_publish_period_sec": SNAPSHOT_PUBLISH_PERIOD_SEC,
                 "disk_publish_period_sec": DISK_PUBLISH_PERIOD_SEC,
@@ -496,6 +510,7 @@ class BackendService:
                 self._last_midi_sent_count = self.midi_transport.send_events(
                     due_events
                 )
+                self.led_matrix_transport.send_events(due_events)
             else:
                 self._last_midi_sent_count = 0
 

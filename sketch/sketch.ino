@@ -9,6 +9,7 @@
 #include "filters.h"
 #include "bench.h"
 #include "streaming.h"
+#include "led_matrix_notes.h"
 
 // UNO Q: comunicación MCU<->MPU (Qualcomm) vía Bridge (MsgPack RPC) + Monitor
 #include <Arduino_RouterBridge.h>
@@ -415,6 +416,21 @@ void setup() {
     Monitor.println("Bridge handler registered: midi_bytes");
   }
 
+  const bool led_matrix_notes_ready = ledMatrixNotesInit();
+  if (led_matrix_notes_ready) {
+    Monitor.println("LED matrix note display enabled");
+  } else {
+    Monitor.println("LED matrix note display unavailable");
+  }
+
+  if (led_matrix_notes_ready) {
+    if (!Bridge.provide_safe("led_note", led_note)) {
+      Monitor.println("ERROR: no se pudo registrar handler led_note");
+    } else {
+      Monitor.println("Bridge handler registered: led_note");
+    }
+  }
+
   bench.report_last_ms = millis();
   bench.tx_queue_max_window = 0;
   bench.tx_queue_drops_window = 0;
@@ -669,5 +685,6 @@ if (pending > 0) {
     txBlocks.publishPendingBlocks(bench, 4);
   }
 
+  serviceLedMatrixNotes();
   reportBenchStatsIfDue();
 }

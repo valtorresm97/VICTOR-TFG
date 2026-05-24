@@ -56,6 +56,8 @@ function renderWarnings(s) {
   const sonif = s.sonification || {};
   const midi = s.midi || {};
   const transport = midi.transport || {};
+  const ledMatrix = s.led_matrix || {};
+  const ledTransport = ledMatrix.transport || {};
   const warnings = [];
 
   if (!sonif.valid) warnings.push("No hay features de sonificación válidas.");
@@ -63,6 +65,8 @@ function renderWarnings(s) {
   if (transport.enabled === false) warnings.push(`Handler MCU esperado: ${midi.mcu_handler || "midi_bytes"}.`);
   if (Number(transport.failed_events_total || 0) > 0) warnings.push("Bridge/MIDI reporta eventos fallidos.");
   if (Number(transport.dropped_events_total || 0) > 256) warnings.push("Hay muchos eventos MIDI descartados.");
+  if (ledTransport.enabled === false) warnings.push("LED matrix desactivada.");
+  if (Number(ledTransport.failed_events_total || 0) > 0) warnings.push("Bridge/LED matrix reporta eventos fallidos.");
 
   root.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
 }
@@ -118,6 +122,8 @@ function renderSonification(s) {
   const midi = s.midi || {};
   const scheduler = midi.scheduler || {};
   const transport = midi.transport || {};
+  const ledMatrix = s.led_matrix || {};
+  const ledTransport = ledMatrix.transport || {};
 
   setText("sonif-activity", fmt(sonif.activity, 3));
   setText("sonif-calmness", fmt(sonif.calmness, 3));
@@ -139,6 +145,11 @@ function renderSonification(s) {
   setText("midi-sent-events", String(transport.sent_events_total ?? 0));
   setText("midi-dropped-events", String(transport.dropped_events_total ?? 0));
   setText("midi-failed-events", String(transport.failed_events_total ?? 0));
+
+  setText("led-matrix-enabled", ledMatrix.enabled ? "enabled" : "disabled");
+  setText("led-matrix-sent-events", String(ledTransport.sent_events_total ?? 0));
+  setText("led-matrix-dropped-events", String(ledTransport.dropped_events_total ?? 0));
+  setText("led-matrix-failed-events", String(ledTransport.failed_events_total ?? 0));
 }
 
 function renderPianoRoll(s) {
