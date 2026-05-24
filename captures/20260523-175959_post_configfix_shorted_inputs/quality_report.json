@@ -1,0 +1,234 @@
+{
+  "channels": {
+    "ch1": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 5.960998362437871e-09,
+        "beta": 3.346223753012994e-08,
+        "delta": 1.915087391263733e-07,
+        "gamma": 4.6241122636891295e-08,
+        "theta": 1.3115864598457248e-08
+      },
+      "bandpower_rel": {
+        "alpha": 0.02053470554356148,
+        "beta": 0.1152721662934515,
+        "delta": 0.6597176056546509,
+        "gamma": 0.15929342362106289,
+        "theta": 0.04518209888727325
+      },
+      "flatline": false,
+      "line_50_power": 5.5185843570193764e-09,
+      "line_50_ratio_1_50": 0.025318396073289673,
+      "max_uV": 2.0,
+      "mean_uV": -0.00143993417443774,
+      "median_uV": 0.0,
+      "min_uV": -2.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.382473944048272,
+        "beta": 21.393307734503566,
+        "delta": 0.5142622051563357,
+        "gamma": 48.34064728469556,
+        "theta": 5.845447065277016
+      },
+      "peak_freq_hz": 0.5142622051563357,
+      "ptp_uV": 4.0,
+      "rms_uV": 0.11503773618262418,
+      "samples": 14584,
+      "std_uV": 0.11502872395882831
+    },
+    "ch2": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 4.151115223501459e-05,
+        "beta": 0.0001318905222024418,
+        "delta": 2.6657910913467532e-05,
+        "gamma": 7.705506478473937e-05,
+        "theta": 3.314004546832488e-05
+      },
+      "bandpower_rel": {
+        "alpha": 0.13379701523679688,
+        "beta": 0.42510403249718426,
+        "delta": 0.08592266705769354,
+        "gamma": 0.2483606723009702,
+        "theta": 0.10681561290735506
+      },
+      "flatline": false,
+      "line_50_power": 3.0603815709004166e-07,
+      "line_50_ratio_1_50": 0.000993670007821852,
+      "max_uV": 24.0,
+      "mean_uV": -0.004936917169500823,
+      "median_uV": 0.0,
+      "min_uV": -131.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 2.0,
+      "peak_by_band_hz": {
+        "alpha": 10.250959956116292,
+        "beta": 13.627948436642896,
+        "delta": 2.5027427317608337,
+        "gamma": 30.11862314865606,
+        "theta": 5.125479978058146
+      },
+      "peak_freq_hz": 2.5027427317608337,
+      "ptp_uV": 155.0,
+      "rms_uV": 2.912228554020142,
+      "samples": 14584,
+      "std_uV": 2.912224369395172
+    },
+    "ch3": {
+      "abrupt_jumps": 15,
+      "bandpower_abs": {
+        "alpha": 0.0007851403435298064,
+        "beta": 0.0024697955021992972,
+        "delta": 0.0004991871454517076,
+        "gamma": 0.0014512502773390019,
+        "theta": 0.0006220227774295038
+      },
+      "bandpower_rel": {
+        "alpha": 0.1347326211122317,
+        "beta": 0.42382489240903365,
+        "delta": 0.08566212790680287,
+        "gamma": 0.2490392391208387,
+        "theta": 0.10674111945109312
+      },
+      "flatline": false,
+      "line_50_power": 5.38929731589956e-06,
+      "line_50_ratio_1_50": 0.0009310929780053271,
+      "max_uV": 568.0,
+      "mean_uV": 0.0039769610532089964,
+      "median_uV": 0.0,
+      "min_uV": -105.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -8.0,
+      "p05_uV": -1.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.622462973121229,
+        "beta": 13.25082281952825,
+        "delta": 3.1198573779484366,
+        "gamma": 30.11862314865606,
+        "theta": 6.993965990126165
+      },
+      "peak_freq_hz": 6.993965990126165,
+      "ptp_uV": 673.0,
+      "rms_uV": 12.624269828387904,
+      "samples": 14584,
+      "std_uV": 12.624269201966738
+    },
+    "ch4": {
+      "abrupt_jumps": 15,
+      "bandpower_abs": {
+        "alpha": 8.481145608700814,
+        "beta": 26.74955708863491,
+        "delta": 5.39588676116122,
+        "gamma": 15.720203180888356,
+        "theta": 6.7390702421381246
+      },
+      "bandpower_rel": {
+        "alpha": 0.13443813274978236,
+        "beta": 0.42401824857133424,
+        "delta": 0.08553242382203456,
+        "gamma": 0.24918741636951575,
+        "theta": 0.10682377848733304
+      },
+      "flatline": false,
+      "line_50_power": 0.05864801354178211,
+      "line_50_ratio_1_50": 0.0009359614215532013,
+      "max_uV": 60977.0,
+      "mean_uV": 0.0047997805814591335,
+      "median_uV": 0.0,
+      "min_uV": -11297.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -810.0,
+      "p05_uV": -83.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.125342841470104,
+        "beta": 13.25082281952825,
+        "delta": 3.874108612177729,
+        "gamma": 30.25575973669775,
+        "theta": 5.999725726823916
+      },
+      "peak_freq_hz": 5.999725726823916,
+      "ptp_uV": 72274.0,
+      "rms_uV": 1311.1407113246973,
+      "samples": 14584,
+      "std_uV": 1311.140711315912
+    }
+  },
+  "diagnosis": {
+    "reasons": [
+      "shorted-input noise/offset is low; ADC/SPI/scale path looks healthy"
+    ],
+    "recommendations": [
+      "Use this result as evidence that the millivolt scalp captures are dominated by electrodes/common-mode/reference, not digital transport."
+    ],
+    "state": "valida_diagnostica"
+  },
+  "metadata": {
+    "ads1299": {
+      "bias_drl_used": false,
+      "channels_streamed": 4,
+      "expected_device": "ADS1299-4PAG",
+      "expected_id": "0x3C",
+      "lead_off_impedance_measured": false,
+      "lsb_v_firmware": 2.235e-08,
+      "pga_gain_assumed": 24,
+      "status_mask": "0xF00000",
+      "status_prefix_expected": "0xC00000",
+      "vref_v_assumed_from_lsb_gain": 4.499648794800001
+    },
+    "block_samples_expected": 8,
+    "bridge_event": "eeg_block_uV",
+    "condition": "post_configfix_shorted_inputs",
+    "created_at_utc": "2026-05-23T18:00:59.816232+00:00",
+    "duration_observed_sec": 60.580277035999984,
+    "duration_requested_sec": 60.0,
+    "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",
+    "fs_hz_expected": 250,
+    "git": {
+      "branch": null,
+      "commit": null,
+      "dirty": false
+    },
+    "notes": "",
+    "num_channels": 4,
+    "raw_counts_available": false,
+    "rx_summary": {
+      "block_gaps_total": 0,
+      "invalid_status_total": 0,
+      "last_block_idx": 3602,
+      "last_sample_idx": 30292,
+      "malformed_blocks_total": 0,
+      "rx_blocks_total": 1823,
+      "rx_samples_total": 14584,
+      "sample_gaps_total": 0
+    },
+    "started_unix": 1779559199.235938,
+    "value_units": "microvolts"
+  },
+  "status": {
+    "invalid_status_fraction": 0.0,
+    "invalid_status_total": 0,
+    "status_prefix_expected": "0xC00000"
+  },
+  "timing": {
+    "duration_sec": 58.336,
+    "effective_fs_hz": 250.0,
+    "first_sample_idx": 15709,
+    "fs_hz_expected": 250.0,
+    "last_sample_idx": 30292,
+    "sample_gaps_detected": 0,
+    "samples_expected_from_duration": 14584,
+    "samples_received": 14584
+  }
+}
