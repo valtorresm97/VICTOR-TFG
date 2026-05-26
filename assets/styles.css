@@ -84,6 +84,44 @@ h1 { margin: 0; font-size: 1.55rem; letter-spacing: 0.2px; }
 
 .compact-stats { margin-top: 12px; }
 
+.midi-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.danger-button {
+  appearance: none;
+  border: 1px solid rgba(255, 95, 111, 0.58);
+  border-radius: 8px;
+  background: rgba(255, 95, 111, 0.18);
+  color: #ffe8ec;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.danger-button:hover {
+  background: rgba(255, 95, 111, 0.28);
+}
+
+.danger-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.action-status {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.action-status.error {
+  color: #ffb3bd;
+}
+
 .warnings {
   display: grid;
   gap: 8px;

@@ -141,6 +141,39 @@ function renderSonification(s) {
   setText("midi-failed-events", String(transport.failed_events_total ?? 0));
 }
 
+function setPanicStatus(text, isError = false) {
+  const el = document.getElementById("midi-panic-status");
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle("error", Boolean(isError));
+}
+
+async function sendMidiPanic() {
+  const button = document.getElementById("midi-panic-button");
+  if (button) button.disabled = true;
+  setPanicStatus("Enviando...");
+
+  try {
+    const res = await fetch('./midi/panic', { method: 'POST' });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok || payload.ok === false) {
+      throw new Error(payload.error || `HTTP ${res.status}`);
+    }
+    setPanicStatus(`Panic enviado (${payload.sent_events ?? 0})`);
+  } catch (e) {
+    console.warn('[WEBUI] MIDI panic error', e);
+    setPanicStatus("Error al enviar panic", true);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function setupMidiPanicButton() {
+  const button = document.getElementById("midi-panic-button");
+  if (!button) return;
+  button.addEventListener("click", sendMidiPanic);
+}
+
 function renderPianoRoll(s) {
   const root = document.getElementById("piano-roll");
   const empty = document.getElementById("piano-roll-empty");
@@ -237,6 +270,7 @@ function startPollingFallback() {
   setInterval(loadInitial, 400);
 }
 
+setupMidiPanicButton();
 loadInitial();
 startSocket();
 startPollingFallback();

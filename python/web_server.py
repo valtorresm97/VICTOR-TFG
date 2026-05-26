@@ -23,6 +23,7 @@ class EEGWebServer:
     def _setup_routes(self):
         self.ui.expose_api("GET", "/status", self.get_status)
         self.ui.expose_api("GET", "/latest", self.get_latest)
+        self.ui.expose_api("POST", "/midi/panic", self.post_midi_panic)
         self.ui.on_connect(self.on_connect)
         self.ui.on_disconnect(self.on_disconnect)
 
@@ -33,6 +34,10 @@ class EEGWebServer:
 
     def get_latest(self):
         return self.backend.get_latest_snapshot() or read_snapshot(default={})
+
+    def post_midi_panic(self):
+        sent_events = self.backend.send_panic()
+        return {"ok": True, "sent_events": int(sent_events)}
 
     def on_connect(self, sid):
         logger.info("[WEB] connected: %s", sid)

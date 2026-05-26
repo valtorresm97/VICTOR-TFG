@@ -19,6 +19,6 @@ No se refactorizo nada. Esta lista documenta deuda para prompts futuros.
 | Reports/documentos solapados | `docs/resultados_*`, `docs/validacion_*`, `docs/validacion_tfg/*` | Dificil saber cual es definitivo. | Media | Marcar docs definitivos y legacy. |
 | `pack_point/unpack_point` no usado por transporte actual | `led_matrix_visualizer.py` | Codigo extra/legacy para posible formato alternativo. | Baja | Mantener hasta decidir formato final. |
 | Music generation fija sin controles UI | `backend_service.py`, assets | Cambios requieren editar codigo/env. | Media | Extraer configuracion musical a snapshot/control UI futuro. |
-| Panic existe en backend pero no expuesto | `backend_service.py`, `midi_live.py`, assets | Operacion segura incompleta en directo. | Alta | Agregar boton/endpoint panic antes de MIDI fisico. |
+| Panic existe en backend pero no expuesto | `backend_service.py`, `midi_live.py`, assets | Resuelto: `POST /midi/panic` y boton `Panic` en WebUI llaman a `BackendService.send_panic()`. | Alta | Queda pendiente panic autonomo firmware si Python/App Lab cae. |
 | Capturas guardan filas en memoria | `capture_manager.py` | Capturas largas pueden crecer mucho. | Baja/Media | Streaming incremental a CSV si se amplian duraciones. |
 | `state/` runtime no versionado pero rutas hardcodeadas | `app_state.py`, `capture_manager.py`, tools | Choques si varias apps corren. | Baja | Namespace por app/branch si hiciera falta. |
