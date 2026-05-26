@@ -75,8 +75,7 @@ Mensajes de seguridad:
 
 Limitaciones:
 
-- No hay boton Web UI de panic.
-- No hay endpoint WebUI para `send_panic()`.
+- Existe boton Web UI de panic y endpoint `POST /midi/panic` conectado a `send_panic()`.
 - El firmware no implementa panic propio; solo reenvia bytes si UART habilitada.
 - `MIDI_UART_ENABLED=0` por defecto y exige definir `MIDI_SERIAL`.
 

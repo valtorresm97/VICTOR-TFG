@@ -78,8 +78,12 @@ eeg_midi/
 │   ├── app_state.py
 │   ├── dsp_core.py
 │   ├── eeg_signal_processor.py
-│   ├── dashboard.py
+│   ├── web_server.py
 │   └── requirements.txt
+├── assets/
+│   ├── index.html
+│   ├── app.js
+│   └── styles.css
 └── sketch/
     ├── sketch.ino
     ├── bench.h
@@ -298,9 +302,9 @@ Estado compartido, snapshots, historial o persistencia temporal.
 
 Debe evitar condiciones de carrera y estructuras inconsistentes.
 
-python/dashboard.py
+python/web_server.py + assets/
 
-Interfaz web.
+Interfaz web real de esta rama.
 
 Debe mostrar:
 
@@ -311,13 +315,15 @@ Estado de adquisición.
 Tasas.
 Warnings.
 
-No debe contener lógica pesada de adquisición ni DSP principal.
+`web_server.py` solo debe exponer rutas WebUI y publicar snapshots.
+`assets/app.js` solo debe renderizar snapshots y acciones UI ligeras.
+No deben contener lógica pesada de adquisición ni DSP principal.
 
 python/main.py
 
 Punto de entrada de la app Python.
 
-Debe iniciar backend, receiver y dashboard según la arquitectura App Lab.
+Debe iniciar backend, receiver y WebUI según la arquitectura App Lab.
 
 5. Estado técnico actual conocido
 
@@ -444,11 +450,12 @@ receiver.py             → recepción y parseo
 dsp_core.py             → DSP puro
 eeg_signal_processor.py → buffer/features
 backend_service.py      → orquestación
-dashboard.py            → presentación
+web_server.py           → rutas WebUI y publicación de snapshots
+assets/                 → presentación HTML/CSS/JS
 app_state.py            → estado
 main.py                 → arranque
 
-No poner DSP pesado en dashboard.py.
+No poner DSP pesado en web_server.py ni assets/app.js.
 
 No poner lógica de UI en dsp_core.py.
 
