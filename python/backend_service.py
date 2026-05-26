@@ -65,7 +65,8 @@ DISK_PUBLISH_PERIOD_SEC = 1.0
 
 MUSIC_BAR_SEC = 2.0
 
-MUSIC_CHANNEL = 0
+# MIDI usa canales internos 0..15. 9 corresponde al canal MIDI 10.
+MUSIC_CHANNEL = 9
 MUSIC_PROGRAM = 0
 
 MUSIC_ROOT_NOTE = "C4"
