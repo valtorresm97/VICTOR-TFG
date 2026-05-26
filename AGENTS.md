@@ -611,6 +611,41 @@ Mantener baja latencia.
 Evitar falsas detecciones por ruido.
 14. Cómo debe trabajar el agente
 
+Revisión obligatoria al inicio de cada nueva conversación
+
+Antes de proponer cambios, editar código o ejecutar refactors, el agente debe
+revisar la documentación de auditoría vigente para recuperar el contexto real
+del sistema. Como mínimo debe leer o consultar:
+
+- `docs/auditoria_codigo_detallada/README.md`
+- `docs/auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md`
+- `docs/auditoria_codigo_detallada/10_mapa_funciones_criticas.md`
+- `docs/auditoria_codigo_detallada/11_hallazgos_para_simplificacion_futura.md`
+- `docs/auditoria_firmware_final_v1/10_redundancias_y_deuda_tecnica.md`
+- `docs/auditoria_firmware_final_v1/12_mapa_criticidad_refactor.md`
+
+Si la tarea afecta a un subsistema concreto, además debe revisar el documento
+detallado correspondiente:
+
+- Firmware / ADS1299 / SPI:
+  `01_firmware_funcion_por_funcion.md` y `02_ads1299_spi_driver.md`.
+- Backend / receiver / capturas / estado:
+  `03_python_backend_funcion_por_funcion.md`.
+- DSP / EEG / calidad espectral:
+  `04_dsp_eeg_funcion_por_funcion.md`.
+- Sonificación / MIDI:
+  `05_sonificacion_midi_funcion_por_funcion.md`.
+- LED matrix:
+  `06_led_matrix_funcion_por_funcion.md`.
+- Web server / assets UI:
+  `07_web_server_assets_funcion_por_funcion.md`.
+- Tools CLI:
+  `08_tools_cli_funcion_por_funcion.md`.
+
+Esta revisión no sustituye leer el código real afectado. La auditoría sirve
+para orientar riesgos, contratos y criticidad; el código actual sigue siendo la
+fuente final antes de modificar.
+
 Antes de modificar:
 
 Leer este archivo.
