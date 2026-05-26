@@ -41,11 +41,6 @@ from sonification_features import SonificationFeatureAdapter
 
 
 FS_HZ_DEFAULT = float(FS_HZ)
-QUALITY_RMS_LOW_UV = 3.0
-QUALITY_RMS_HIGH_UV = 120.0
-QUALITY_RMS_ARTIFACT_UV = 200.0
-QUALITY_PTP_ARTIFACT_UV = 5000.0
-QUALITY_50HZ_WARN = 0.25
 
 
 def _load_capture_csv(capture_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -124,39 +119,6 @@ def _spectral_entropy(freqs: np.ndarray | None, pxx: np.ndarray | None, low: flo
     if max_entropy <= 0:
         return None
     return entropy / max_entropy
-
-
-def _quality_score(
-    *,
-    rms_uv: float,
-    ptp_uv: float,
-    line_50_ratio: float | None,
-    finite_features: bool,
-    sample_gap: bool,
-) -> tuple[float, list[str]]:
-    score = 1.0
-    warnings: list[str] = []
-
-    if not finite_features:
-        score -= 0.50
-        warnings.append("non_finite_features")
-    if sample_gap:
-        score -= 0.30
-        warnings.append("sample_gap")
-    if rms_uv < QUALITY_RMS_LOW_UV:
-        score -= 0.10
-        warnings.append("very_low_rms")
-    if rms_uv > QUALITY_RMS_HIGH_UV:
-        score -= min(0.35, (rms_uv - QUALITY_RMS_HIGH_UV) / 400.0)
-        warnings.append("high_rms")
-    if rms_uv > QUALITY_RMS_ARTIFACT_UV or ptp_uv > QUALITY_PTP_ARTIFACT_UV:
-        score -= 0.25
-        warnings.append("possible_artifact_window")
-    if line_50_ratio is not None and line_50_ratio > QUALITY_50HZ_WARN:
-        score -= 0.25
-        warnings.append("high_50hz_ratio")
-
-    return max(0.0, min(1.0, float(score))), warnings
 
 
 def _summary(values: list[float]) -> dict:
