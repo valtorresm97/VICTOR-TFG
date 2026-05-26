@@ -84,6 +84,39 @@ h1 { margin: 0; font-size: 1.55rem; letter-spacing: 0.2px; }
 
 .compact-stats { margin-top: 12px; }
 
+.channel-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.channel-mode,
+.channel-chip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.channel-mode {
+  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--muted);
+  background: rgba(8, 0, 18, 0.42);
+}
+
+.channel-chip.active {
+  border: 1px solid rgba(89, 255, 212, 0.45);
+  color: #dffef6;
+  background: rgba(89, 255, 212, 0.13);
+}
+
+.channel-chip.inactive {
+  border: 1px solid rgba(255, 195, 87, 0.45);
+  color: #ffe5a8;
+  background: rgba(255, 195, 87, 0.13);
+}
+
 .midi-actions {
   display: flex;
   align-items: center;

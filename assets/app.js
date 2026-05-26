@@ -56,15 +56,38 @@ function renderWarnings(s) {
   const sonif = s.sonification || {};
   const midi = s.midi || {};
   const transport = midi.transport || {};
+  const cfg = s.config || {};
+  const inactiveChannels = (cfg.channels || []).filter((ch) => ch && ch.active === false);
   const warnings = [];
 
   if (!sonif.valid) warnings.push("No hay features de sonificación válidas.");
+  if (inactiveChannels.length) warnings.push(`${inactiveChannels.map((ch) => ch.name).join(", ")} apagados por ADS_DIAGNOSTIC_MODE=${cfg.ads_diagnostic_mode}.`);
   if (!midi.live_enabled) warnings.push("MIDI físico desactivado por seguridad.");
   if (transport.enabled === false) warnings.push(`Handler MCU esperado: ${midi.mcu_handler || "midi_bytes"}.`);
   if (Number(transport.failed_events_total || 0) > 0) warnings.push("Bridge/MIDI reporta eventos fallidos.");
   if (Number(transport.dropped_events_total || 0) > 256) warnings.push("Hay muchos eventos MIDI descartados.");
 
   root.innerHTML = warnings.map((w) => `<div class="warning">${w}</div>`).join("");
+}
+
+function renderChannelStatus(s) {
+  const root = document.getElementById("channel-status");
+  if (!root) return;
+  const cfg = s.config || {};
+  const channels = Array.isArray(cfg.channels) ? cfg.channels : [];
+  if (!channels.length) {
+    root.innerHTML = "";
+    return;
+  }
+
+  const mode = cfg.ads_diagnostic_mode ?? "n/a";
+  const chips = channels.map((ch) => {
+    const active = ch.active !== false;
+    const cls = active ? "channel-chip active" : "channel-chip inactive";
+    const role = String(ch.role || (active ? "active" : "inactive")).replace(/_/g, " ");
+    return `<span class="${cls}" title="${role}">${ch.name || `CH${Number(ch.index || 0) + 1}`}: ${active ? "activo" : "apagado"}</span>`;
+  });
+  root.innerHTML = `<span class="channel-mode">ADS_DIAGNOSTIC_MODE=${mode}</span>${chips.join("")}`;
 }
 
 function renderDiagnostics(s) {
@@ -233,6 +256,7 @@ function renderSnapshot(s) {
   setText("malformed", String(rx.malformed_blocks_total ?? 0));
   setText("lost-frames", String(rx.lost_frames_total ?? 0));
   setText("lost-blocks", String(rx.lost_blocks_total ?? 0));
+  renderChannelStatus(s);
   setText("rms", fmt(f.rms, 6));
   setText("peak-freq", `${fmt(f.peak_freq, 2)} Hz`);
   setText("peak-delta", `${fmt(f.peak_delta, 2)} Hz`);

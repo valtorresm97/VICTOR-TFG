@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 import time
 
@@ -82,6 +83,42 @@ MIDI_LOOKAHEAD_SEC = 0.02
 MIDI_GENERATE_PERIOD_SEC = MUSIC_BAR_SEC
 
 
+def _read_ads_diagnostic_mode(project_root: str) -> int | None:
+    sketch_path = os.path.join(project_root, "sketch", "sketch.ino")
+    try:
+        with open(sketch_path, "r", encoding="utf-8") as f:
+            text = f.read()
+    except Exception:
+        return None
+
+    m = re.search(r"^\s*#define\s+ADS_DIAGNOSTIC_MODE\s+(\d+)\s*$", text, re.MULTILINE)
+    return int(m.group(1)) if m else None
+
+
+def _channel_status_for_ads_mode(mode: int | None) -> list[dict]:
+    mode_value = int(mode) if mode is not None else None
+    channels = []
+    for idx in range(NUM_CH):
+        active = not (mode_value == 5 and idx > 0)
+        if mode_value == 5:
+            role = "active_eeg" if idx == 0 else "powered_down"
+        elif mode_value == 1:
+            role = "shorted_input"
+        elif mode_value == 2:
+            role = "internal_test_signal"
+        else:
+            role = "active_eeg"
+        channels.append(
+            {
+                "index": idx,
+                "name": f"CH{idx + 1}",
+                "active": active,
+                "role": role,
+            }
+        )
+    return channels
+
+
 class BackendService:
     """
     Orquesta:
@@ -117,6 +154,9 @@ class BackendService:
         self.capture_manager = CaptureManager(
             project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         )
+        self.project_root = self.capture_manager.project_root
+        self.ads_diagnostic_mode = _read_ads_diagnostic_mode(self.project_root)
+        self.channel_status = _channel_status_for_ads_mode(self.ads_diagnostic_mode)
 
         Bridge.provide("linux_started", self.rx.linux_started)
         logger.info("[BRIDGE] registered linux_started")
@@ -287,6 +327,8 @@ class BackendService:
                 "feature_hop_samples": FEATURE_HOP_SAMPLES,
                 "psd_method": "multitaper",
                 "channel_idx": 0,
+                "ads_diagnostic_mode": self.ads_diagnostic_mode,
+                "channels": self.channel_status,
             },
             "status": status,
             "rx": {

@@ -15,7 +15,7 @@ No se refactorizo nada. Esta lista documenta deuda para prompts futuros.
 | Adafruit NeoPixel declarado pero no usado | `sketch/sketch.yaml` | Dependencia innecesaria. | Baja | Confirmar si legacy; quitar en refactor si no hay matriz externa. |
 | `std::vector` en handler firmware LED | `sketch.ino` | Resuelto: handler `led_matrix_row` usa chunks fijos y framebuffer estatico, sin `std::vector`. | Media | Vigilar carga Bridge: ahora son 8 llamadas por frame si se activa LED fisico. |
 | `USE_SYNTHETIC` bloque parcialmente comentado en setup | `sketch.ino` | Resuelto: `setup()` vuelve a separar modo sintetico y ADS real con `#if USE_SYNTHETIC`. | Media | Mantener default `0`; probar modo sintetico si se usa para validacion sin ADS1299. |
-| CH2-CH4 siguen transmitidos aunque modo 5 los apaga | Firmware/Python/UI | Usuarios pueden interpretarlos como EEG. | Media | UI debe etiquetar CH1 activo. |
+| CH2-CH4 siguen transmitidos aunque modo 5 los apaga | Firmware/Python/UI | Resuelto: snapshot/WebUI exponen `ADS_DIAGNOSTIC_MODE` y etiquetan CH1 activo, CH2-CH4 apagados en modo 5. | Media | Mantener payload `eeg_block_uV` de 4 canales; no ocultar canales en receiver. |
 | Reports/documentos solapados | `docs/resultados_*`, `docs/validacion_*`, `docs/validacion_tfg/*` | Dificil saber cual es definitivo. | Media | Marcar docs definitivos y legacy. |
 | `pack_point/unpack_point` no usado por transporte actual | `led_matrix_visualizer.py` | Codigo extra/legacy para posible formato alternativo. | Baja | Mantener hasta decidir formato final. |
 | Music generation fija sin controles UI | `backend_service.py`, assets | Cambios requieren editar codigo/env. | Media | Extraer configuracion musical a snapshot/control UI futuro. |
