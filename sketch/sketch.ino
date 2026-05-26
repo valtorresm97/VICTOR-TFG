@@ -139,11 +139,16 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 #endif
 
 static uint8_t midi_debug_left = 16;
+static uint32_t midi_calls_total = 0;
+static uint32_t midi_bytes_total = 0;
 
 static bool midi_bytes(int n, int b0, int b1, int b2) {
   if (n < 1 || n > 3) {
     return false;
   }
+
+  ++midi_calls_total;
+  midi_bytes_total += static_cast<uint32_t>(n);
 
   const uint8_t data[3] = {
     static_cast<uint8_t>(b0 & 0xFF),
@@ -162,6 +167,13 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     }
     Monitor.println();
     --midi_debug_left;
+  }
+
+  if ((midi_calls_total % 128UL) == 0) {
+    Monitor.print("[MIDI TX TOTAL] calls=");
+    Monitor.print(midi_calls_total);
+    Monitor.print(" bytes=");
+    Monitor.println(midi_bytes_total);
   }
 
   for (int i = 0; i < n; ++i) {
