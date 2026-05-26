@@ -23,6 +23,7 @@ class EEGWebServer:
     def _setup_routes(self):
         self.ui.expose_api("GET", "/status", self.get_status)
         self.ui.expose_api("GET", "/latest", self.get_latest)
+        self.ui.expose_api("POST", "/music/config", self.post_music_config)
         self.ui.expose_api("POST", "/midi/panic", self.post_midi_panic)
         self.ui.on_connect(self.on_connect)
         self.ui.on_disconnect(self.on_disconnect)
@@ -38,6 +39,38 @@ class EEGWebServer:
     def post_midi_panic(self):
         sent_events = self.backend.send_panic()
         return {"ok": True, "sent_events": int(sent_events)}
+
+    def post_music_config(
+        self,
+        root_note=None,
+        main_note=None,
+        scale_name=None,
+        channel=None,
+        program=None,
+        bar_sec=None,
+        **payload,
+    ):
+        if isinstance(root_note, dict) and main_note is None and scale_name is None:
+            request = dict(root_note)
+        else:
+            request = {
+                "root_note": root_note,
+                "main_note": main_note,
+                "scale_name": scale_name,
+                "channel": channel,
+                "program": program,
+                "bar_sec": bar_sec,
+            }
+            for key in ("json", "body", "payload"):
+                if isinstance(payload.get(key), dict):
+                    request.update(payload.pop(key))
+            request.update(payload)
+        try:
+            music = self.backend.update_music_config(request)
+        except Exception as exc:
+            logger.warning("[WEB] invalid music config: %s", exc)
+            return {"ok": False, "error": str(exc)}
+        return {"ok": True, "music": music}
 
     def on_connect(self, sid):
         logger.info("[WEB] connected: %s", sid)

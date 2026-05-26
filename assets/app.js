@@ -155,6 +155,7 @@ function renderSonification(s) {
   setText("music-current-chord", (music.current_chord_notes || []).join(" · ") || "n/a");
   setText("music-scale", `${music.root_note || "n/a"} ${music.scale_name || ""}`.trim());
   setText("music-main-note", music.main_note || "n/a");
+  renderMusicControls(music);
 
   setText("midi-live-enabled", midi.live_enabled ? "enabled" : "disabled");
   setText("midi-queued-events", String(scheduler.queued_events ?? 0));
@@ -195,6 +196,78 @@ function setupMidiPanicButton() {
   const button = document.getElementById("midi-panic-button");
   if (!button) return;
   button.addEventListener("click", sendMidiPanic);
+}
+
+function setControlValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el || document.activeElement === el) return;
+  el.value = value ?? "";
+}
+
+function setMusicConfigStatus(text, isError = false) {
+  const el = document.getElementById("music-config-status");
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle("error", Boolean(isError));
+}
+
+function renderMusicControls(music = {}) {
+  setControlValue("music-root-input", music.root_note || "C4");
+  setControlValue("music-main-input", music.main_note || "G4");
+  setControlValue("music-channel-input", music.channel ?? 0);
+  setControlValue("music-program-input", music.program ?? 0);
+  setControlValue("music-bar-input", music.bar_sec ?? 2);
+
+  const scaleSelect = document.getElementById("music-scale-select");
+  if (scaleSelect && document.activeElement !== scaleSelect) {
+    const names = Array.isArray(music.scale_names) && music.scale_names.length
+      ? music.scale_names
+      : [music.scale_name || "Major (Ionian)"];
+    const selected = music.scale_name || names[0];
+    scaleSelect.innerHTML = names.map((name) => `<option value="${name}">${name}</option>`).join("");
+    scaleSelect.value = selected;
+  }
+}
+
+async function applyMusicConfig() {
+  const button = document.getElementById("music-apply-button");
+  if (button) button.disabled = true;
+  setMusicConfigStatus("Aplicando...");
+
+  const payload = {
+    root_note: document.getElementById("music-root-input")?.value,
+    main_note: document.getElementById("music-main-input")?.value,
+    scale_name: document.getElementById("music-scale-select")?.value,
+    channel: Number(document.getElementById("music-channel-input")?.value ?? 0),
+    program: Number(document.getElementById("music-program-input")?.value ?? 0),
+    bar_sec: Number(document.getElementById("music-bar-input")?.value ?? 2),
+  };
+
+  try {
+    const res = await fetch('./music/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    renderMusicControls(data.music || payload);
+    setMusicConfigStatus("Aplicado");
+    await loadInitial();
+  } catch (e) {
+    console.warn('[WEBUI] music config error', e);
+    setMusicConfigStatus("Error", true);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function setupMusicConfigButton() {
+  const button = document.getElementById("music-apply-button");
+  if (!button) return;
+  button.addEventListener("click", applyMusicConfig);
 }
 
 function renderPianoRoll(s) {
@@ -295,6 +368,7 @@ function startPollingFallback() {
 }
 
 setupMidiPanicButton();
+setupMusicConfigButton();
 loadInitial();
 startSocket();
 startPollingFallback();
