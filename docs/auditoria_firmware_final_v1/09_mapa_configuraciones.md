@@ -8,8 +8,10 @@ Busqueda realizada con `rg` sobre flags, `ENABLED`, `MODE`, `DEBUG`, `BENCH`, `S
 | `ADS_DIAGNOSTIC_MODE` | `sketch/sketch.ino` | `5` | 0..5 | Config ADS normal/short/test/no-bias/bias/CH1-only. | Cambia hardware pipeline. | Documentar modo en cada captura. |
 | `DEBUG_MONITOR` | `sketch/sketch.ino` | `true` | bool | Prints cada 500 muestras y errores. | Puede afectar timing. | Separar de build final si hace falta. |
 | `DEBUG_EVERY_N` | `sketch/sketch.ino` | `500` | entero | Frecuencia de prints debug. | Prints excesivos. | Subir o desactivar en pruebas largas. |
-| `BENCH_NOTIFY_ENABLED` | `sketch/sketch.ino` | `true` | bool | Envio EEG por Bridge. | Nombre confuso; no es solo bench. | Renombrar futuro a streaming enabled o documentar. |
-| `BENCH_REPORT_EVERY_MS` | `sketch/sketch.ino` | `5000` | ms | Reporte Monitor. | No hay off separado. | Agregar `BENCH_REPORT_ENABLED` futuro. |
+| `EEG_STREAMING_NOTIFY_ENABLED` | `sketch/sketch.ino` | `1` | macro 0/1 | Envio EEG por Bridge. | Si se apaga, Python no recibe `eeg_block_uV`. | Mantener activo para captura real. |
+| `BENCH_NOTIFY_ENABLED` | `sketch/sketch.ino` | alias legacy | macro 0/1 | Compatibilidad externa: si existe, alimenta `EEG_STREAMING_NOTIFY_ENABLED`. | Nombre historico confuso. | No usar en cambios nuevos. |
+| `BENCH_REPORT_ENABLED` | `sketch/sketch.ino` | `1` | macro 0/1 | Activa/desactiva reportes Monitor. | Si hay prints excesivos puede afectar timing. | Apagar para pruebas de latencia si hace falta. |
+| `BENCH_REPORT_EVERY_MS` | `sketch/sketch.ino` | `5000` | ms | Periodo de reporte Monitor. | Reportes frecuentes pueden afectar timing. | Mantener 5 s por defecto. |
 | `LED_MATRIX_ENABLED` | `sketch/sketch.ino` | `0` | macro 0/1 | Arduino_LED_Matrix en firmware. | Bridge/LED puede cargar loop si activo. | Activar solo tras medir. |
 | `MIDI_UART_ENABLED` | `sketch/sketch.ino` | `0` | macro 0/1 | UART MIDI fisica. | Requiere `MIDI_SERIAL`; puede interferir. | No activar sin verificar D1/TX. |
 | `MIDI_SERIAL` | `sketch/sketch.ino` | no definido | objeto UART | Puerto fisico MIDI. | Compilacion falla si falta y UART enabled. | Definir solo con placa verificada. |

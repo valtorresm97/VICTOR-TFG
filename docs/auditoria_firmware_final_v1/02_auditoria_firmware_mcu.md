@@ -72,15 +72,17 @@
 | `USE_SYNTHETIC` | `0` | Captura real ADS1299. |
 | `ADS_DIAGNOSTIC_MODE` | `5` | CH1-only con BIAS CH1P+CH1N y CH2-CH4 apagados. |
 | `DEBUG_MONITOR` | `true` | Print cada 500 muestras y errores limitados. |
-| `BENCH_NOTIFY_ENABLED` | `true` | Envia bloques EEG por Bridge si MPU listo. |
-| `BENCH_REPORT_EVERY_MS` | `5000` | Imprime reporte bench cada 5 s. |
+| `EEG_STREAMING_NOTIFY_ENABLED` | `1` | Envia bloques EEG por Bridge si MPU listo. |
+| `BENCH_NOTIFY_ENABLED` | alias legacy | Compatibilidad: si se define externamente, controla `EEG_STREAMING_NOTIFY_ENABLED`. |
+| `BENCH_REPORT_ENABLED` | `1` | Activa informes benchmark por Monitor. |
+| `BENCH_REPORT_EVERY_MS` | `5000` | Imprime reporte bench cada 5 s si `BENCH_REPORT_ENABLED=1`. |
 | `LED_MATRIX_ENABLED` | `0` | Handler registrado, pero no dibuja. |
 | `MIDI_UART_ENABLED` | `0` | Handler registrado, pero no escribe UART. |
 
 ## Riesgos firmware detectados
 
-- `BENCH_NOTIFY_ENABLED` controla streaming, no solo benchmark; el nombre puede confundir.
-- No existe `BENCH_REPORT_ENABLED` separado; los reports por Monitor siempre se imprimen cada 5 s.
+- `EEG_STREAMING_NOTIFY_ENABLED` controla streaming EEG por Bridge.
+- `BENCH_REPORT_ENABLED` controla solo los reports por Monitor.
 - `DEBUG_MONITOR=true` implica prints durante adquisicion, aunque espaciados.
 - `pending > 1` se cuenta como lag, pero se pierde el numero de frames no leidos como metrica especifica.
 - LED y MIDI comparten Bridge con EEG; si se activan sin medir pueden afectar latencia.

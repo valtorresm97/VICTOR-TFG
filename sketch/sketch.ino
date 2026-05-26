@@ -83,9 +83,26 @@ static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 static constexpr bool     DEBUG_MONITOR = true;
 static constexpr uint32_t DEBUG_EVERY_N = 500;
 
-// Benchmark / instrumentación
-static constexpr bool     BENCH_NOTIFY_ENABLED  = true;
-static constexpr uint32_t BENCH_REPORT_EVERY_MS = 5000;
+// Streaming EEG y benchmark / instrumentación
+//
+// Compatibilidad: si algún perfil externo define BENCH_NOTIFY_ENABLED, se usa
+// como alias legacy para controlar el streaming EEG por Bridge. El nombre nuevo
+// deja claro que no controla los informes de benchmark.
+#ifndef EEG_STREAMING_NOTIFY_ENABLED
+#ifdef BENCH_NOTIFY_ENABLED
+#define EEG_STREAMING_NOTIFY_ENABLED BENCH_NOTIFY_ENABLED
+#else
+#define EEG_STREAMING_NOTIFY_ENABLED 1
+#endif
+#endif
+
+#ifndef BENCH_REPORT_ENABLED
+#define BENCH_REPORT_ENABLED 1
+#endif
+
+static constexpr bool     STREAMING_NOTIFY_ENABLED = (EEG_STREAMING_NOTIFY_ENABLED != 0);
+static constexpr bool     BENCH_REPORTS_ENABLED    = (BENCH_REPORT_ENABLED != 0);
+static constexpr uint32_t BENCH_REPORT_EVERY_MS    = 5000;
 
 // ---------------------------
 // Handshake con Python (para no perder notifies)
@@ -193,6 +210,8 @@ static BenchStats  bench;
 // Helpers de benchmark
 // ---------------------------
 static void reportBenchStatsIfDue() {
+  if (!BENCH_REPORTS_ENABLED) return;
+
   const uint32_t now_ms = millis();
   if (now_ms - bench.report_last_ms < BENCH_REPORT_EVERY_MS) return;
 
@@ -586,7 +605,7 @@ void loop() {
       bench.filter_time_us_max_window = filter_dt_us;
     }
 
-    if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+    if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
       txBlocks.appendSampleToFillBlock((uint32_t)sample_idx, (uint32_t)status, ch_uV, bench);
     }
 
@@ -676,7 +695,7 @@ if (pending > 0) {
     bench.filter_time_us_max_window = filter_dt_us;
   }
 
-  if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+  if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
     txBlocks.appendSampleToFillBlock((uint32_t)sample_idx, (uint32_t)status, ch_uV, bench);
   }
 
@@ -713,7 +732,7 @@ if (pending > 0) {
     }
   }
 
-  if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+  if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
     txBlocks.publishPendingBlocks(bench, 4);
   }
 
