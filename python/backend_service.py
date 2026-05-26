@@ -68,7 +68,6 @@ MUSIC_MAIN_NOTE = "G4"
 
 MUSIC_SCALE_FAMILY = "Diatonic"
 MUSIC_SCALE_NAME = "Major (Ionian)"
-MUSIC_SCALE_NAMES = ("Major (Ionian)", "Natural minor (Aeolian)")
 
 RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
@@ -82,18 +81,6 @@ MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, False)
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02
 MIDI_GENERATE_PERIOD_SEC = MUSIC_BAR_SEC
-
-
-def _default_music_config() -> dict:
-    return {
-        "bar_sec": MUSIC_BAR_SEC,
-        "channel": MUSIC_CHANNEL,
-        "program": MUSIC_PROGRAM,
-        "root_note": MUSIC_ROOT_NOTE,
-        "main_note": MUSIC_MAIN_NOTE,
-        "scale_family": MUSIC_SCALE_FAMILY,
-        "scale_name": MUSIC_SCALE_NAME,
-    }
 
 
 def _read_ads_diagnostic_mode(project_root: str) -> int | None:
@@ -201,14 +188,12 @@ class BackendService:
         # ----------------------------------------------------
         # Estado musical live
         # ----------------------------------------------------
-        self._music_config_lock = threading.RLock()
-        self.music_config = _default_music_config()
         self.music_scale = build_scale_config(
-            self.music_config["scale_family"],
-            self.music_config["scale_name"],
-            self.music_config["root_note"],
+            MUSIC_SCALE_FAMILY,
+            MUSIC_SCALE_NAME,
+            MUSIC_ROOT_NOTE,
         )
-        self.music_main_note_midi = note_name_to_midi(self.music_config["main_note"])
+        self.music_main_note_midi = note_name_to_midi(MUSIC_MAIN_NOTE)
 
         self.music_segment_builder = MusicSegmentBuilder(fs=FS_HZ)
         self.bar_gen = BarGenerator(random_seed=123)
@@ -260,69 +245,6 @@ class BackendService:
         self._logged_first_snapshot = False
         self._logged_features_ready = False
         self._logged_first_music = False
-
-    def get_music_config(self) -> dict:
-        with self._music_config_lock:
-            out = dict(self.music_config)
-            out["main_note_midi"] = int(self.music_main_note_midi)
-            out["scale_names"] = list(MUSIC_SCALE_NAMES)
-            return out
-
-    def update_music_config(self, request: dict) -> dict:
-        if not isinstance(request, dict):
-            raise ValueError("music config request must be a dict")
-
-        with self._music_config_lock:
-            next_cfg = dict(self.music_config)
-
-            if request.get("root_note") not in (None, ""):
-                root_note = str(request.get("root_note")).strip()
-                note_name_to_midi(root_note)
-                next_cfg["root_note"] = root_note
-
-            if request.get("main_note") not in (None, ""):
-                main_note = str(request.get("main_note")).strip()
-                note_name_to_midi(main_note)
-                next_cfg["main_note"] = main_note
-
-            if request.get("scale_name") not in (None, ""):
-                scale_name = str(request.get("scale_name")).strip()
-                if scale_name not in MUSIC_SCALE_NAMES:
-                    raise ValueError(f"unsupported scale_name: {scale_name!r}")
-                next_cfg["scale_name"] = scale_name
-
-            if request.get("channel") not in (None, ""):
-                next_cfg["channel"] = max(0, min(15, int(request.get("channel"))))
-
-            if request.get("program") not in (None, ""):
-                next_cfg["program"] = max(0, min(127, int(request.get("program"))))
-
-            if request.get("bar_sec") not in (None, ""):
-                bar_sec = float(request.get("bar_sec"))
-                next_cfg["bar_sec"] = max(0.25, min(8.0, bar_sec))
-
-            next_scale = build_scale_config(
-                next_cfg["scale_family"],
-                next_cfg["scale_name"],
-                next_cfg["root_note"],
-            )
-            next_main_note_midi = note_name_to_midi(next_cfg["main_note"])
-            reset_program = (
-                int(next_cfg["channel"]) != int(self.music_config["channel"])
-                or int(next_cfg["program"]) != int(self.music_config["program"])
-            )
-
-            self.music_config = next_cfg
-            self.music_scale = next_scale
-            self.music_main_note_midi = next_main_note_midi
-            self._last_music_t = 0.0
-            self._last_rhythm_cadence = None
-            self._last_chord_root_midi = None
-            self._last_chord_pitches = []
-            if reset_program:
-                self._program_change_sent = False
-
-            return self.get_music_config()
 
     # --------------------------------------------------------
     # Snapshot
@@ -395,7 +317,6 @@ class BackendService:
                 bp_rel.items(),
                 key=lambda kv: float(kv[1] or 0.0),
             )[0]
-        music_config = self.get_music_config()
 
         return {
             "ts_monotonic": now,
@@ -444,7 +365,13 @@ class BackendService:
                 self._last_sonification
             ),
             "music": {
-                **music_config,
+                "bar_sec": MUSIC_BAR_SEC,
+                "channel": MUSIC_CHANNEL,
+                "program": MUSIC_PROGRAM,
+                "root_note": MUSIC_ROOT_NOTE,
+                "main_note": MUSIC_MAIN_NOTE,
+                "scale_family": MUSIC_SCALE_FAMILY,
+                "scale_name": MUSIC_SCALE_NAME,
                 "rhythm_cadence": self._last_rhythm_cadence,
                 "current_chord_root_midi": self._last_chord_root_midi,
                 "current_chord_pitches": list(self._last_chord_pitches),
@@ -475,7 +402,7 @@ class BackendService:
             "performance": {
                 "snapshot_publish_period_sec": SNAPSHOT_PUBLISH_PERIOD_SEC,
                 "disk_publish_period_sec": DISK_PUBLISH_PERIOD_SEC,
-                "midi_generate_period_sec": music_config["bar_sec"],
+                "midi_generate_period_sec": MIDI_GENERATE_PERIOD_SEC,
                 "recent_notes_window_sec": RECENT_NOTES_WINDOW_SEC,
                 "led_matrix_refresh_rate_hz": self.led_matrix_config.refresh_rate_hz,
             },
@@ -521,7 +448,7 @@ class BackendService:
 
     def _maybe_generate_music(self, now: float) -> None:
         """
-        Genera un compás musical cada bar_sec configurado.
+        Genera un compás musical cada MUSIC_GENERATE_PERIOD_SEC.
 
         Requisitos:
           - Ya debe existir self._last_sonification.
@@ -534,26 +461,17 @@ class BackendService:
         if not getattr(self._last_sonification, "valid", False):
             return
 
-        with self._music_config_lock:
-            music_config = dict(self.music_config)
-            music_scale = self.music_scale
-            main_note_midi = int(self.music_main_note_midi)
-
-        bar_sec = float(music_config["bar_sec"])
-        channel = int(music_config["channel"])
-        program = int(music_config["program"])
-
-        if (now - self._last_music_t) < bar_sec:
+        if (now - self._last_music_t) < MIDI_GENERATE_PERIOD_SEC:
             return
 
         try:
             music_segment = self.music_segment_builder.build_live_segment(
                 sonification_features=self._last_sonification,
-                user_scale=music_scale,
-                user_main_note_midi=main_note_midi,
+                user_scale=self.music_scale,
+                user_main_note_midi=self.music_main_note_midi,
                 eeg_features=self._last_features,
                 t_start=0.0,
-                duration_sec=bar_sec,
+                duration_sec=MUSIC_BAR_SEC,
             )
 
             bar = self.bar_gen.generate_live_bar(
@@ -567,20 +485,20 @@ class BackendService:
             notes = self.note_gen.generate_notes_for_bar(
                 segment=music_segment,
                 bar=bar,
-                channel=channel,
-                program=program,
+                channel=MUSIC_CHANNEL,
+                program=MUSIC_PROGRAM,
             )
 
             # Enviar program_change una sola vez al inicio.
             if not self._program_change_sent:
                 self.midi_scheduler.schedule_program_change(
-                    program=program,
-                    channel=channel,
+                    program=MUSIC_PROGRAM,
+                    channel=MUSIC_CHANNEL,
                     due_time=now,
                 )
                 self._program_change_sent = True
 
-            # Los NoteEvent tienen tiempos 0..bar_sec.
+            # Los NoteEvent tienen tiempos 0..MUSIC_BAR_SEC.
             # time_origin=now los convierte al reloj monotónico actual.
             self.midi_scheduler.schedule_notes(
                 notes=notes,
