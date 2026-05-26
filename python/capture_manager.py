@@ -7,7 +7,7 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 
 
 from eeg_contract import (
@@ -26,6 +26,19 @@ from eeg_contract import (
 
 
 VREF_V_ASSUMED = LSB_V * PGA_GAIN * ((2 ** 23) - 1)
+
+CAPTURE_FIELDNAMES = [
+    "t_capture_sec",
+    "timestamp_unix",
+    "block_idx",
+    "sample_idx",
+    "sample_in_block",
+    "status",
+    "ch1_uV",
+    "ch2_uV",
+    "ch3_uV",
+    "ch4_uV",
+]
 
 
 def _json_safe(value: Any):
@@ -95,8 +108,12 @@ class CaptureManager:
         self.started_unix = 0.0
         self.last_seen_request_id: str | None = None
         self.last_status_write = 0.0
+        self.last_csv_flush = 0.0
 
-        self.rows: list[dict] = []
+        self.csv_path: Path | None = None
+        self.csv_file: TextIO | None = None
+        self.csv_writer: csv.DictWriter | None = None
+        self.csv_rows_written = 0
         self.rx_blocks_total = 0
         self.rx_samples_total = 0
         self.malformed_blocks_total = 0
@@ -107,7 +124,11 @@ class CaptureManager:
         self.last_block_idx: int | None = None
 
     def _reset_counters(self) -> None:
-        self.rows = []
+        self._close_csv()
+        self.csv_path = None
+        self.csv_writer = None
+        self.csv_rows_written = 0
+        self.last_csv_flush = 0.0
         self.rx_blocks_total = 0
         self.rx_samples_total = 0
         self.malformed_blocks_total = 0
@@ -116,6 +137,38 @@ class CaptureManager:
         self.block_gaps_total = 0
         self.last_sample_idx = None
         self.last_block_idx = None
+
+    def _open_csv(self) -> None:
+        if self.capture_dir is None:
+            raise RuntimeError("capture_dir is not set")
+        self.capture_dir.mkdir(parents=True, exist_ok=True)
+        self.csv_path = self.capture_dir / "eeg_timeseries.csv"
+        self.csv_file = self.csv_path.open("w", newline="", encoding="utf-8")
+        self.csv_writer = csv.DictWriter(self.csv_file, fieldnames=CAPTURE_FIELDNAMES)
+        self.csv_writer.writeheader()
+        self.csv_file.flush()
+        self.last_csv_flush = time.monotonic()
+
+    def _close_csv(self) -> None:
+        if self.csv_file is None:
+            return
+        try:
+            self.csv_file.flush()
+        finally:
+            self.csv_file.close()
+        self.csv_file = None
+        self.csv_writer = None
+
+    def _write_capture_row(self, row: dict) -> None:
+        if self.csv_writer is None:
+            raise RuntimeError("capture CSV writer is not open")
+        self.csv_writer.writerow(row)
+        self.csv_rows_written += 1
+
+        now = time.monotonic()
+        if self.csv_file is not None and (now - self.last_csv_flush) >= 1.0:
+            self.csv_file.flush()
+            self.last_csv_flush = now
 
     def _status_payload(self, state: str) -> dict:
         elapsed = time.monotonic() - self.started_monotonic if self.started_monotonic else 0.0
@@ -128,6 +181,7 @@ class CaptureManager:
             "capture_dir": str(self.capture_dir) if self.capture_dir else None,
             "rx_blocks_total": self.rx_blocks_total,
             "rx_samples_total": self.rx_samples_total,
+            "csv_rows_written": self.csv_rows_written,
             "invalid_status_total": self.invalid_status_total,
             "sample_gaps_total": self.sample_gaps_total,
             "block_gaps_total": self.block_gaps_total,
@@ -194,8 +248,23 @@ class CaptureManager:
         self.capture_dir = self.captures_root / f"{stamp}_{self.condition}"
         self.started_monotonic = time.monotonic()
         self.started_unix = time.time()
-        self.active = True
         self.completed = False
+        try:
+            self._open_csv()
+        except Exception as exc:
+            self.active = False
+            _atomic_write_json(
+                self.status_path,
+                {
+                    "state": "error",
+                    "request_id": self.request_id,
+                    "error": f"cannot_open_capture_csv: {exc}",
+                    "updated_at_unix": time.time(),
+                },
+            )
+            return
+
+        self.active = True
         self._publish_status("recording", force=True)
 
     def add_block(
@@ -233,23 +302,38 @@ class CaptureManager:
             self.malformed_blocks_total += 1
             return
 
-        for sample_idx, sample_in_block, status, sample in block_samples:
-            if not is_valid_ads1299_status(status):
-                self.invalid_status_total += 1
-            self.rows.append(
+        try:
+            for sample_idx, sample_in_block, status, sample in block_samples:
+                if not is_valid_ads1299_status(status):
+                    self.invalid_status_total += 1
+                self._write_capture_row(
+                    {
+                        "t_capture_sec": now_mono - self.started_monotonic,
+                        "timestamp_unix": now_unix,
+                        "block_idx": block_idx,
+                        "sample_idx": sample_idx,
+                        "sample_in_block": sample_in_block,
+                        "status": status,
+                        "ch1_uV": int(sample[0]),
+                        "ch2_uV": int(sample[1]),
+                        "ch3_uV": int(sample[2]),
+                        "ch4_uV": int(sample[3]),
+                    }
+                )
+        except Exception as exc:
+            self._close_csv()
+            self.active = False
+            _atomic_write_json(
+                self.status_path,
                 {
-                    "t_capture_sec": now_mono - self.started_monotonic,
-                    "timestamp_unix": now_unix,
-                    "block_idx": block_idx,
-                    "sample_idx": sample_idx,
-                    "sample_in_block": sample_in_block,
-                    "status": status,
-                    "ch1_uV": int(sample[0]),
-                    "ch2_uV": int(sample[1]),
-                    "ch3_uV": int(sample[2]),
-                    "ch4_uV": int(sample[3]),
-                }
+                    "state": "error",
+                    "request_id": self.request_id,
+                    "capture_dir": str(self.capture_dir) if self.capture_dir else None,
+                    "error": f"cannot_write_capture_csv: {exc}",
+                    "updated_at_unix": time.time(),
+                },
             )
+            return
 
         self.rx_blocks_total += 1
         self.rx_samples_total += sample_count
@@ -269,24 +353,7 @@ class CaptureManager:
         if not self.active or self.capture_dir is None:
             return
 
-        self.capture_dir.mkdir(parents=True, exist_ok=True)
-        csv_path = self.capture_dir / "eeg_timeseries.csv"
-        fieldnames = [
-            "t_capture_sec",
-            "timestamp_unix",
-            "block_idx",
-            "sample_idx",
-            "sample_in_block",
-            "status",
-            "ch1_uV",
-            "ch2_uV",
-            "ch3_uV",
-            "ch4_uV",
-        ]
-        with csv_path.open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.rows)
+        self._close_csv()
 
         metadata = {
             "condition": self.condition,
@@ -322,6 +389,7 @@ class CaptureManager:
                 "block_gaps_total": self.block_gaps_total,
                 "last_sample_idx": self.last_sample_idx,
                 "last_block_idx": self.last_block_idx,
+                "csv_rows_written": self.csv_rows_written,
             },
             "git": {
                 "branch": _git_value(self.project_root, ["branch", "--show-current"]),
