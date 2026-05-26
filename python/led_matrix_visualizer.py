@@ -2,44 +2,37 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-import os
 from statistics import median
 from typing import Any, Iterable
 
-
-def _env_bool(name: str, default: bool = False) -> bool:
-    value = os.environ.get(name)
-    if value is None:
-        return bool(default)
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _env_int(name: str, default: int, lo: int | None = None, hi: int | None = None) -> int:
-    try:
-        value = int(os.environ.get(name, str(default)))
-    except Exception:
-        value = int(default)
-
-    if lo is not None:
-        value = max(int(lo), value)
-    if hi is not None:
-        value = min(int(hi), value)
-    return value
-
-
-def _env_float(name: str, default: float, lo: float | None = None, hi: float | None = None) -> float:
-    try:
-        value = float(os.environ.get(name, str(default)))
-    except Exception:
-        value = float(default)
-
-    if not math.isfinite(value):
-        value = float(default)
-    if lo is not None:
-        value = max(float(lo), value)
-    if hi is not None:
-        value = min(float(hi), value)
-    return value
+from runtime_config import (
+    EEG_LED_MATRIX_BRIDGE_METHOD_ENV,
+    EEG_LED_MATRIX_BRIGHTNESS_ENV,
+    EEG_LED_MATRIX_CLIP_MODE_ENV,
+    EEG_LED_MATRIX_DYNAMIC_CENTER_ENV,
+    EEG_LED_MATRIX_ENABLED_ENV,
+    EEG_LED_MATRIX_HEIGHT_ENV,
+    EEG_LED_MATRIX_MAX_POINTS_ENV,
+    EEG_LED_MATRIX_NOTE_MODE_ENV,
+    EEG_LED_MATRIX_PITCH_CENTER_ENV,
+    EEG_LED_MATRIX_REFRESH_HZ_ENV,
+    EEG_LED_MATRIX_VISIBLE_PITCH_SPAN_ENV,
+    EEG_LED_MATRIX_WIDTH_ENV,
+    LED_MATRIX_DEFAULT_BRIDGE_METHOD,
+    LED_MATRIX_DEFAULT_BRIGHTNESS,
+    LED_MATRIX_DEFAULT_CLIP_MODE,
+    LED_MATRIX_DEFAULT_HEIGHT,
+    LED_MATRIX_DEFAULT_MAX_POINTS,
+    LED_MATRIX_DEFAULT_NOTE_MODE,
+    LED_MATRIX_DEFAULT_REFRESH_HZ,
+    LED_MATRIX_DEFAULT_VISIBLE_PITCH_SPAN,
+    LED_MATRIX_DEFAULT_WIDTH,
+    env_bool,
+    env_choice,
+    env_float,
+    env_int,
+    env_str,
+)
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -71,47 +64,56 @@ class LedMatrixConfig:
     """
 
     enabled: bool = False
-    width: int = 13
-    height: int = 8
+    width: int = LED_MATRIX_DEFAULT_WIDTH
+    height: int = LED_MATRIX_DEFAULT_HEIGHT
     pitch_center: int = 67
     dynamic_pitch_center: bool = False
-    visible_pitch_span: int = 8
-    refresh_rate_hz: float = 8.0
-    brightness: int = 7
-    max_points: int = 24
-    clip_mode: str = "ignore"
-    note_mode: str = "point"
-    bridge_method: str = "led_matrix_frame"
+    visible_pitch_span: int = LED_MATRIX_DEFAULT_VISIBLE_PITCH_SPAN
+    refresh_rate_hz: float = LED_MATRIX_DEFAULT_REFRESH_HZ
+    brightness: int = LED_MATRIX_DEFAULT_BRIGHTNESS
+    max_points: int = LED_MATRIX_DEFAULT_MAX_POINTS
+    clip_mode: str = LED_MATRIX_DEFAULT_CLIP_MODE
+    note_mode: str = LED_MATRIX_DEFAULT_NOTE_MODE
+    bridge_method: str = LED_MATRIX_DEFAULT_BRIDGE_METHOD
 
     @classmethod
     def from_env(cls, default_pitch_center: int = 67) -> "LedMatrixConfig":
-        clip_mode = os.environ.get("EEG_LED_MATRIX_CLIP_MODE", "ignore").strip().lower()
-        if clip_mode not in {"ignore", "saturate"}:
-            clip_mode = "ignore"
-
-        note_mode = os.environ.get("EEG_LED_MATRIX_NOTE_MODE", "point").strip().lower()
-        if note_mode not in {"point", "duration"}:
-            note_mode = "point"
-
         return cls(
-            enabled=_env_bool("EEG_LED_MATRIX_ENABLED", False),
-            width=_env_int("EEG_LED_MATRIX_WIDTH", 13, lo=1, hi=64),
-            height=_env_int("EEG_LED_MATRIX_HEIGHT", 8, lo=1, hi=32),
-            pitch_center=_env_int(
-                "EEG_LED_MATRIX_PITCH_CENTER",
+            enabled=env_bool(EEG_LED_MATRIX_ENABLED_ENV, False),
+            width=env_int(EEG_LED_MATRIX_WIDTH_ENV, LED_MATRIX_DEFAULT_WIDTH, lo=1, hi=64),
+            height=env_int(EEG_LED_MATRIX_HEIGHT_ENV, LED_MATRIX_DEFAULT_HEIGHT, lo=1, hi=32),
+            pitch_center=env_int(
+                EEG_LED_MATRIX_PITCH_CENTER_ENV,
                 int(default_pitch_center),
                 lo=0,
                 hi=127,
             ),
-            dynamic_pitch_center=_env_bool("EEG_LED_MATRIX_DYNAMIC_CENTER", False),
-            visible_pitch_span=_env_int("EEG_LED_MATRIX_VISIBLE_PITCH_SPAN", 8, lo=1, hi=64),
-            refresh_rate_hz=_env_float("EEG_LED_MATRIX_REFRESH_HZ", 8.0, lo=1.0, hi=30.0),
-            brightness=_env_int("EEG_LED_MATRIX_BRIGHTNESS", 7, lo=1, hi=7),
-            max_points=_env_int("EEG_LED_MATRIX_MAX_POINTS", 24, lo=1, hi=64),
-            clip_mode=clip_mode,
-            note_mode=note_mode,
-            bridge_method=os.environ.get("EEG_LED_MATRIX_BRIDGE_METHOD", "led_matrix_frame").strip()
-            or "led_matrix_frame",
+            dynamic_pitch_center=env_bool(EEG_LED_MATRIX_DYNAMIC_CENTER_ENV, False),
+            visible_pitch_span=env_int(
+                EEG_LED_MATRIX_VISIBLE_PITCH_SPAN_ENV,
+                LED_MATRIX_DEFAULT_VISIBLE_PITCH_SPAN,
+                lo=1,
+                hi=64,
+            ),
+            refresh_rate_hz=env_float(
+                EEG_LED_MATRIX_REFRESH_HZ_ENV,
+                LED_MATRIX_DEFAULT_REFRESH_HZ,
+                lo=1.0,
+                hi=30.0,
+            ),
+            brightness=env_int(EEG_LED_MATRIX_BRIGHTNESS_ENV, LED_MATRIX_DEFAULT_BRIGHTNESS, lo=1, hi=7),
+            max_points=env_int(EEG_LED_MATRIX_MAX_POINTS_ENV, LED_MATRIX_DEFAULT_MAX_POINTS, lo=1, hi=64),
+            clip_mode=env_choice(
+                EEG_LED_MATRIX_CLIP_MODE_ENV,
+                LED_MATRIX_DEFAULT_CLIP_MODE,
+                {"ignore", "saturate"},
+            ),
+            note_mode=env_choice(
+                EEG_LED_MATRIX_NOTE_MODE_ENV,
+                LED_MATRIX_DEFAULT_NOTE_MODE,
+                {"point", "duration"},
+            ),
+            bridge_method=env_str(EEG_LED_MATRIX_BRIDGE_METHOD_ENV, LED_MATRIX_DEFAULT_BRIDGE_METHOD),
         )
 
     def to_dict(self) -> dict[str, Any]:
