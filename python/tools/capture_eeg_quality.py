@@ -11,7 +11,13 @@ from pathlib import Path
 
 PYTHON_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PYTHON_DIR.parent
-STATE_DIR = PROJECT_ROOT / "state"
+if str(PYTHON_DIR) not in sys.path:
+    sys.path.insert(0, str(PYTHON_DIR))
+
+from runtime_config import runtime_state_dir
+
+
+STATE_DIR = runtime_state_dir(PROJECT_ROOT)
 REQUEST_PATH = STATE_DIR / "capture_request.json"
 STATUS_PATH = STATE_DIR / "capture_status.json"
 

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import math
 import os
+from pathlib import Path
 
 
 EEG_MIDI_LIVE_ENABLED_ENV = "EEG_MIDI_LIVE_ENABLED"
+EEG_RUNTIME_STATE_DIR_ENV = "EEG_RUNTIME_STATE_DIR"
 
 EEG_LED_MATRIX_ENABLED_ENV = "EEG_LED_MATRIX_ENABLED"
 EEG_LED_MATRIX_WIDTH_ENV = "EEG_LED_MATRIX_WIDTH"
@@ -28,6 +30,7 @@ LED_MATRIX_DEFAULT_MAX_POINTS = 24
 LED_MATRIX_DEFAULT_CLIP_MODE = "ignore"
 LED_MATRIX_DEFAULT_NOTE_MODE = "point"
 LED_MATRIX_DEFAULT_BRIDGE_METHOD = "led_matrix_row"
+RUNTIME_STATE_DEFAULT_DIR = "state"
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -72,3 +75,11 @@ def env_choice(name: str, default: str, choices: set[str]) -> str:
 
 def env_str(name: str, default: str) -> str:
     return os.environ.get(name, default).strip() or default
+
+
+def runtime_state_dir(project_root: str | Path) -> Path:
+    value = os.environ.get(EEG_RUNTIME_STATE_DIR_ENV, "").strip()
+    if value:
+        path = Path(value).expanduser()
+        return path if path.is_absolute() else Path(project_root) / path
+    return Path(project_root) / RUNTIME_STATE_DEFAULT_DIR

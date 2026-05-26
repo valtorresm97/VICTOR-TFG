@@ -23,6 +23,7 @@ from eeg_contract import (
     is_valid_ads1299_status,
     iter_eeg_block_samples,
 )
+from runtime_config import runtime_state_dir
 
 
 VREF_V_ASSUMED = LSB_V * PGA_GAIN * ((2 ** 23) - 1)
@@ -92,7 +93,7 @@ class CaptureManager:
 
     def __init__(self, project_root: Path):
         self.project_root = Path(project_root)
-        self.state_dir = self.project_root / "state"
+        self.state_dir = runtime_state_dir(self.project_root)
         self.captures_root = self.project_root / "captures"
         self.request_path = self.state_dir / "capture_request.json"
         self.status_path = self.state_dir / "capture_status.json"
