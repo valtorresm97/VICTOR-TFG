@@ -514,9 +514,9 @@ void setup() {
   txBlocks.resetStreamingState();
   initFilters();
 
-//#if USE_SYNTHETIC
-  //Monitor.println("Modo: SYNTHETIC (sin ADS1299)");
-//#else
+#if USE_SYNTHETIC
+  Monitor.println("Modo: SYNTHETIC (sin ADS1299)");
+#else
   Monitor.println("Modo: REAL (ADS1299)");
 
   pinMode(PIN_DRDY, INPUT_PULLUP);
@@ -561,7 +561,7 @@ void setup() {
   ads.cmdRDATAC();
   Monitor.println("START + RDATAC activo. Esperando DRDY...");
 
-//#endif
+#endif
 }
 
 void loop() {
