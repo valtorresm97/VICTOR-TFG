@@ -10,7 +10,19 @@ from pathlib import Path
 from typing import Any
 
 
-from eeg_contract import BLOCK_SAMPLES, FS_HZ, LSB_V, NUM_CH, PGA_GAIN, STATUS_MASK, STATUS_PREFIX
+from eeg_contract import (
+    BLOCK_SAMPLES,
+    EEG_BLOCK_EVENT,
+    EegBlockPayloadError,
+    FS_HZ,
+    LSB_V,
+    NUM_CH,
+    PGA_GAIN,
+    STATUS_MASK,
+    STATUS_PREFIX,
+    is_valid_ads1299_status,
+    iter_eeg_block_samples,
+)
 
 
 VREF_V_ASSUMED = LSB_V * PGA_GAIN * ((2 ** 23) - 1)
@@ -211,18 +223,26 @@ class CaptureManager:
         if self.last_sample_idx is not None and first_sample_idx > self.last_sample_idx + 1:
             self.sample_gaps_total += first_sample_idx - (self.last_sample_idx + 1)
 
-        for i in range(sample_count):
-            status = int(statuses[i])
-            if (status & STATUS_MASK) != STATUS_PREFIX:
+        try:
+            block_samples = tuple(iter_eeg_block_samples(first_sample_idx, statuses, samples, num_ch=NUM_CH))
+        except EegBlockPayloadError:
+            self.malformed_blocks_total += 1
+            return
+
+        if len(block_samples) != sample_count:
+            self.malformed_blocks_total += 1
+            return
+
+        for sample_idx, sample_in_block, status, sample in block_samples:
+            if not is_valid_ads1299_status(status):
                 self.invalid_status_total += 1
-            sample = samples[i]
             self.rows.append(
                 {
                     "t_capture_sec": now_mono - self.started_monotonic,
                     "timestamp_unix": now_unix,
                     "block_idx": block_idx,
-                    "sample_idx": first_sample_idx + i,
-                    "sample_in_block": i,
+                    "sample_idx": sample_idx,
+                    "sample_in_block": sample_in_block,
                     "status": status,
                     "ch1_uV": int(sample[0]),
                     "ch2_uV": int(sample[1]),
@@ -277,7 +297,7 @@ class CaptureManager:
             "fs_hz_expected": FS_HZ,
             "num_channels": NUM_CH,
             "block_samples_expected": BLOCK_SAMPLES,
-            "bridge_event": "eeg_block_uV",
+            "bridge_event": EEG_BLOCK_EVENT,
             "value_units": "microvolts",
             "raw_counts_available": False,
             "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",

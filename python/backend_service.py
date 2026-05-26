@@ -26,7 +26,7 @@ from midi_live import MidiScheduler
 from midi_byte_transport import MidiByteTransport
 from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
 from led_matrix_transport import LedMatrixTransport
-from eeg_contract import FS_HZ, NUM_CH
+from eeg_contract import EEG_BLOCK_EVENT, FS_HZ, NUM_CH
 
 
 logging.basicConfig(level=logging.INFO)
@@ -127,8 +127,8 @@ class BackendService:
         Bridge.provide("linux_started", self.rx.linux_started)
         logger.info("[BRIDGE] registered linux_started")
 
-        Bridge.provide("eeg_block_uV", self.rx.eeg_block_uV)
-        logger.info("[BRIDGE] registered eeg_block_uV")
+        Bridge.provide(EEG_BLOCK_EVENT, self.rx.eeg_block_uV)
+        logger.info("[BRIDGE] registered %s", EEG_BLOCK_EVENT)
 
         # ----------------------------------------------------
         # Estado DSP / sonificación

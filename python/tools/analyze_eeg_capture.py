@@ -32,8 +32,8 @@ def _add_cached_site_packages() -> None:
 _add_cached_site_packages()
 
 import numpy as np
-from scipy.signal import windows
 
+from dsp_core import DSPCore
 from eeg_contract import FS_HZ, LSB_V, NUM_CH, STATUS_MASK, STATUS_PREFIX
 
 FS_HZ_DEFAULT = float(FS_HZ)
@@ -91,16 +91,11 @@ def _multitaper_psd(x_uv: np.ndarray, fs_hz: float, nw: float = 2.5) -> tuple[np
     if x.size < 4:
         return np.array([], dtype=float), np.array([], dtype=float)
     x = x - np.mean(x)
-    n = x.size
-    kmax = max(1, int(2 * nw - 1))
-    tapers = windows.dpss(n, nw, Kmax=kmax, sym=False)
-    freqs = np.fft.rfftfreq(n, d=1.0 / fs_hz)
-    psd = np.zeros_like(freqs)
-    dt = 1.0 / fs_hz
-    for taper in tapers:
-        xf = np.fft.rfft(x * taper)
-        psd += (dt / n) * np.abs(xf) ** 2
-    return freqs, psd / kmax
+    dsp = DSPCore(fs=fs_hz, window_sec=x.size / float(fs_hz), mt_nw=nw)
+    freqs, psd = dsp.compute_psd(x, method="multitaper", preprocess=False)
+    if freqs is None or psd is None:
+        return np.array([], dtype=float), np.array([], dtype=float)
+    return freqs, psd
 
 
 def _bandpower(freqs: np.ndarray, psd: np.ndarray, f_low: float, f_high: float) -> float:

@@ -5,7 +5,14 @@ import time
 import logging
 from typing import Deque, Tuple, Optional, Any
 
-from eeg_contract import BLOCK_SAMPLES, FS_HZ, NUM_CH, STATUS_MASK, STATUS_PREFIX
+from eeg_contract import (
+    BLOCK_SAMPLES,
+    EegBlockPayloadError,
+    FS_HZ,
+    NUM_CH,
+    is_valid_ads1299_status,
+    parse_eeg_block_values,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +99,6 @@ class EEGReceiver:
         self._last_report_t = self.t0
         # Contrato esperado del firmware actual.
         self.expected_block_samples: int = BLOCK_SAMPLES
-        self.expected_status_prefix: int = STATUS_PREFIX
-        self.status_prefix_mask: int = STATUS_MASK
         self.invalid_status_total: int = 0
         self._logged_first_block: bool = False
 
@@ -251,22 +256,24 @@ class EEGReceiver:
             first_sample_idx = int(first_sample_idx)
             sample_count = int(sample_count)
 
-            if sample_count <= 0 or sample_count > self.expected_block_samples:
-                self.malformed_blocks_total += 1
-                self.malformed_blocks_window += 1
-                return
             if block_idx < 0 or first_sample_idx < 0:
                 self.malformed_blocks_total += 1
                 self.malformed_blocks_window += 1
                 return
 
-            stride = 1 + self.num_ch
-            expected_vals = sample_count * stride
-
-            if len(vals) != expected_vals:
+            try:
+                statuses, samples = parse_eeg_block_values(
+                    sample_count,
+                    vals,
+                    num_ch=self.num_ch,
+                    max_samples=self.expected_block_samples,
+                )
+            except EegBlockPayloadError:
                 self.malformed_blocks_total += 1
                 self.malformed_blocks_window += 1
                 return
+
+            sample_count = len(statuses)
 
             # Continuidad por block_idx
             if self.last_block_idx is not None:
@@ -288,23 +295,17 @@ class EEGReceiver:
                         self.lost_frames_total += gap_frames
                         self.lost_frames_window += gap_frames
 
-            statuses = [0] * sample_count
-            samples = [None] * sample_count
-
-            for i in range(sample_count):
-                base = i * stride
-                statuses[i] = int(vals[base])
-                if (statuses[i] & self.status_prefix_mask) != self.expected_status_prefix:
+            for status in statuses:
+                if not is_valid_ads1299_status(status):
                     self.invalid_status_total += 1
                     self.invalid_status_window += 1
-                samples[i] = tuple(int(v) for v in vals[base + 1: base + 1 + self.num_ch])
 
             item: BlockItem = (
                 block_idx,
                 first_sample_idx,
                 sample_count,
-                tuple(statuses),
-                tuple(samples),
+                statuses,
+                samples,
             )
 
             self._enqueue_block(item)
