@@ -194,24 +194,6 @@ def _velocity_to_intensity(velocity: int, brightness: int) -> int:
     return int(round((vel / 127.0) * int(brightness)))
 
 
-def pack_point(x: int, y: int, intensity: int) -> int:
-    """Empaqueta x, y e intensidad en un entero pequeño para Bridge."""
-    return (
-        (int(intensity) & 0xFF) << 16
-        | (int(y) & 0xFF) << 8
-        | (int(x) & 0xFF)
-    )
-
-
-def unpack_point(value: int) -> dict[str, int]:
-    packed = int(value)
-    return {
-        "x": packed & 0xFF,
-        "y": (packed >> 8) & 0xFF,
-        "intensity": (packed >> 16) & 0xFF,
-    }
-
-
 def build_led_matrix_frame(
     recent_notes: Iterable[dict[str, Any]],
     *,
@@ -276,14 +258,11 @@ def build_led_matrix_frame(
     for p in points:
         rows[p["y"]][p["x"]] = max(rows[p["y"]][p["x"]], int(p["intensity"]))
 
-    packed_points = [pack_point(p["x"], p["y"], p["intensity"]) for p in points]
-
     return {
         "config": config.to_dict(),
         "pitch_center_used": int(center),
         "window_sec": float(window_sec),
         "point_count": len(points),
         "points": points,
-        "packed_points": packed_points,
         "rows": rows,
     }
