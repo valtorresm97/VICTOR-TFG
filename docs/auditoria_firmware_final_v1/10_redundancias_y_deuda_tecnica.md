@@ -13,7 +13,7 @@ No se refactorizo nada. Esta lista documenta deuda para prompts futuros.
 | `BENCH_NOTIFY_ENABLED` mezcla streaming y benchmark | `sketch.ino` | Resuelto: streaming EEG usa `EEG_STREAMING_NOTIFY_ENABLED`/`STREAMING_NOTIFY_ENABLED`; reportes usan `BENCH_REPORT_ENABLED`/`BENCH_REPORTS_ENABLED`. | Alta | Mantener alias legacy `BENCH_NOTIFY_ENABLED` solo para perfiles externos antiguos. |
 | `dashboard.py` esperado por docs iniciales no existe | Prompt/AGENTS vs `web_server.py` + assets | Resuelto: docs base apuntan a `web_server.py` + `assets/`. | Media | Mantener `dashboard` como concepto, no como archivo esperado salvo que se cree realmente. |
 | Adafruit NeoPixel declarado pero no usado | `sketch/sketch.yaml` | Dependencia innecesaria. | Baja | Confirmar si legacy; quitar en refactor si no hay matriz externa. |
-| `std::vector` en handler firmware LED | `sketch.ino` | Asignacion dinamica/Bridge payload en MCU. | Media | Mantener disabled; evaluar payload fijo si se activa en tiempo real. |
+| `std::vector` en handler firmware LED | `sketch.ino` | Resuelto: handler `led_matrix_row` usa chunks fijos y framebuffer estatico, sin `std::vector`. | Media | Vigilar carga Bridge: ahora son 8 llamadas por frame si se activa LED fisico. |
 | `USE_SYNTHETIC` bloque parcialmente comentado en setup | `sketch.ino` | Confusion: siempre imprime modo real. | Media | Limpiar en refactor, sin tocar funcionalidad ahora. |
 | CH2-CH4 siguen transmitidos aunque modo 5 los apaga | Firmware/Python/UI | Usuarios pueden interpretarlos como EEG. | Media | UI debe etiquetar CH1 activo. |
 | Reports/documentos solapados | `docs/resultados_*`, `docs/validacion_*`, `docs/validacion_tfg/*` | Dificil saber cual es definitivo. | Media | Marcar docs definitivos y legacy. |

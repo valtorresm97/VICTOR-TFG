@@ -39,7 +39,7 @@ Inventario levantado con `rg --files` y clasificado por bloque funcional. Las ca
 | `python/midi_live.py` | MIDI live | `MidiLiveEvent`, scheduler, program/CC/note on/off, panic y bytes MIDI. | Si | Panic existe en Python. |
 | `python/midi_byte_transport.py` | MIDI transporte | Envia bytes por `Bridge.call("midi_bytes", n,b0,b1,b2)`. | Si | Desactivado por defecto por env. |
 | `python/led_matrix_visualizer.py` | LED matrix | Config por env y conversion `recent_notes` a frame 13x8 row-major. | Si | Misma fuente que piano roll web. |
-| `python/led_matrix_transport.py` | LED matrix transporte | Envia frame LED por `Bridge.call("led_matrix_frame", payload)`. | Medio | Desactivado por defecto. |
+| `python/led_matrix_transport.py` | LED matrix transporte | Envia frame LED por filas empaquetadas con `Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)`. | Medio | Desactivado por defecto. |
 | `python/capture_manager.py` | Capturas | Gestiona solicitudes `state/capture_request.json` y guarda CSV/metadata. | Si | Vive dentro de App Lab. |
 | `python/app_state.py` | Estado / snapshot | Publica/lee `state/snapshot.json` con escritura atomica. | Medio | UI puede leer fallback desde disco. |
 | `python/web_server.py` | Web UI | WebUI brick, rutas `/status` y `/latest`, websocket `eeg_snapshot`. | Medio | Sustituye a `dashboard.py`; no hay Streamlit. |

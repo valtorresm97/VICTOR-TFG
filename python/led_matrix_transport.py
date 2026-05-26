@@ -15,13 +15,13 @@ class LedMatrixTransport:
 
     La entrada es un frame ya calculado desde recent_notes. Este bloque no
     entiende EEG ni genera musica; solo entrega bytes row-major al handler
-    Arduino_LED_Matrix compatible con el ejemplo oficial.
+    Arduino_LED_Matrix mediante filas empaquetadas de tamano fijo.
     """
 
     def __init__(
         self,
         *,
-        bridge_method: str = "led_matrix_frame",
+        bridge_method: str = "led_matrix_row",
         enabled: bool = False,
         width: int = 13,
         height: int = 8,
@@ -44,18 +44,29 @@ class LedMatrixTransport:
     def set_enabled(self, enabled: bool) -> None:
         self.enabled = bool(enabled)
 
-    def _frame_to_bytes(self, frame: dict[str, Any]) -> bytes:
+    def _frame_to_rows(self, frame: dict[str, Any]) -> list[list[int]]:
         rows = frame.get("rows") if isinstance(frame, dict) else None
         if not isinstance(rows, list) or len(rows) != self.height:
             raise ValueError("LED frame rows have unexpected height")
 
-        out: list[int] = []
+        out: list[list[int]] = []
         for row in rows:
             if not isinstance(row, list) or len(row) != self.width:
                 raise ValueError("LED frame rows have unexpected width")
-            out.extend(max(0, min(7, int(v))) for v in row)
+            out.append([max(0, min(7, int(v))) for v in row])
 
-        return bytes(out)
+        return out
+
+    def _pack_row(self, row: list[int]) -> tuple[int, int, int]:
+        packed = 0
+        for col, value in enumerate(row):
+            packed |= (int(value) & 0x7) << (int(col) * 3)
+
+        return (
+            int(packed & 0xFFFF),
+            int((packed >> 16) & 0xFFFF),
+            int((packed >> 32) & 0x7F),
+        )
 
     def send_frame(self, frame: dict[str, Any]) -> bool:
         """
@@ -71,12 +82,22 @@ class LedMatrixTransport:
             return False
 
         try:
-            payload = self._frame_to_bytes(frame)
+            rows = self._frame_to_rows(frame)
+            payload = bytes(value for row in rows for value in row)
             if payload == self._last_payload:
                 self.skipped_unchanged_frames_total += 1
                 return True
 
-            Bridge.call(self.bridge_method, payload)
+            for row_idx, row in enumerate(rows):
+                chunk0, chunk1, chunk2 = self._pack_row(row)
+                Bridge.call(
+                    self.bridge_method,
+                    int(row_idx),
+                    int(chunk0),
+                    int(chunk1),
+                    int(chunk2),
+                )
+
             self._last_payload = payload
             self.sent_frames_total += 1
             self.sent_bytes_total += len(payload)

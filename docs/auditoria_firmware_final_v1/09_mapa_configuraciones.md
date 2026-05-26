@@ -28,7 +28,7 @@ Busqueda realizada con `rg` sobre flags, `ENABLED`, `MODE`, `DEBUG`, `BENCH`, `S
 | `EEG_LED_MATRIX_MAX_POINTS` | `led_matrix_visualizer.py` | `24` | 1..64 | Puntos por frame. | Saturacion visual/carga. | OK. |
 | `EEG_LED_MATRIX_CLIP_MODE` | `led_matrix_visualizer.py` | `ignore` | `ignore/saturate` | Recorte vertical. | Perder notas o saturar bordes. | `ignore` es conservador. |
 | `EEG_LED_MATRIX_NOTE_MODE` | `led_matrix_visualizer.py` | `point` | `point/duration` | Punto o duracion. | `duration` mas puntos. | Probar coste si se activa. |
-| `EEG_LED_MATRIX_BRIDGE_METHOD` | `led_matrix_visualizer.py` | `led_matrix_frame` | string | Nombre handler. | Mismatch con firmware. | No cambiar salvo coordinado. |
+| `EEG_LED_MATRIX_BRIDGE_METHOD` | `led_matrix_visualizer.py` | `led_matrix_row` | string | Nombre handler. | Mismatch con firmware. | No cambiar salvo coordinado. |
 | `FEATURE_WINDOW_SEC` | `backend_service.py` | `4.0` | segundos | Ventana DSP. | Latencia/resolucion. | Critico para features. |
 | `FEATURE_HOP_SAMPLES` | `backend_service.py` | `64` | muestras | Hop DSP. | CPU/latencia. | OK. |
 | `SNAPSHOT_PUBLISH_PERIOD_SEC` | `backend_service.py` | `0.2` | segundos | UI snapshot. | UI/carga. | OK. |

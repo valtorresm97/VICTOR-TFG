@@ -72,9 +72,9 @@ La UI no es Streamlit: usa `arduino.app_bricks.web_ui.WebUI` y assets estaticos.
 
 ## LED matrix scroll
 
-La matriz LED usa la misma lista `recent_notes` del piano roll web. `led_matrix_visualizer.py` calcula un frame row-major 13x8 con brillo 0..7. `led_matrix_transport.py` lo envia por `Bridge.call("led_matrix_frame", payload)` solo si `EEG_LED_MATRIX_ENABLED=1`.
+La matriz LED usa la misma lista `recent_notes` del piano roll web. `led_matrix_visualizer.py` calcula un frame row-major 13x8 con brillo 0..7. `led_matrix_transport.py` lo envia por filas empaquetadas con `Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)` solo si `EEG_LED_MATRIX_ENABLED=1`.
 
-En firmware, `led_matrix_frame(std::vector<uint8_t> frame)` valida 104 bytes. Si `LED_MATRIX_ENABLED=0`, responde `false` sin dibujar. Si se compila con `LED_MATRIX_ENABLED=1`, usa `Arduino_LED_Matrix`.
+En firmware, `led_matrix_row(...)` valida fila y chunks fijos, reconstruye un framebuffer estatico de 104 bytes y dibuja al recibir la ultima fila. Si `LED_MATRIX_ENABLED=0`, responde `false` sin dibujar. Si se compila con `LED_MATRIX_ENABLED=1`, usa `Arduino_LED_Matrix`.
 
 ## Flujos offline
 

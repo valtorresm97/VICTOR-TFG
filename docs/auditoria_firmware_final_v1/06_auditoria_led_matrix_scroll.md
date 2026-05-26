@@ -17,9 +17,9 @@ recent_notes en snapshot
        ↓
      LedMatrixTransport.send_frame()
        ↓
-     Bridge.call("led_matrix_frame", payload 13x8)
+     Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
        ↓
-     MCU led_matrix_frame()
+     MCU led_matrix_row()
        ↓
      Arduino_LED_Matrix.draw()
 ```
@@ -30,7 +30,7 @@ recent_notes en snapshot
 | --- | --- | --- | --- | --- |
 | Enabled Python | `False` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_ENABLED` | No llama Bridge si esta desactivado. |
 | Enabled firmware | `0` | `sketch.ino` | Macro `LED_MATRIX_ENABLED` | Compila Arduino_LED_Matrix solo si se habilita. |
-| Resolucion | `13 x 8` | `led_matrix_visualizer.py`, `sketch.ino` | Env width/height en Python | Firmware espera exactamente 104 bytes. |
+| Resolucion | `13 x 8` | `led_matrix_visualizer.py`, `sketch.ino` | Env width/height en Python | Firmware espera 8 filas de 13 pixeles. |
 | Brillo | `1..7`, default `7` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_BRIGHTNESS` | Compatible con grayscale 3 bits. |
 | Refresh | `8 Hz` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_REFRESH_HZ` | Limitado a 1..30 Hz. |
 | Pitch center | `G4 / 67` default | `backend_service.py`, `led_matrix_visualizer.py` | `EEG_LED_MATRIX_PITCH_CENTER` | Default toma main note. |
@@ -39,7 +39,7 @@ recent_notes en snapshot
 | Clip mode | `ignore` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_CLIP_MODE` | Tambien `saturate`. |
 | Note mode | `point` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_NOTE_MODE` | Tambien `duration`. |
 | Max points | `24` | `led_matrix_visualizer.py` | `EEG_LED_MATRIX_MAX_POINTS` | Controla carga/frame. |
-| Bridge method | `led_matrix_frame` | ambos | `EEG_LED_MATRIX_BRIDGE_METHOD` en Python | Debe coincidir con firmware. |
+| Bridge method | `led_matrix_row` | ambos | `EEG_LED_MATRIX_BRIDGE_METHOD` en Python | Debe coincidir con firmware. |
 
 ## Mapeos
 
@@ -52,10 +52,11 @@ recent_notes en snapshot
 
 ## Firmware
 
-`led_matrix_frame(std::vector<uint8_t> frame)`:
+`led_matrix_row(row_idx, chunk0, chunk1, chunk2)`:
 
-- valida longitud `13*8`,
-- si `LED_MATRIX_ENABLED=1`: `ledMatrix.draw(frame.data())`,
+- valida `row_idx` y chunks positivos de `16 + 16 + 7` bits,
+- reconstruye un framebuffer estatico `13*8` sin `std::vector`,
+- si `LED_MATRIX_ENABLED=1`: dibuja al recibir la ultima fila valida,
 - si `LED_MATRIX_ENABLED=0`: ignora el frame y devuelve `false`.
 
 La matriz se inicializa en `setup()` solo si se compila con LED habilitado:
@@ -72,7 +73,7 @@ Protecciones actuales:
 - Python no llama Bridge si disabled.
 - El transporte salta frames identicos.
 - Refresh bajo por defecto (8 Hz).
-- Payload compacto fijo: 104 bytes.
+- Payload compacto fijo: 8 llamadas por frame, cada una con 3 chunks.
 - El MCU no calcula notas ni historial.
 
 Riesgos restantes:

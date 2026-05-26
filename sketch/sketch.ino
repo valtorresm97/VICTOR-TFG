@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <math.h>
-#include <vector>
 
 #include <ADS1299Plus.h>
 #include <ADS1299_SafeSPI.h>
@@ -154,24 +153,49 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
 }
 
 // Handler Bridge compatible con el LED Matrix Painter:
-//   Bridge.call("led_matrix_frame", frame_bytes)
+//   Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
 //
-// frame_bytes es row-major 8x13 con brillo 0..7. El backend Python calcula
-// el piano scroll desde recent_notes y el MCU solo dibuja un frame compacto.
-static bool led_matrix_frame(std::vector<uint8_t> frame) {
-  static constexpr size_t LED_MATRIX_WIDTH = 13;
-  static constexpr size_t LED_MATRIX_HEIGHT = 8;
-  static constexpr size_t LED_MATRIX_BYTES = LED_MATRIX_WIDTH * LED_MATRIX_HEIGHT;
+// Cada fila 13x1 se empaqueta en 3 chunks positivos de 16/16/7 bits:
+// 13 pixeles * 3 bits de brillo = 39 bits. Asi el handler no recibe
+// std::vector ni reserva memoria dinamica en el MCU.
+static constexpr size_t LED_MATRIX_WIDTH = 13;
+static constexpr size_t LED_MATRIX_HEIGHT = 8;
+static constexpr size_t LED_MATRIX_BYTES = LED_MATRIX_WIDTH * LED_MATRIX_HEIGHT;
+static uint8_t led_frame_buffer[LED_MATRIX_BYTES] = {0};
+static uint8_t led_rows_received_mask = 0;
 
-  if (frame.size() != LED_MATRIX_BYTES) {
+static bool led_matrix_row(int row_idx, int chunk0, int chunk1, int chunk2) {
+  if (row_idx < 0 || row_idx >= static_cast<int>(LED_MATRIX_HEIGHT)) {
+    return false;
+  }
+  if (chunk0 < 0 || chunk0 > 0xFFFF || chunk1 < 0 || chunk1 > 0xFFFF || chunk2 < 0 || chunk2 > 0x7F) {
     return false;
   }
 
+  if (row_idx == 0) {
+    led_rows_received_mask = 0;
+  }
+
+  const uint64_t packed =
+      (static_cast<uint64_t>(chunk0) & 0xFFFFULL) |
+      ((static_cast<uint64_t>(chunk1) & 0xFFFFULL) << 16) |
+      ((static_cast<uint64_t>(chunk2) & 0x7FULL) << 32);
+
+  const size_t row_offset = static_cast<size_t>(row_idx) * LED_MATRIX_WIDTH;
+  for (size_t col = 0; col < LED_MATRIX_WIDTH; ++col) {
+    led_frame_buffer[row_offset + col] =
+        static_cast<uint8_t>((packed >> (col * 3U)) & 0x7U);
+  }
+
+  led_rows_received_mask |= static_cast<uint8_t>(1U << row_idx);
+
 #if LED_MATRIX_ENABLED
-  ledMatrix.draw(frame.data());
+  const uint8_t full_frame_mask = static_cast<uint8_t>((1U << LED_MATRIX_HEIGHT) - 1U);
+  if (row_idx == static_cast<int>(LED_MATRIX_HEIGHT - 1) && led_rows_received_mask == full_frame_mask) {
+    ledMatrix.draw(led_frame_buffer);
+  }
   return true;
 #else
-  (void)frame;
   return false;
 #endif
 }
@@ -460,7 +484,7 @@ void setup() {
   ledMatrix.clear();
   Monitor.println("LED matrix enabled: Arduino_LED_Matrix 13x8 grayscale 0..7");
 #else
-  Monitor.println("LED matrix disabled: led_matrix_frame handler registered for dry-run only");
+  Monitor.println("LED matrix disabled: led_matrix_row handler registered for dry-run only");
 #endif
 
 #if MIDI_UART_ENABLED
@@ -476,10 +500,10 @@ void setup() {
     Monitor.println("Bridge handler registered: midi_bytes");
   }
 
-  if (!Bridge.provide_safe("led_matrix_frame", led_matrix_frame)) {
-    Monitor.println("ERROR: no se pudo registrar handler led_matrix_frame");
+  if (!Bridge.provide_safe("led_matrix_row", led_matrix_row)) {
+    Monitor.println("ERROR: no se pudo registrar handler led_matrix_row");
   } else {
-    Monitor.println("Bridge handler registered: led_matrix_frame");
+    Monitor.println("Bridge handler registered: led_matrix_row");
   }
 
   bench.report_last_ms = millis();

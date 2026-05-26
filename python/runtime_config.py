@@ -27,7 +27,7 @@ LED_MATRIX_DEFAULT_BRIGHTNESS = 7
 LED_MATRIX_DEFAULT_MAX_POINTS = 24
 LED_MATRIX_DEFAULT_CLIP_MODE = "ignore"
 LED_MATRIX_DEFAULT_NOTE_MODE = "point"
-LED_MATRIX_DEFAULT_BRIDGE_METHOD = "led_matrix_frame"
+LED_MATRIX_DEFAULT_BRIDGE_METHOD = "led_matrix_row"
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -72,4 +72,3 @@ def env_choice(name: str, default: str, choices: set[str]) -> str:
 
 def env_str(name: str, default: str) -> str:
     return os.environ.get(name, default).strip() or default
-

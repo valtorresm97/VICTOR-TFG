@@ -52,7 +52,7 @@
 | `sketch.ino` | `applyAdsDiagnosticMode()` | Macro compile-time | `bool` | Programa modos normal/short/test/no-bias/bias/CH1-only. | Cambia registros de adquisicion; requiere trazabilidad. | Si |
 | `sketch.ino` | `initFilters()` | Constantes FS/fc | Ninguna | Inicializa HP, notch y LP por canal. | Cambia espectro antes de Python. | Si |
 | `sketch.ino` | `midi_bytes()` | `n,b0,b1,b2` | `bool` | Handler Bridge para MIDI; escribe UART solo si habilitada. | Actualmente devuelve `false` por defecto. | Medio |
-| `sketch.ino` | `led_matrix_frame()` | `vector<uint8_t>` | `bool` | Valida 104 bytes y dibuja en Arduino_LED_Matrix si habilitado. | Payload grande por Bridge si se sube refresh. | Medio |
+| `sketch.ino` | `led_matrix_row()` | `row_idx, chunk0, chunk1, chunk2` | `bool` | Valida fila/chunks fijos, reconstruye framebuffer estatico 13x8 y dibuja si habilitado. | Mas llamadas Bridge por frame si se sube refresh. | Medio |
 | `sketch.ino` | `checkMpuReady()` | Ninguna | `bool` | Llama `linux_started` a Python. | RPC sincronico, pero solo hasta ready a 1 Hz. | Medio |
 | `streaming.h` | `appendSampleToFillBlock()` | sample idx, status, uV | Ninguna | Llena bloque de 8 muestras. | Si cambia orden rompe receiver. | Si |
 | `streaming.h` | `publishPendingBlocks()` | bench, max bloques | bloques enviados | Publica `eeg_block_uV` con payload fijo. | `Bridge.notify` puede bloquear; se mide. | Si |

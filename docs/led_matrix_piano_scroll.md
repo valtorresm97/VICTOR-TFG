@@ -25,7 +25,7 @@ Web UI piano roll
    ↓
 LED matrix piano scroll
    ↓
-Bridge.call("led_matrix_frame", frame_bytes)
+Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
    ↓
 Arduino_LED_Matrix
 ```
@@ -42,7 +42,7 @@ Arduino_LED_Matrix
   painter (`AppFrame.create_empty()` usa `height=8`, `width=13`).
 - Pines: no aplica en esta version porque `Arduino_LED_Matrix` es la matriz
   integrada/gestionada por libreria. No se han tocado pines ADS1299 ni MIDI.
-- Control: Python calcula el frame; el MCU solo recibe bytes y dibuja.
+- Control: Python calcula el frame; el MCU recibe filas empaquetadas y dibuja.
 - Restricciones: `LED_MATRIX_ENABLED` queda a `0` por defecto en firmware y
   `EEG_LED_MATRIX_ENABLED=0` por defecto en Python. La activacion fisica queda
   pendiente de probar en UNO Q.
@@ -95,7 +95,8 @@ Motivos:
 
 - Sincronia directa con la Web UI: ambas vistas usan `recent_notes`.
 - Carga MCU minima: no calcula pitch, tiempo ni historial.
-- Bridge limitado: 13x8 = 104 bytes por frame a una tasa configurable.
+- Bridge limitado: 13x8 = 104 bytes logicos por frame, enviados como 8 filas
+  empaquetadas de tamano fijo a una tasa configurable.
 - El transporte evita reenviar frames identicos, reduciendo trafico cuando no
   cambia la representacion musical.
 - Depuracion ligera: el snapshot mantiene solo configuracion y contadores LED,
@@ -124,7 +125,7 @@ EEG_LED_MATRIX_REFRESH_HZ=8
 EEG_LED_MATRIX_BRIGHTNESS=7
 EEG_LED_MATRIX_CLIP_MODE=ignore
 EEG_LED_MATRIX_NOTE_MODE=point
-EEG_LED_MATRIX_BRIDGE_METHOD=led_matrix_frame
+EEG_LED_MATRIX_BRIDGE_METHOD=led_matrix_row
 ```
 
 Firmware:
@@ -142,12 +143,14 @@ Python con `EEG_LED_MATRIX_ENABLED=1`. No activar hasta confirmar que
 Handler añadido:
 
 ```text
-Bridge.call("led_matrix_frame", frame_bytes)
+Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
 ```
 
-`frame_bytes` contiene `width * height` bytes en orden row-major, brillo 0..7.
+Cada fila contiene 13 pixeles con brillo 0..7. Python empaqueta esos
+`13 * 3 = 39` bits en tres chunks positivos (`16 + 16 + 7` bits), evitando
+payload dinamico en el MCU.
 
-El handler valida que el tamaño sea 104 bytes. Si `LED_MATRIX_ENABLED=0`,
+El handler valida fila y chunks. Si `LED_MATRIX_ENABLED=0`,
 devuelve `false` y no dibuja; sirve como dry-run seguro.
 
 ## Observabilidad
