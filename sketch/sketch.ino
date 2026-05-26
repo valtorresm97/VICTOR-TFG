@@ -118,11 +118,11 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// Rama midi-config: probar MIDI OUT físico por D1/TX usando Serial.
-// Si interfiere con Bridge/Monitor, volver a MIDI_UART_ENABLED=0 y probar
-// de nuevo tras verificar el objeto UART exacto de D1/TX en UNO Q.
+// Rama midi-config: probar MIDI OUT físico por D1/TX usando Serial1.
+// En UNO Q / Zephyr, los pines D0/D1 se exponen como UART de hardware.
+// Si interfiere con Bridge/Monitor, volver a MIDI_UART_ENABLED=0.
 #ifndef MIDI_SERIAL
-#define MIDI_SERIAL Serial
+#define MIDI_SERIAL Serial1
 #endif
 
 #ifndef MIDI_UART_ENABLED
@@ -152,10 +152,6 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
   };
 
 #if MIDI_UART_CONFIGURED
-  for (int i = 0; i < n; ++i) {
-    MIDI_SERIAL.write(data[i]);
-  }
-
   if (midi_debug_left > 0) {
     Monitor.print("[MIDI TX] n=");
     Monitor.print(n);
@@ -166,6 +162,10 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     }
     Monitor.println();
     --midi_debug_left;
+  }
+
+  for (int i = 0; i < n; ++i) {
+    MIDI_SERIAL.write(data[i]);
   }
 
   return true;
