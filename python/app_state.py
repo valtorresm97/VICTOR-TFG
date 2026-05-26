@@ -64,7 +64,7 @@ def clear_runtime_state() -> None:
 #   - convierte numpy scalars/arrays cuando existen
 #   - degrada a str cuando no haya mejor opción
 # -----------------------------------------------------------------------------
-def _json_safe(obj: Any):
+def json_safe(obj: Any):
     """Convierte un objeto arbitrario a una estructura segura para JSON."""
     if obj is None or isinstance(obj, (str, bool, int)):
         return obj
@@ -74,19 +74,19 @@ def _json_safe(obj: Any):
 
     try:
         if hasattr(obj, "item"):
-            return _json_safe(obj.item())
+            return json_safe(obj.item())
     except Exception:
         pass
 
     if isinstance(obj, dict):
-        return {str(k): _json_safe(v) for k, v in obj.items()}
+        return {str(k): json_safe(v) for k, v in obj.items()}
 
     if isinstance(obj, (list, tuple)):
-        return [_json_safe(v) for v in obj]
+        return [json_safe(v) for v in obj]
 
     try:
         if hasattr(obj, "tolist"):
-            return _json_safe(obj.tolist())
+            return json_safe(obj.tolist())
     except Exception:
         pass
 
@@ -104,9 +104,17 @@ def _json_safe(obj: Any):
 #
 # Esto es clave para evitar que el dashboard lea un JSON a medio escribir.
 # -----------------------------------------------------------------------------
-def _atomic_write_json(path: Path, payload: dict) -> None:
+def atomic_write_json(path: Path, payload: dict, *, indent: int | None = None, sort_keys: bool = False) -> None:
     """Escribe un JSON de forma atómica sobre el path destino."""
-    ensure_state_dir()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    dump_kwargs: dict[str, Any] = {
+        "ensure_ascii": False,
+        "sort_keys": sort_keys,
+    }
+    if indent is None:
+        dump_kwargs["separators"] = (",", ":")
+    else:
+        dump_kwargs["indent"] = indent
 
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -114,7 +122,7 @@ def _atomic_write_json(path: Path, payload: dict) -> None:
         dir=str(path.parent),
         delete=False,
     ) as tmp:
-        json.dump(payload, tmp, ensure_ascii=False, separators=(",", ":"))
+        json.dump(json_safe(payload), tmp, **dump_kwargs)
         tmp.flush()
         os.fsync(tmp.fileno())
         tmp_path = tmp.name
@@ -130,7 +138,7 @@ def _atomic_write_json(path: Path, payload: dict) -> None:
 # -----------------------------------------------------------------------------
 def _make_public_snapshot(snapshot: dict) -> dict:
     """Convierte el snapshot interno del backend en un snapshot público JSON."""
-    out = _json_safe(snapshot if isinstance(snapshot, dict) else {})
+    out = json_safe(snapshot if isinstance(snapshot, dict) else {})
     if not isinstance(out, dict):
         out = {}
     out["published_at_unix"] = time.time()
@@ -142,7 +150,7 @@ def _make_public_snapshot(snapshot: dict) -> dict:
 # -----------------------------------------------------------------------------
 def publish_snapshot(snapshot: dict) -> None:
     """Publica el snapshot live actual en snapshot.json."""
-    _atomic_write_json(SNAPSHOT_PATH, _make_public_snapshot(snapshot))
+    atomic_write_json(SNAPSHOT_PATH, _make_public_snapshot(snapshot))
 
 
 # -----------------------------------------------------------------------------
@@ -150,9 +158,9 @@ def publish_snapshot(snapshot: dict) -> None:
 # -----------------------------------------------------------------------------
 def publish_history(history: dict) -> None:
     """Publica el histórico resumido en history.json."""
-    _atomic_write_json(
+    atomic_write_json(
         HISTORY_PATH,
-        {"published_at_unix": time.time(), "history": _json_safe(history)},
+        {"published_at_unix": time.time(), "history": json_safe(history)},
     )
 
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import time
 import uuid
@@ -14,19 +13,13 @@ PROJECT_ROOT = PYTHON_DIR.parent
 if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
 
+from app_state import atomic_write_json
 from runtime_config import runtime_state_dir
 
 
 STATE_DIR = runtime_state_dir(PROJECT_ROOT)
 REQUEST_PATH = STATE_DIR / "capture_request.json"
 STATUS_PATH = STATE_DIR / "capture_status.json"
-
-
-def _atomic_write_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
-    os.replace(tmp, path)
 
 
 def _read_json(path: Path) -> dict:
@@ -65,7 +58,7 @@ def main() -> int:
         "requested_at_unix": time.time(),
     }
 
-    _atomic_write_json(REQUEST_PATH, request)
+    atomic_write_json(REQUEST_PATH, request, indent=2, sort_keys=True)
     print(f"[capture-request] request_id={request_id}")
     print(f"[capture-request] condition={args.condition} duration={args.duration:.1f}s")
     print("[capture-request] waiting for the running App Lab app to record the capture...")

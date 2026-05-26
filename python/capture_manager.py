@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import csv
 import json
-import os
 import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TextIO
+from typing import TextIO
 
 
+from app_state import atomic_write_json
 from eeg_contract import (
     BLOCK_SAMPLES,
     EEG_BLOCK_EVENT,
@@ -40,23 +40,6 @@ CAPTURE_FIELDNAMES = [
     "ch3_uV",
     "ch4_uV",
 ]
-
-
-def _json_safe(value: Any):
-    if isinstance(value, (str, int, float, bool)) or value is None:
-        return value
-    if isinstance(value, dict):
-        return {str(k): _json_safe(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_safe(v) for v in value]
-    return str(value)
-
-
-def _atomic_write_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(_json_safe(payload), indent=2, sort_keys=True), encoding="utf-8")
-    os.replace(tmp, path)
 
 
 def _safe_condition(value: str) -> str:
@@ -193,7 +176,7 @@ class CaptureManager:
         now = time.monotonic()
         if not force and (now - self.last_status_write) < 0.5:
             return
-        _atomic_write_json(self.status_path, self._status_payload(state))
+        atomic_write_json(self.status_path, self._status_payload(state), indent=2, sort_keys=True)
         self.last_status_write = now
 
     def poll_request(self) -> None:
@@ -203,9 +186,11 @@ class CaptureManager:
         try:
             request = json.loads(self.request_path.read_text(encoding="utf-8"))
         except Exception as exc:
-            _atomic_write_json(
+            atomic_write_json(
                 self.status_path,
                 {"state": "error", "error": f"cannot_read_request: {exc}", "updated_at_unix": time.time()},
+                indent=2,
+                sort_keys=True,
             )
             return
 
@@ -221,17 +206,21 @@ class CaptureManager:
             return
 
         if command != "start":
-            _atomic_write_json(
+            atomic_write_json(
                 self.status_path,
                 {"state": "error", "error": f"unsupported_command: {command}", "updated_at_unix": time.time()},
+                indent=2,
+                sort_keys=True,
             )
             self.last_seen_request_id = request_id
             return
 
         if self.active:
-            _atomic_write_json(
+            atomic_write_json(
                 self.status_path,
                 {"state": "busy", "active_request_id": self.request_id, "updated_at_unix": time.time()},
+                indent=2,
+                sort_keys=True,
             )
             return
 
@@ -254,7 +243,7 @@ class CaptureManager:
             self._open_csv()
         except Exception as exc:
             self.active = False
-            _atomic_write_json(
+            atomic_write_json(
                 self.status_path,
                 {
                     "state": "error",
@@ -262,6 +251,8 @@ class CaptureManager:
                     "error": f"cannot_open_capture_csv: {exc}",
                     "updated_at_unix": time.time(),
                 },
+                indent=2,
+                sort_keys=True,
             )
             return
 
@@ -324,7 +315,7 @@ class CaptureManager:
         except Exception as exc:
             self._close_csv()
             self.active = False
-            _atomic_write_json(
+            atomic_write_json(
                 self.status_path,
                 {
                     "state": "error",
@@ -333,6 +324,8 @@ class CaptureManager:
                     "error": f"cannot_write_capture_csv: {exc}",
                     "updated_at_unix": time.time(),
                 },
+                indent=2,
+                sort_keys=True,
             )
             return
 
@@ -399,10 +392,7 @@ class CaptureManager:
             },
             "notes": self.notes,
         }
-        (self.capture_dir / "metadata.json").write_text(
-            json.dumps(_json_safe(metadata), indent=2, sort_keys=True),
-            encoding="utf-8",
-        )
+        atomic_write_json(self.capture_dir / "metadata.json", metadata, indent=2, sort_keys=True)
 
         self.active = False
         self.completed = state == "completed"
