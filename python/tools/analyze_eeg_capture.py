@@ -34,12 +34,9 @@ _add_cached_site_packages()
 import numpy as np
 from scipy.signal import windows
 
+from eeg_contract import FS_HZ, LSB_V, NUM_CH, STATUS_MASK, STATUS_PREFIX
 
-FS_HZ_DEFAULT = 250.0
-NUM_CH = 4
-STATUS_PREFIX = 0xC00000
-STATUS_MASK = 0xF00000
-LSB_V = 2.235e-8
+FS_HZ_DEFAULT = float(FS_HZ)
 ADC_FULL_SCALE_UV = 8388607.0 * LSB_V * 1e6
 RESTING_RMS_WARN_UV = 500.0
 RESTING_PTP_WARN_UV = 5000.0
@@ -222,7 +219,7 @@ def _diagnose(report: dict) -> tuple[str, list[str], list[str]]:
 
     if report["status"]["invalid_status_total"] > 0:
         reasons.append("invalid ADS1299 status prefix observed")
-        recommendations.append("Check SPI framing, DRDY timing, and status prefix 0xC00000.")
+        recommendations.append(f"Check SPI framing, DRDY timing, and status prefix 0x{STATUS_PREFIX:06X}.")
     if report["timing"]["sample_gaps_detected"] > 0:
         reasons.append("sample index gaps detected")
         recommendations.append("Check Bridge queue drops and MCU pending>1 DRDY events.")
@@ -427,7 +424,7 @@ def analyze(capture_dir: Path) -> dict:
             "last_sample_idx": int(sample_idx[-1]) if sample_idx.size else None,
         },
         "status": {
-            "status_prefix_expected": "0xC00000",
+            "status_prefix_expected": f"0x{STATUS_PREFIX:06X}",
             "invalid_status_total": invalid_status,
             "invalid_status_fraction": float(invalid_status / sample_idx.size) if sample_idx.size else 0.0,
         },

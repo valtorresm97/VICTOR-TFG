@@ -16,11 +16,12 @@ import numpy as np
 import logging
 
 from dsp_core import DSPCore
+from eeg_contract import FS_HZ, LSB_V, NUM_CH
 
 logger = logging.getLogger(__name__)
 
-SAMPLING_RATE = 250
-NUM_CHANNELS = 4
+SAMPLING_RATE = FS_HZ
+NUM_CHANNELS = NUM_CH
 
 
 class EEGSignalProcessor:
@@ -386,8 +387,7 @@ class EEGSignalProcessor:
             float(v) for v in np.percentile(x_uv, [1, 5, 95, 99])
         ]
 
-        # El escalado actual del firmware usa 2.235e-8 V/count.
-        adc_full_scale_uv = 8388607.0 * 2.235e-8 * 1e6
+        adc_full_scale_uv = 8388607.0 * LSB_V * 1e6
         near_adc_limit = np.abs(x_uv) >= (0.98 * adc_full_scale_uv)
         saturation_fraction = float(np.mean(near_adc_limit))
 

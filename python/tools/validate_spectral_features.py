@@ -35,12 +35,12 @@ if not hasattr(np, "trapezoid"):
 
 from analyze_eeg_capture import BANDS, analyze
 from dsp_core import DSPCore
+from eeg_contract import FS_HZ, NUM_CH
 from spectral_quality import compute_spectral_quality
 from sonification_features import SonificationFeatureAdapter
 
 
-FS_HZ_DEFAULT = 250.0
-NUM_CH = 4
+FS_HZ_DEFAULT = float(FS_HZ)
 QUALITY_RMS_LOW_UV = 3.0
 QUALITY_RMS_HIGH_UV = 120.0
 QUALITY_RMS_ARTIFACT_UV = 200.0

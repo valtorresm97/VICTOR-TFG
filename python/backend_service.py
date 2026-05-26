@@ -26,6 +26,7 @@ from midi_live import MidiScheduler
 from midi_byte_transport import MidiByteTransport
 from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
 from led_matrix_transport import LedMatrixTransport
+from eeg_contract import FS_HZ, NUM_CH
 
 
 logging.basicConfig(level=logging.INFO)
@@ -40,13 +41,6 @@ def _midi_to_note_name(midi_note: int) -> str:
     octave = (note // 12) - 1
     return f"{_NOTE_NAMES[note % 12]}{octave}"
 
-
-# ------------------------------------------------------------
-# Configuración EEG / DSP
-# ------------------------------------------------------------
-
-FS_HZ = 250
-NUM_CH = 4
 
 FEATURE_WINDOW_SEC = 4.0
 FEATURE_HOP_SAMPLES = 64

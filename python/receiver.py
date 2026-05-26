@@ -5,6 +5,8 @@ import time
 import logging
 from typing import Deque, Tuple, Optional, Any
 
+from eeg_contract import BLOCK_SAMPLES, FS_HZ, NUM_CH, STATUS_MASK, STATUS_PREFIX
+
 logger = logging.getLogger(__name__)
 
 # Block item:
@@ -29,7 +31,7 @@ class EEGReceiver:
     - métricas separadas de recepción y consumo
     """
 
-    def __init__(self, fs_hz: int = 250, num_ch: int = 4, queue_max: int = 512):
+    def __init__(self, fs_hz: int = FS_HZ, num_ch: int = NUM_CH, queue_max: int = 512):
         self.fs_hz = int(fs_hz)
         self.num_ch = int(num_ch)
 
@@ -89,9 +91,9 @@ class EEGReceiver:
 
         self._last_report_t = self.t0
         # Contrato esperado del firmware actual.
-        self.expected_block_samples: int = 8
-        self.expected_status_prefix: int = 0xC00000
-        self.status_prefix_mask: int = 0xF00000
+        self.expected_block_samples: int = BLOCK_SAMPLES
+        self.expected_status_prefix: int = STATUS_PREFIX
+        self.status_prefix_mask: int = STATUS_MASK
         self.invalid_status_total: int = 0
         self._logged_first_block: bool = False
 

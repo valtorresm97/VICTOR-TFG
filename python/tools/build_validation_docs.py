@@ -34,9 +34,11 @@ if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
 
 from dsp_core import DSPCore
+from eeg_contract import STATUS_PREFIX
 
 
 BANDS = ("delta", "theta", "alpha", "beta", "gamma")
+STATUS_PREFIX_HEX = f"0x{STATUS_PREFIX:06X}"
 BAND_RANGES = {
     "delta": "0.5-4 Hz",
     "theta": "4-8 Hz",
@@ -1243,7 +1245,7 @@ def _write(path: Path, text: str) -> None:
 
 def _doc_00(captures: list[CaptureSummary], final_cap: CaptureSummary | None) -> str:
     rows = [
-        ["ADS1299/SPI/RDATAC", "ID 0x3C, status 0xC00000, shorted_inputs", "sin gaps/invalid status en capturas versionadas", "razonablemente validado"],
+        ["ADS1299/SPI/RDATAC", f"ID 0x3C, status {STATUS_PREFIX_HEX}, shorted_inputs", "sin gaps/invalid status en capturas versionadas", "razonablemente validado"],
         ["Bridge MCU-Python", "capturas CSV con 250 Hz y bloques de 8", "streaming estable", "validado en condiciones probadas"],
         ["Montaje electrodos", "Fp1-Fp2, ear-EEG, BIAS/RLD", "ear-EEG y CH1-only más estables", "montaje final definido"],
         ["DSP multitaper", "windowed PSD, bandpowers, quality score", "features reproducibles offline", "validado para diagnóstico"],
@@ -1310,7 +1312,7 @@ def _doc_01(shorted: CaptureSummary | None, figs: dict[str, str]) -> str:
     text += (
         "La arquitectura de adquisición validada es:\n\n"
         "```text\nElectrodos\n   ↓\nADS1299-4PAG\n   ↓\nSPI / DRDY / RDATAC\n   ↓\nArduino UNO Q MCU\n   ↓\nBridge\n   ↓\nPython backend\n   ↓\nCSV / DSP / UI\n```\n\n"
-        "El firmware reconstruye frames RDATAC de 24 bits, valida el prefijo de estado `0xC00000`, convierte cuentas a voltios "
+        f"El firmware reconstruye frames RDATAC de 24 bits, valida el prefijo de estado `{STATUS_PREFIX_HEX}`, convierte cuentas a voltios "
         "mediante el LSB configurado y envía bloques `eeg_block_uV` de 8 muestras. Los CSV analizados contienen la señal ya en microvoltios.\n\n"
     )
     if shorted:

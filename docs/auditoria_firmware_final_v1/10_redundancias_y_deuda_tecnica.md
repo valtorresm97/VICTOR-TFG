@@ -4,7 +4,7 @@ No se refactorizo nada. Esta lista documenta deuda para prompts futuros.
 
 | Redundancia/deuda | Archivos afectados | Riesgo | Prioridad | Recomendacion futura |
 | --- | --- | --- | --- | --- |
-| Constantes EEG repetidas (`FS_HZ`, `NUM_CH`, `BLOCK_SAMPLES`, `LSB_V`, status mask) | `sketch.ino`, `receiver.py`, `capture_manager.py`, tools offline | Divergencia silenciosa del contrato. | Alta | Crear documento/constantes compartidas o tests de contrato. |
+| Constantes EEG repetidas (`FS_HZ`, `NUM_CH`, `BLOCK_SAMPLES`, `LSB_V`, status mask) | `sketch.ino`, `receiver.py`, `capture_manager.py`, tools offline | Resuelto en Python: `receiver.py`, `capture_manager.py`, backend y tools importan `python/eeg_contract.py`. Firmware queda como fuente del payload real. | Alta | Mantener sincronía con firmware si cambian `streaming.h` o ADS1299. |
 | Formato `eeg_block_uV` duplicado manualmente | `streaming.h`, `receiver.py`, `capture_manager.py` | Cambios rompen parseo. | Alta | Test de contrato y tabla versionada. |
 | DSP multitaper implementado en live y offline | `dsp_core.py`, `analyze_eeg_capture.py`, `validate_spectral_features.py`, `build_validation_docs.py` | Resultados offline/live pueden divergir. | Alta | Reusar `DSPCore` en tools cuando sea viable. |
 | Quality score duplicado parcialmente | `spectral_quality.py`, `validate_spectral_features.py`, docs | Umbrales/documentacion pueden quedar desalineados. | Media | Centralizar calculo y documentar version. |

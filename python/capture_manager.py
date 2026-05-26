@@ -10,13 +10,9 @@ from pathlib import Path
 from typing import Any
 
 
-FS_HZ = 250
-NUM_CH = 4
-BLOCK_SAMPLES = 8
-STATUS_PREFIX = 0xC00000
-STATUS_MASK = 0xF00000
-LSB_V = 2.235e-8
-PGA_GAIN = 24
+from eeg_contract import BLOCK_SAMPLES, FS_HZ, LSB_V, NUM_CH, PGA_GAIN, STATUS_MASK, STATUS_PREFIX
+
+
 VREF_V_ASSUMED = LSB_V * PGA_GAIN * ((2 ** 23) - 1)
 
 
@@ -288,8 +284,8 @@ class CaptureManager:
             "ads1299": {
                 "expected_device": "ADS1299-4PAG",
                 "expected_id": "0x3C",
-                "status_prefix_expected": "0xC00000",
-                "status_mask": "0xF00000",
+                "status_prefix_expected": f"0x{STATUS_PREFIX:06X}",
+                "status_mask": f"0x{STATUS_MASK:06X}",
                 "channels_streamed": 4,
                 "lsb_v_firmware": LSB_V,
                 "pga_gain_assumed": PGA_GAIN,
