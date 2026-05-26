@@ -5,7 +5,6 @@ profiles:
       - platform: arduino:zephyr
     libraries:
       - ArduinoJson (7.4.3)
-      - Arduino_LED_Matrix
       - Adafruit NeoPixel (1.15.4)
       - dependency: Arduino_RPClite (0.2.1)
       - Arduino_RouterBridge (0.4.1)

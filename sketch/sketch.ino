@@ -83,9 +83,26 @@ static constexpr float LSB_V  = 2.235e-8f;   // tu LSB (según tu config/gain)
 static constexpr bool     DEBUG_MONITOR = true;
 static constexpr uint32_t DEBUG_EVERY_N = 500;
 
-// Benchmark / instrumentación
-static constexpr bool     BENCH_NOTIFY_ENABLED  = true;
-static constexpr uint32_t BENCH_REPORT_EVERY_MS = 5000;
+// Streaming EEG y benchmark / instrumentación
+//
+// Compatibilidad: si algun perfil externo define BENCH_NOTIFY_ENABLED, se usa
+// como alias legacy para controlar el streaming EEG por Bridge. El nombre nuevo
+// deja claro que no controla los informes de benchmark.
+#ifndef EEG_STREAMING_NOTIFY_ENABLED
+#ifdef BENCH_NOTIFY_ENABLED
+#define EEG_STREAMING_NOTIFY_ENABLED BENCH_NOTIFY_ENABLED
+#else
+#define EEG_STREAMING_NOTIFY_ENABLED 1
+#endif
+#endif
+
+#ifndef BENCH_REPORT_ENABLED
+#define BENCH_REPORT_ENABLED 1
+#endif
+
+static constexpr bool     STREAMING_NOTIFY_ENABLED = (EEG_STREAMING_NOTIFY_ENABLED != 0);
+static constexpr bool     BENCH_REPORTS_ENABLED    = (BENCH_REPORT_ENABLED != 0);
+static constexpr uint32_t BENCH_REPORT_EVERY_MS    = 5000;
 
 // ---------------------------
 // Handshake con Python (para no perder notifies)
@@ -101,18 +118,27 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// La UART física queda desactivada por defecto porque RouterBridge usa su
-// propio serial interno y hay que confirmar en placa qué objeto Arduino
-// corresponde realmente a D1/TX sin interferir con Bridge/Monitor.
-#ifndef MIDI_UART_ENABLED
-#define MIDI_UART_ENABLED 0
+// Rama midi-config: probar MIDI OUT físico por D1/TX usando Serial.
+// Si interfiere con Bridge/Monitor, volver a MIDI_UART_ENABLED=0 y probar
+// de nuevo tras verificar el objeto UART exacto de D1/TX en UNO Q.
+#ifndef MIDI_SERIAL
+#define MIDI_SERIAL Serial
 #endif
 
-#if MIDI_UART_ENABLED
+#ifndef MIDI_UART_ENABLED
+#define MIDI_UART_ENABLED 1
+#endif
+
+#if (MIDI_UART_ENABLED != 0)
 #ifndef MIDI_SERIAL
 #error "Define MIDI_SERIAL as the hardware UART verified for D1/TX MIDI OUT."
 #endif
+#define MIDI_UART_CONFIGURED 1
+#else
+#define MIDI_UART_CONFIGURED 0
 #endif
+
+static uint8_t midi_debug_left = 16;
 
 static bool midi_bytes(int n, int b0, int b1, int b2) {
   if (n < 1 || n > 3) {
@@ -125,10 +151,23 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     static_cast<uint8_t>(b2 & 0xFF),
   };
 
-#if MIDI_UART_ENABLED
+#if MIDI_UART_CONFIGURED
   for (int i = 0; i < n; ++i) {
     MIDI_SERIAL.write(data[i]);
   }
+
+  if (midi_debug_left > 0) {
+    Monitor.print("[MIDI TX] n=");
+    Monitor.print(n);
+    Monitor.print(" bytes=");
+    for (int i = 0; i < n; ++i) {
+      Monitor.print(" 0x");
+      Monitor.print(data[i], HEX);
+    }
+    Monitor.println();
+    --midi_debug_left;
+  }
+
   return true;
 #else
   (void)data;
@@ -193,6 +232,8 @@ static BenchStats  bench;
 // Helpers de benchmark
 // ---------------------------
 static void reportBenchStatsIfDue() {
+  if (!BENCH_REPORTS_ENABLED) return;
+
   const uint32_t now_ms = millis();
   if (now_ms - bench.report_last_ms < BENCH_REPORT_EVERY_MS) return;
 
@@ -444,7 +485,7 @@ void setup() {
   Monitor.println("LED matrix disabled: led_matrix_frame handler registered for dry-run only");
 #endif
 
-#if MIDI_UART_ENABLED
+#if MIDI_UART_CONFIGURED
   MIDI_SERIAL.begin(MIDI_BAUD);
   Monitor.println("MIDI UART enabled at 31250 baud");
 #else
@@ -586,7 +627,7 @@ void loop() {
       bench.filter_time_us_max_window = filter_dt_us;
     }
 
-    if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+    if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
       txBlocks.appendSampleToFillBlock((uint32_t)sample_idx, (uint32_t)status, ch_uV, bench);
     }
 
@@ -676,7 +717,7 @@ if (pending > 0) {
     bench.filter_time_us_max_window = filter_dt_us;
   }
 
-  if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+  if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
     txBlocks.appendSampleToFillBlock((uint32_t)sample_idx, (uint32_t)status, ch_uV, bench);
   }
 
@@ -713,7 +754,7 @@ if (pending > 0) {
     }
   }
 
-  if (mpu_ready && BENCH_NOTIFY_ENABLED) {
+  if (mpu_ready && STREAMING_NOTIFY_ENABLED) {
     txBlocks.publishPendingBlocks(bench, 4);
   }
 

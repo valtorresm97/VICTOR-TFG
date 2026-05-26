@@ -26,6 +26,7 @@ from midi_live import MidiScheduler
 from midi_byte_transport import MidiByteTransport
 from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
 from led_matrix_transport import LedMatrixTransport
+from runtime_config import EEG_LED_MATRIX_ENABLED_ENV, EEG_MIDI_LIVE_ENABLED_ENV, env_bool
 
 
 logging.basicConfig(level=logging.INFO)
@@ -77,17 +78,9 @@ RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
 
 
-def _env_bool(name: str, default: bool = False) -> bool:
-    value = os.environ.get(name)
-    if value is None:
-        return bool(default)
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-# Importante:
-# - Por defecto queda en False aunque el handler "midi_bytes" exista.
-# - Actívalo con EEG_MIDI_LIVE_ENABLED=1 solo cuando la UART física esté verificada.
-MIDI_LIVE_ENABLED = _env_bool("EEG_MIDI_LIVE_ENABLED", False)
+# Rama midi-config: enviar MIDI live por defecto.
+# Se puede desactivar en placa con EEG_MIDI_LIVE_ENABLED=0.
+MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, True)
 
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02
@@ -361,12 +354,12 @@ class BackendService:
                 "live_enabled": MIDI_LIVE_ENABLED,
                 "lookahead_sec": MIDI_LOOKAHEAD_SEC,
                 "mcu_handler": MIDI_BRIDGE_METHOD,
-                "enabled_source": "EEG_MIDI_LIVE_ENABLED",
+                "enabled_source": EEG_MIDI_LIVE_ENABLED_ENV,
             },
             "led_matrix": {
                 "config": self.led_matrix_config.to_dict(),
                 "transport": self.led_matrix_transport.get_status(),
-                "enabled_source": "EEG_LED_MATRIX_ENABLED",
+                "enabled_source": EEG_LED_MATRIX_ENABLED_ENV,
                 "mcu_handler": self.led_matrix_config.bridge_method,
             },
             "performance": {
