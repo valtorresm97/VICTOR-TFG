@@ -60,7 +60,8 @@ DISK_PUBLISH_PERIOD_SEC = 1.0
 
 MUSIC_BAR_SEC = 2.0
 
-MUSIC_CHANNEL = 0
+# MIDI usa canales internos 0..15. 9 corresponde al canal MIDI 10.
+MUSIC_CHANNEL = 9
 MUSIC_PROGRAM = 0
 
 MUSIC_ROOT_NOTE = "C4"
@@ -73,10 +74,9 @@ RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
 
 
-# Importante:
-# - Por defecto queda en False aunque el handler "midi_bytes" exista.
-# - Actívalo con EEG_MIDI_LIVE_ENABLED=1 solo cuando la UART física esté verificada.
-MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, False)
+# Rama midi-config-v2: enviar MIDI live por defecto para validar la salida DIN.
+# Se puede desactivar en placa con EEG_MIDI_LIVE_ENABLED=0.
+MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, True)
 
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02

@@ -77,10 +77,28 @@ class MidiByteTransport:
 
         self.sent_events_total = 0
         self.failed_events_total = 0
+        self.bridge_rejected_events_total = 0
         self.sent_bytes_total = 0
         self.dropped_events_total = 0
 
         self._log_first_events = int(log_first_events)
+
+    @staticmethod
+    def _bridge_call_succeeded(result) -> bool:
+        """
+        Interpreta el retorno de Bridge.call sin acoplarse a una version concreta
+        de App Lab. Algunas versiones devuelven el valor del handler y otras no
+        exponen resultado util desde Python.
+        """
+        if result is None:
+            return True
+        if isinstance(result, bool):
+            return result
+        if isinstance(result, tuple) and result:
+            first = result[0]
+            if isinstance(first, bool):
+                return first
+        return True
 
     def set_enabled(self, enabled: bool) -> None:
         """Activa o desactiva el envío físico al MCU."""
@@ -108,13 +126,25 @@ class MidiByteTransport:
 
             # Handler esperado en el sketch:
             #   midi_bytes(n, b0, b1, b2)
-            Bridge.call(
+            result = Bridge.call(
                 self.bridge_method,
                 int(n),
                 int(b0),
                 int(b1),
                 int(b2),
             )
+
+            if not self._bridge_call_succeeded(result):
+                self.failed_events_total += 1
+                self.bridge_rejected_events_total += 1
+                if self.bridge_rejected_events_total <= self._log_first_events:
+                    logger.warning(
+                        "[MIDI] bridge handler rejected type=%s bytes=%s result=%r",
+                        event.type,
+                        [int(x) for x in data],
+                        result,
+                    )
+                return False
 
             self.sent_events_total += 1
             self.sent_bytes_total += n
@@ -155,6 +185,7 @@ class MidiByteTransport:
             "bridge_method": self.bridge_method,
             "sent_events_total": self.sent_events_total,
             "failed_events_total": self.failed_events_total,
+            "bridge_rejected_events_total": self.bridge_rejected_events_total,
             "sent_bytes_total": self.sent_bytes_total,
             "dropped_events_total": self.dropped_events_total,
         }

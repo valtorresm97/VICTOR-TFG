@@ -117,23 +117,37 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// La UART física queda desactivada por defecto porque RouterBridge usa su
-// propio serial interno y hay que confirmar en placa qué objeto Arduino
-// corresponde realmente a D1/TX sin interferir con Bridge/Monitor.
-#ifndef MIDI_UART_ENABLED
-#define MIDI_UART_ENABLED 0
+// Rama midi-config-v2: probar MIDI OUT fisico por D1/TX usando Serial1.
+// En UNO Q / Zephyr, D0/D1 se exponen como UART de hardware. Si interfiere
+// con Bridge/Monitor, compilar con MIDI_UART_ENABLED=0 para volver a dry-run.
+#ifndef MIDI_SERIAL
+#define MIDI_SERIAL Serial1
 #endif
 
-#if MIDI_UART_ENABLED
+#ifndef MIDI_UART_ENABLED
+#define MIDI_UART_ENABLED 1
+#endif
+
+#if (MIDI_UART_ENABLED != 0)
 #ifndef MIDI_SERIAL
 #error "Define MIDI_SERIAL as the hardware UART verified for D1/TX MIDI OUT."
 #endif
+#define MIDI_UART_CONFIGURED 1
+#else
+#define MIDI_UART_CONFIGURED 0
 #endif
+
+static uint8_t midi_debug_left = 16;
+static uint32_t midi_calls_total = 0;
+static uint32_t midi_bytes_total = 0;
 
 static bool midi_bytes(int n, int b0, int b1, int b2) {
   if (n < 1 || n > 3) {
     return false;
   }
+
+  ++midi_calls_total;
+  midi_bytes_total += static_cast<uint32_t>(n);
 
   const uint8_t data[3] = {
     static_cast<uint8_t>(b0 & 0xFF),
@@ -141,7 +155,26 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     static_cast<uint8_t>(b2 & 0xFF),
   };
 
-#if MIDI_UART_ENABLED
+#if MIDI_UART_CONFIGURED
+  if (midi_debug_left > 0) {
+    Monitor.print("[MIDI TX] n=");
+    Monitor.print(n);
+    Monitor.print(" bytes=");
+    for (int i = 0; i < n; ++i) {
+      Monitor.print(" 0x");
+      Monitor.print(data[i], HEX);
+    }
+    Monitor.println();
+    --midi_debug_left;
+  }
+
+  if ((midi_calls_total % 128UL) == 0) {
+    Monitor.print("[MIDI TX TOTAL] calls=");
+    Monitor.print(midi_calls_total);
+    Monitor.print(" bytes=");
+    Monitor.println(midi_bytes_total);
+  }
+
   for (int i = 0; i < n; ++i) {
     MIDI_SERIAL.write(data[i]);
   }
