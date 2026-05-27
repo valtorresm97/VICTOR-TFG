@@ -235,6 +235,7 @@ class BackendService:
 
         self._last_music_t = 0.0
         self._program_change_sent = False
+        self._midi_direct_test_active = False
         self._midi_test_loop = {
             "active": bool(MIDI_TEST_LOOP_AUTOSTART),
             "channel": MIDI_TEST_LOOP_CHANNEL,
@@ -281,6 +282,13 @@ class BackendService:
     # --------------------------------------------------------
     # Snapshot
     # --------------------------------------------------------
+
+    def _midi_mode(self) -> str:
+        if self._midi_direct_test_active:
+            return "diagnostic_direct_sequence"
+        if self._midi_test_loop.get("active"):
+            return "diagnostic_test_loop"
+        return "eeg_live"
 
     def _build_quality_rx_delta_metrics(self, rxm: dict) -> dict[str, int]:
         """Calcula eventos RX desde la ultima ventana de features."""
@@ -415,6 +423,7 @@ class BackendService:
                 "generation_errors_total": self._music_generation_errors_total,
             },
             "midi": {
+                "mode": self._midi_mode(),
                 "scheduler": self.midi_scheduler.get_status(),
                 "transport": self.midi_transport.get_status(),
                 "test_loop": self.get_midi_test_loop_status(),
@@ -478,6 +487,7 @@ class BackendService:
 
         recent.sort(key=lambda n: (n["abs_start"], n["pitch_midi"]))
         self._recent_notes = recent[-RECENT_NOTES_MAX:]
+        self._last_notes_count = len(self._recent_notes)
 
     def _remember_midi_test_note(
         self,
@@ -826,6 +836,9 @@ class BackendService:
         # EEG. Mientras esté activo no mezclamos la sonificación musical live.
         if self._midi_test_loop.get("active"):
             self._pump_midi_test_loop(now=now)
+        elif self._midi_direct_test_active:
+            self._last_midi_due_count = 0
+            self._last_midi_sent_count = 0
         else:
             self._maybe_generate_music(now=now)
             self._pump_midi(now=now)
@@ -971,8 +984,15 @@ class BackendService:
         failed = 0
         bytes_sent: list[list[int]] = []
         now = time.monotonic()
+        restore_loop = bool(self._midi_test_loop.get("active"))
 
         try:
+            if restore_loop:
+                self._midi_test_loop["active"] = False
+                self._midi_test_loop["active_note"] = None
+                self.midi_scheduler.clear()
+            self._midi_direct_test_active = True
+
             if program is not None:
                 program_event = MidiLiveEvent(
                     sort_index=now,
@@ -1031,9 +1051,22 @@ class BackendService:
             self._midi_pump_errors_total += 1
             logger.exception("[MIDI] test sequence error: %s", exc)
             failed += 1
+        finally:
+            self._midi_direct_test_active = False
+            if restore_loop:
+                self._midi_test_loop.update(
+                    {
+                        "active": True,
+                        "phase": "program",
+                        "next_due": 0.0,
+                        "active_note": None,
+                    }
+                )
 
         return {
             "ok": failed == 0,
+            "midi_mode": self._midi_mode(),
+            "paused_test_loop": restore_loop,
             "channel": channel_human,
             "channel_zero_based": channel_zero,
             "notes": note_values,

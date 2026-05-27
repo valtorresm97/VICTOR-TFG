@@ -64,6 +64,7 @@ function renderWarnings(s) {
   if (inactiveChannels.length) warnings.push(`${inactiveChannels.map((ch) => ch.name).join(", ")} apagados por ADS_DIAGNOSTIC_MODE=${cfg.ads_diagnostic_mode}.`);
   if (!midi.live_enabled) warnings.push("MIDI físico desactivado por seguridad.");
   if (transport.enabled === false) warnings.push(`Handler MCU esperado: ${midi.mcu_handler || "midi_bytes"}.`);
+  if ((midi.test_loop || {}).active) warnings.push("Modo diagnóstico MIDI activo: la sonificación EEG no envía notas.");
   if (Number(transport.failed_events_total || 0) > 0) warnings.push("Bridge/MIDI reporta eventos fallidos.");
   if (Number(transport.dropped_events_total || 0) > 256) warnings.push("Hay muchos eventos MIDI descartados.");
 
@@ -141,6 +142,7 @@ function renderSonification(s) {
   const midi = s.midi || {};
   const scheduler = midi.scheduler || {};
   const transport = midi.transport || {};
+  const testLoop = midi.test_loop || {};
 
   setText("sonif-activity", fmt(sonif.activity, 3));
   setText("sonif-calmness", fmt(sonif.calmness, 3));
@@ -156,6 +158,10 @@ function renderSonification(s) {
   setText("music-scale", `${music.root_note || "n/a"} ${music.scale_name || ""}`.trim());
   setText("music-main-note", music.main_note || "n/a");
 
+  setText("midi-mode", midi.mode || "n/a");
+  setText("midi-test-loop", testLoop.active ? `${testLoop.phase || "active"} · ${testLoop.cycles ?? 0} ciclos` : "off");
+  setText("midi-test-channel", testLoop.active ? `ch${testLoop.channel ?? "n/a"} · prog${Number(testLoop.program ?? -1) + 1}` : "n/a");
+  setText("midi-test-bytes", (testLoop.last_bytes || []).length ? `[${testLoop.last_bytes.join(", ")}]` : "n/a");
   setText("midi-live-enabled", midi.live_enabled ? "enabled" : "disabled");
   setText("midi-queued-events", String(scheduler.queued_events ?? 0));
   setText("midi-active-notes", String(scheduler.active_notes ?? 0));
