@@ -8,6 +8,7 @@ debe usarse en cada fase.
 
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
+| `configuracion_final_v3.md` | Definitivo para final-v3 | Resumen consolidado de arquitectura, firmware, streaming, Python, DSP, sonificacion, MIDI fisico y WebUI. |
 | `auditoria_firmware_final_v1/README.md` | Definitivo para arquitectura y riesgos de refactor | Punto de entrada tecnico antes de tocar firmware/backend/DSP/UI. |
 | `auditoria_firmware_final_v1/10_redundancias_y_deuda_tecnica.md` | Definitivo para eliminacion incremental de redundancias | Lista de trabajo actual de esta rama. |
 | `auditoria_firmware_final_v1/12_mapa_criticidad_refactor.md` | Definitivo para decidir riesgo de cambios | Consultar antes de modificar archivos criticos. |
@@ -21,6 +22,7 @@ debe usarse en cada fase.
 | `ads1299_diagnostic_modes.md` | Activo | Referencia de modos diagnosticos ADS1299. |
 | `ads1299_register_audit_bias_drl.md` | Activo | Contexto de registros, BIAS/RLD y decisiones ADS1299. |
 | `diseno_spectral_quality_score.md` | Activo | Diseno del score de calidad espectral. |
+| `midi_out_inverted_tx_validation.md` | Activo | Validacion de MIDI OUT fisico, `Serial1`/D1 y TX invertido obligatorio. |
 | `led_matrix_piano_scroll.md` | Activo | Referencia del piano scroll LED y su transporte. |
 
 ## Validacion TFG consolidada

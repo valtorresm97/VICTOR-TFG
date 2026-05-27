@@ -32,7 +32,7 @@ Inventario levantado con `rg --files` y clasificado por bloque funcional. Las ca
 | `python/spectral_quality.py` | DSP / quality gate | Calcula `score`, estado y `gate_factor` de calidad espectral. | Si | Protege sonificacion frente a artefactos. |
 | `python/sonification_features.py` | Sonificacion | Convierte features DSP en controles musicales suavizados y con gate. | Si | No calcula DSP. |
 | `python/music_utils.py` | Sonificacion | Conversor de nombre de nota a MIDI. | Medio | Usado por escala/main note. |
-| `python/scale_registry.py` | Sonificacion | Registro de escalas y construccion de `ScaleConfig`. | Medio | Config musical fija actual. |
+| `python/scale_registry.py` | Sonificacion | Registro de escalas y construccion de `ScaleConfig`. | Medio | Usado por configuracion musical WebUI root/main/scale. |
 | `python/music_segment.py` | Sonificacion | `LiveSegment`, `ScaleConfig`, `MusicSegment`, cadencia e histeresis. | Si | Entrada a bar generator. |
 | `python/music_bar.py` | Sonificacion | Genera compas, acorde y slots ritmicos desde controles EEG. | Si | Modula densidad/tension/estabilidad. |
 | `python/music_note.py` | Sonificacion / MIDI | Convierte compas en `NoteEvent` con pitch, velocity y duracion. | Si | Alimenta scheduler y piano roll. |

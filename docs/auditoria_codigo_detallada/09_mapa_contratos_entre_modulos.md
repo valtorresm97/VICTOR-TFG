@@ -19,6 +19,7 @@
 | `NoteEvent` | `NoteGenerator` | `MidiScheduler`, recent_notes | t_start,t_end,pitch,velocity,channel,program | `music_note.py` | MIDI/piano roll incorrectos | Test pitch/velocity/time. |
 | `MidiLiveEvent` | `midi_live` | `MidiByteTransport` | due_time,type,channel,data1,data2 | `midi_live.py` | Bytes MIDI incorrectos | event_to_midi_bytes tests. |
 | `midi_bytes` | `MidiByteTransport` | firmware handler | `Bridge.call("midi_bytes", n,b0,b1,b2)` | `midi_byte_transport.py`, `sketch.ino` | MIDI fisico no suena o bloquea | Mock + placa UART. |
+| Music config WebUI | `assets/app.js`, `web_server.py` | `BackendService.update_music_config` | `root_note`, `main_note`, `scale_key`; endpoints `/music/config`, `/music/scale/{key}`, `/music/root/{note}`, `/music/main/{note}` | `web_server.py`, `backend_service.py`, `scale_registry.py` | Escala/nota invalida o UI desincronizada | HTTP smoke + snapshot `music.*`. |
 | LED frame `rows` | `build_led_matrix_frame` | `LedMatrixTransport` | `rows[height][width]` ints 0..7 | `led_matrix_visualizer.py` | LED transporte falla | `test_led_matrix_visualizer.py`. |
 | `led_matrix_row` | `LedMatrixTransport` | firmware handler | row_idx, 3 chunks positivos 16/16/7 bits | `led_matrix_transport.py`, `sketch.ino` | Pixel mapping roto | Bit-exact test + placa. |
 | `/latest` | `web_server.py` | `assets/app.js` | snapshot JSON | `web_server.py` | UI sin datos | HTTP smoke. |
@@ -27,7 +28,13 @@
 | Socket `eeg_snapshot` | `web_server.publish_snapshot` | `assets/app.js` | snapshot dict | `web_server.py` | UI live no actualiza | Browser/socket smoke. |
 | App Lab config | `app.yaml`, `sketch.yaml` | Arduino App Lab build/run | plataforma/librerias | config files | Build roto | Build en placa/App Lab. |
 
-## Contratos no resueltos a proposito
+## Contratos resueltos en final-v3
 
-- Controles musicales WebUI runtime: retirados por estabilidad. Futuro contrato debera definir endpoint, validacion, snapshot y persistencia antes de reintroducirlos.
-- MIDI UART fisico: handler existe, pero `MIDI_UART_ENABLED=0`; falta verificar objeto UART para D1/TX en placa.
+- Controles musicales WebUI runtime: reintroducidos de forma acotada para root/main/scale; falta prueba automatica de endpoints y snapshot.
+- MIDI UART fisico: validado en `Serial1`/D1 con `MIDI_UART_ENABLED=1` por defecto y TX invertido obligatorio (`USART_CR2_TXINV`).
+
+## Contratos aun no resueltos a proposito
+
+- Persistencia de configuracion musical entre reinicios.
+- Control WebUI para habilitar/deshabilitar MIDI/LED.
+- Panic autonomo en firmware si Python/App Lab cae.

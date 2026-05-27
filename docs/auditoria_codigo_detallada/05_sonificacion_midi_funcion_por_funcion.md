@@ -14,7 +14,7 @@ DSP features
   -> Bridge.call("midi_bytes", n, b0, b1, b2)
 ```
 
-Los controles WebUI/MIDI dinamicos fueron retirados por estabilidad. La configuracion musical actual es fija en `backend_service.py` y la futura UI MIDI queda fuera de esta auditoria.
+En final-v3 los controles WebUI/MIDI dinamicos vuelven de forma acotada: `root_note`, `main_note` y `scale_key`. No cambian firmware, transporte ni parametros de densidad; cada cambio reconstruye escala/centro melodico, ejecuta `panic()` si procede y limpia memoria musical para evitar notas colgadas.
 
 ## Funciones y clases
 
@@ -39,7 +39,7 @@ Los controles WebUI/MIDI dinamicos fueron retirados por estabilidad. La configur
 | `sonification_features.py` | `SonificationFeatureAdapter` | `_smooth` | raw | raw | Usa `_last` | EMA controles continuos | Medio | Test monotonia. |
 | `sonification_features.py` | N/A | `build_sonification_snapshot` | sonif/None | dict | Ninguno | Snapshot UI | Cambiar claves rompe UI | Snapshot test. |
 | `music_utils.py` | N/A | `note_name_to_midi` | nota texto | MIDI 0..127 | Ninguno | Parse C4/F#3/Bb5 | Medio | Notas validas/invalidas. |
-| `scale_registry.py` | N/A | `build_scale_config` | familia, escala, root | `ScaleConfig` | Ninguno | Escala fija inicial | UI futura dependera | Test escalas soportadas. |
+| `scale_registry.py` | N/A | `build_scale_config` | familia, escala, root | `ScaleConfig` | Ninguno | Escala elegida por backend/WebUI | Root/escala invalidos rompen generacion | Test escalas soportadas. |
 | `music_segment.py` | `LiveSegment` | `duration_sec` | self | float | Ninguno | Duracion musical | Bajo | Test. |
 | `music_segment.py` | `ScaleConfig` | `contains` | midi | bool | Ninguno | Pertenencia escala | Medio | Test notas. |
 | `music_segment.py` | `ScaleConfig` | `nearest_note` | midi | midi | Ninguno | Cuantizacion a escala | Medio | Test cromatico. |
@@ -93,13 +93,18 @@ Los controles WebUI/MIDI dinamicos fueron retirados por estabilidad. La configur
 
 ## Enabled/disabled actual
 
-- `MIDI_LIVE_ENABLED` lee `EEG_MIDI_LIVE_ENABLED`; default `False`.
+- `MIDI_LIVE_ENABLED` lee `EEG_MIDI_LIVE_ENABLED`; default `True` en final-v3.
 - Aunque el scheduler genera eventos, `MidiByteTransport` cuenta drops si `enabled=False`.
-- Firmware `midi_bytes` existe, pero UART fisica default `MIDI_UART_ENABLED=0`.
-- Panic WebUI existe y llama backend, pero si transporte esta disabled no envia bytes fisicos.
+- Firmware `midi_bytes` existe y la UART fisica default es `MIDI_UART_ENABLED=1`.
+- MIDI OUT fisico esta validado en `Serial1`/D1 con TX invertido obligatorio para el circuito N-audio.
+- Panic WebUI existe y llama backend; si transporte esta disabled no envia bytes fisicos.
+- La WebUI expone root/main en C3..B5 y escalas `major`, `minor`, `blues`, `spanish`, `arabic`, `harmonic_minor`, `phrygian_dominant`, `minor_pentatonic`, `major_pentatonic`.
+- Acordes menos frecuentes: `MUSIC_CHORD_MIN_PERIOD_SEC=12.0` y `MUSIC_CHORD_CHANGE_THRESHOLD=0.45`.
+- Mayor variedad melodica: `MUSIC_PITCH_VARIETY=0.65`, `MUSIC_SCALE_RADIUS_SEMITONES=28`, salto maximo 7..16 semitonos segun tension.
 
 ## Riesgos
 
 - La cola MIDI puede acumular eventos si generacion supera consumo.
 - `send_panic()` limpia scheduler aunque transporte este disabled; esto esta bien para evitar estado colgado interno.
-- No reintroducir controles WebUI musicales hasta tener contrato claro y pruebas de snapshot/endpoints.
+- Los controles WebUI musicales ya existen; falta cubrirlos con pruebas de snapshot/endpoints.
+- Si se cambia el circuito MIDI OUT, se debe revalidar polaridad: final-v3 asume TX invertido obligatorio.

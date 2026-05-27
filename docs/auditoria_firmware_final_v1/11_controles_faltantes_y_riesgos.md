@@ -2,15 +2,16 @@
 
 | Control faltante | Subsistema | Motivo | Riesgo si falta | Prioridad |
 | --- | --- | --- | --- | --- |
-| `BENCH_REPORT_ENABLED` separado | Firmware | `BENCH_NOTIFY_ENABLED` no debe controlar prints. | No se puede apagar Monitor bench sin tocar codigo. | Alta |
+| `BENCH_REPORT_ENABLED` separado | Firmware | Resuelto: existe flag separado para reports Monitor. | Mantener alias legacy sin volver a mezclar streaming/prints. | Cerrado |
 | Contador explicito de DRDY overruns/frame drops | Firmware | `pending > 1` solo incrementa lag generico. | Perdidas no cuantificadas claramente. | Alta |
 | Modo raw/unfiltered diagnostico | Firmware/Python | Separar adquisicion real de filtros MCU. | Filtros pueden ocultar problemas ADS/electrodos. | Alta |
 | Watchdog de adquisicion | Firmware/Python | Detectar ausencia prolongada de DRDY/bloques. | UI puede quedar esperando sin causa clara. | Media |
-| Estado ADS mode visible en snapshot/UI | Firmware/Python/UI | Saber si modo 5, test, shorted, normal. | Capturas mal interpretadas. | Alta |
+| Estado ADS mode visible en snapshot/UI | Firmware/Python/UI | Resuelto parcialmente: snapshot/UI muestran `ADS_DIAGNOSTIC_MODE` y CH activos/apagados. | Falta panel BIAS/RLD mas explicito. | Media |
 | Estado BIAS/RLD visible en UI | Firmware/Python/UI | Modo 5 depende de conexion fisica. | Usuario no sabe configuracion analogica activa. | Alta |
-| Boton/endpoint MIDI panic | MIDI/UI | Panic existe en Python pero no expuesto. | Notas colgadas en prueba fisica. | Alta |
+| Boton/endpoint MIDI panic | MIDI/UI | Resuelto: `POST /midi/panic` y boton WebUI. | Falta panic autonomo si Python/App Lab cae. | Cerrado |
 | Panic firmware autonomo | Firmware MIDI | Cortar notas aunque Python falle. | Si Bridge/app se cae, notas pueden quedar activas. | Media |
 | Confirmacion de handler MIDI | Python/Firmware | `midi_bytes` puede devolver false. | Activacion parcial genera fallos confusos. | Media |
+| Tests endpoints musicales WebUI | WebUI/MIDI | Root/main/scale ya estan expuestos. | Rename o cambio de payload puede desincronizar UI/backend. | Media |
 | Control de cola Bridge EEG vs MIDI/LED | Bridge | Tres flujos comparten canal. | Latencia/drops al activar MIDI/LED. | Alta |
 | Fallback LED claro | LED/UI | Transporte guarda `last_error`, UI no lo muestra. | Fallos LED invisibles. | Media |
 | Boton clear LED | LED/UI | Limpiar matriz fisica. | Frame residual si app para. | Baja/Media |

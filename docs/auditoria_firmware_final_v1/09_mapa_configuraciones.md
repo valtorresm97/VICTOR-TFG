@@ -13,9 +13,11 @@ Busqueda realizada con `rg` sobre flags, `ENABLED`, `MODE`, `DEBUG`, `BENCH`, `S
 | `BENCH_REPORT_ENABLED` | `sketch/sketch.ino` | `1` | macro 0/1 | Activa/desactiva reportes Monitor. | Si hay prints excesivos puede afectar timing. | Apagar para pruebas de latencia si hace falta. |
 | `BENCH_REPORT_EVERY_MS` | `sketch/sketch.ino` | `5000` | ms | Periodo de reporte Monitor. | Reportes frecuentes pueden afectar timing. | Mantener 5 s por defecto. |
 | `LED_MATRIX_ENABLED` | `sketch/sketch.ino` | `0` | macro 0/1 | Arduino_LED_Matrix en firmware. | Bridge/LED puede cargar loop si activo. | Activar solo tras medir. |
-| `MIDI_UART_ENABLED` | `sketch/sketch.ino` | `0` | macro 0/1 | UART MIDI fisica. | Requiere `MIDI_SERIAL`; puede interferir. | No activar sin verificar D1/TX. |
-| `MIDI_SERIAL` | `sketch/sketch.ino` | no definido | objeto UART | Puerto fisico MIDI. | Compilacion falla si falta y UART enabled. | Definir solo con placa verificada. |
-| `EEG_MIDI_LIVE_ENABLED` | `backend_service.py` | env default `False` | true/false | Transporte MIDI Python. | Si firmware no esta listo, fallos/drops. | Mantener false hasta prueba MIDI fisica. |
+| `MIDI_UART_ENABLED` | `sketch/sketch.ino` | `1` | macro 0/1 | UART MIDI fisica. | Comparte Bridge/loop con EEG; si se desactiva Python cuenta drops/fallos. | Mantener 1 en final-v3 validado. |
+| `MIDI_SERIAL` | `sketch/sketch.ino` | `Serial1` | objeto UART | Puerto fisico MIDI D1/TX. | Cambiar UART exige revalidar placa. | Mantener `Serial1`. |
+| `USART_CR2_TXINV` | `sketch/sketch.ino` | obligatorio | bit USART1 | Invierte TX para circuito N-audio. | Sin inversion los bytes son correctos pero el sintetizador no suena bien. | No retirar. |
+| `MIDI_MCU_SELF_TEST_ENABLED` | `sketch/sketch.ino` | `0` | macro 0/1 | Arpegio diagnostico directo MCU. | Puede tapar sonificacion EEG si se deja activo. | Mantener 0 salvo prueba aislada. |
+| `EEG_MIDI_LIVE_ENABLED` | `backend_service.py` | env default `True` | true/false | Transporte MIDI Python. | Si firmware no esta listo, fallos/drops. | Mantener true en final-v3 con UART validada. |
 | `MIDI_LOOKAHEAD_SEC` | `backend_service.py` | `0.02` | segundos | Adelanto scheduler. | Jitter si demasiado bajo/alto. | Medir con MIDI real. |
 | `EEG_LED_MATRIX_ENABLED` | `led_matrix_visualizer.py` | env default `False` | true/false | Transporte LED Python. | Bridge.call extra. | Activar tras bench EEG estable. |
 | `EEG_LED_MATRIX_WIDTH` | `led_matrix_visualizer.py` | `13` | 1..64 | Ancho frame Python. | Firmware espera 13; mismatch rompe handler. | No cambiar sin firmware. |
@@ -31,10 +33,13 @@ Busqueda realizada con `rg` sobre flags, `ENABLED`, `MODE`, `DEBUG`, `BENCH`, `S
 | `EEG_LED_MATRIX_BRIDGE_METHOD` | `led_matrix_visualizer.py` | `led_matrix_row` | string | Nombre handler. | Mismatch con firmware. | No cambiar salvo coordinado. |
 | `FEATURE_WINDOW_SEC` | `backend_service.py` | `4.0` | segundos | Ventana DSP. | Latencia/resolucion. | Critico para features. |
 | `FEATURE_HOP_SAMPLES` | `backend_service.py` | `64` | muestras | Hop DSP. | CPU/latencia. | OK. |
+| `MUSIC_CHORD_MIN_PERIOD_SEC` | `backend_service.py` | `12.0` | 2..120 s | Reduce repeticion de acordes. | Cambiar bajo puede reintroducir pulsos armonicos repetitivos. | Mantener salvo prueba musical. |
+| `MUSIC_CHORD_CHANGE_THRESHOLD` | `backend_service.py` | `0.45` | 0.05..2.0 | Permite cambio de acorde si hay cambio musical suficiente. | Alto congela armonia, bajo repite acordes. | Ajustar con escucha. |
+| `MUSIC_PITCH_VARIETY` | `backend_service.py` | `0.65` | 0..1 | Variedad melodica entre candidatos cercanos. | Alto puede sonar erratico, bajo repetitivo. | Mantener valor final-v3. |
 | `SNAPSHOT_PUBLISH_PERIOD_SEC` | `backend_service.py` | `0.2` | segundos | UI snapshot. | UI/carga. | OK. |
 | `DISK_PUBLISH_PERIOD_SEC` | `backend_service.py` | `1.0` | segundos | Snapshot JSON en disco. | I/O. | OK. |
 | Quality gate | `spectral_quality.py` | thresholds fijos | codigo | Atenua/congela sonificacion. | Umbrales empiricos. | Mantener hasta mas capturas. |
 | Filtros MCU | `sketch.ino`, `filters.h` | HP 0.5, notch 50, LP 40 | codigo | Filtrado previo a Python. | No hay raw compare. | Agregar modo diagnostico futuro. |
 | CH1-only | `ADS_DIAGNOSTIC_MODE=5` | activo | modo 5 | CH1 activo, CH2-CH4 apagados. | Columns CH2-CH4 no son EEG real. | UI/docs deben indicarlo. |
 | BIAS/RLD | modo 4/5 | activo en modo 5 | registros CONFIG3/BIAS | Deriva BIAS desde CH1P+CH1N. | Depende conexion fisica segura. | Documentar montaje. |
-| Capture mode | `capture_manager.py` | idle | request JSON | Captura CSV. | Memoria crece en `rows` durante captura. | OK para duraciones actuales. |
+| Capture mode | `capture_manager.py` | idle | request JSON | Captura CSV incremental. | Errores de disco pasan estado a error. | OK para duraciones actuales. |

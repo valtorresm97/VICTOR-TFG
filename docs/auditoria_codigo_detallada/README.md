@@ -1,8 +1,9 @@
 # Auditoria detallada de codigo
 
-Rama auditada: `eliminacion-redudancias`.
+Rama auditada originalmente: `eliminacion-redudancias`.
+Actualizacion documental: `docs/final-v3-audit-update`, contrastada contra el codigo de `codex/direct-band-sonification` y el estado congelado `firmware-final-v3`.
 
-Objetivo: documentar archivo por archivo y funcion por funcion la aplicacion EEG-MIDI despues de resolver redundancias principales. Esta auditoria no simplifica codigo, no cambia comportamiento y no reintroduce controles WebUI/MIDI.
+Objetivo: documentar archivo por archivo y funcion por funcion la aplicacion EEG-MIDI despues de resolver redundancias principales. La version final-v3 ya incorpora MIDI fisico validado, TX invertido obligatorio, controles WebUI de root/main/escala y ajustes musicales para reducir repeticion armonica.
 
 ## Alcance
 
@@ -21,7 +22,7 @@ Documentos generados:
 11. `10_mapa_funciones_criticas.md`: criticidad y pruebas minimas.
 12. `11_hallazgos_para_simplificacion_futura.md`: hallazgos sin refactor.
 
-## Estado post-redundancias
+## Estado final-v3 documentado
 
 Resuelto:
 
@@ -33,11 +34,18 @@ Resuelto:
 - Escritura JSON atomica centralizada en `app_state.atomic_write_json`.
 - NeoPixel no usado retirado.
 - `packed_points` LED legacy eliminado.
-- Controles musicales WebUI retirados por estabilidad.
+- `BENCH_REPORT_ENABLED` separado del streaming EEG.
+- Panic MIDI expuesto en WebUI.
+- MIDI fisico validado en UNO Q por `Serial1`/D1 con `USART_CR2_TXINV`.
+- Controles WebUI de configuracion musical reintroducidos con endpoints acotados: root note, main note y escala.
+- Escalas disponibles ampliadas: mayor, menor natural, blues, Spanish Phrygian, Arabic Double Harmonic, harmonic minor, phrygian dominant, minor pentatonic y major pentatonic.
+- Acordes menos frecuentes mediante periodo minimo/histeresis de cambio, y mayor variedad melodica mediante `pitch_variety`, rango de escala y salto maximo dependiente de tension.
 
 Pendiente a proposito:
 
-- Diseno futuro de controles WebUI/MIDI. No se ha reintroducido ningun endpoint ni UI de configuracion musical runtime.
+- Tests automaticos de contrato para snapshot WebUI, endpoints musicales y ruta MIDI fisica.
+- Panic autonomo en firmware si Python/App Lab cae.
+- Medida formal de latencia EEG -> nota -> MIDI OUT.
 
 ## Arquitectura resumida
 
@@ -89,7 +97,7 @@ ADS1299-4PAG
 1. Tests de contrato.
 2. Extraer snapshot builder puro desde `backend_service.py`.
 3. Separar motor musical live de la orquestacion.
-4. Validar UART MIDI fisico.
-5. Redisenar controles WebUI/MIDI con endpoint y schema testeados.
+4. Mantener validacion UART MIDI fisico en cada cambio de firmware/placa.
+5. Anadir pruebas de endpoints WebUI/MIDI y snapshot musical.
 6. Refactor offline tools grandes.
 7. Tocar firmware solo con placa y benchmark antes/despues.

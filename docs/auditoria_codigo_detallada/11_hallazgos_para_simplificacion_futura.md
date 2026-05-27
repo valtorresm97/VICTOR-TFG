@@ -15,8 +15,8 @@ No se ha refactorizado nada en esta auditoria. Esta lista prepara la siguiente f
 | `compute_quality_diagnostics` recalcula PSD para snapshot | `eeg_signal_processor.py` | Coste CPU | Puede duplicar trabajo con features live | Reusar PSD/features si se guarda contexto | Media |
 | Quality score heuristico necesita tests | `spectral_quality.py` | Falta test | Cambios de umbral pueden alterar sonificacion | Tests clean/artifact/bad basados en capturas | Alta |
 | Generadores musicales tienen muchos helpers privados | `music_bar.py`, `music_note.py` | Funcion larga/estado dificil | Dificil ajustar musicalmente sin romper | Tests musicales y separacion de pitch/rhythm/velocity | Media |
-| Controles musicales WebUI pendientes | `backend_service.py`, `assets` | Feature pendiente | Config fija limita demo interactiva | Disenar endpoint/schema/test antes de reintroducir | Media, futuro |
-| MIDI UART disabled sin validacion fisica | `sketch.ino`, `midi_byte_transport.py` | Dependencia hardware | MIDI live solo dry-run si no se activa UART | Validar D1/TX y documentar `MIDI_SERIAL` | Alta para fase MIDI |
+| Controles musicales WebUI acotados sin tests | `backend_service.py`, `web_server.py`, `assets` | Falta test | Root/main/scale ya funcionan, pero un rename puede romper UI/endpoints | Tests HTTP + snapshot para `/music/*` | Media |
+| MIDI UART fisico validado, requiere preservar TXINV | `sketch.ino`, `midi_byte_transport.py` | Dependencia hardware | Cambiar UART/polaridad rompe MIDI OUT aunque los bytes sean correctos | Mantener `Serial1`/D1 + `USART_CR2_TXINV`; revalidar en placa si cambia hardware | Alta |
 | LED fisico disabled y handler dry-run devuelve false | `sketch.ino`, `led_matrix_transport.py` | Semantica confusa | Transport podria contar fallo aunque handler valido | Definir contrato dry-run vs real | Baja/media |
 | `build_validation_docs.py` es monolitico | `python/tools/build_validation_docs.py` | Tool offline grande | Dificil mantener; muchos plots/docs en un archivo | Separar loaders, plots, docs | Baja, offline |
 | Escritura JSON offline no atomica en tools | Algunas tools offline | Logica residual | Reports offline podrian quedar a medias si se interrumpe | Usar helper compartido solo si aporta valor | Baja |
@@ -30,6 +30,6 @@ No se ha refactorizado nada en esta auditoria. Esta lista prepara la siguiente f
 1. Crear pruebas de contrato para snapshot, `eeg_block_uV`, `event_to_midi_bytes`, LED row packing y quality gate.
 2. Extraer de `backend_service.py` la construccion de snapshot a modulo puro testeable.
 3. Separar motor musical live de la orquestacion backend.
-4. Validar UART MIDI fisico y solo despues reintroducir controles WebUI/MIDI.
+4. Mantener prueba UART MIDI fisica con TX invertido tras cambios de firmware.
 5. Simplificar tools offline grandes sin tocar runtime.
 6. Revisar firmware solo con placa y metricas antes/despues.

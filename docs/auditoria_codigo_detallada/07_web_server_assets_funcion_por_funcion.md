@@ -2,17 +2,21 @@
 
 ## Estado actual
 
-La Web UI muestra adquisicion, DSP, calidad, sonificacion, MIDI status, panic, piano roll y estado LED. Los controles musicales WebUI fueron retirados por estabilidad y no deben reintroducirse en esta fase.
+La Web UI muestra adquisicion, DSP, calidad, sonificacion, MIDI status, panic, piano roll y estado LED. En final-v3 tambien incluye controles musicales acotados para root note, main note y escala; no expone controles de firmware, MIDI enable ni LED enable.
 
 ## Endpoints y funciones
 
 | Archivo | Funcion/Endpoint/Elemento | Entrada | Salida | Snapshot keys usadas | Estado UI | Riesgo |
 | --- | --- | --- | --- | --- | --- | --- |
 | `web_server.py` | `EEGWebServer.__init__` | backend, port | servidor | N/A | Inicializa WebUI | Si assets path cambia, UI no carga. |
-| `web_server.py` | `_setup_routes` | Ninguna | rutas | N/A | Registra `/status`, `/latest`, `/midi/panic`, socket | Cambiar rutas rompe `app.js`. |
+| `web_server.py` | `_setup_routes` | Ninguna | rutas | N/A | Registra `/status`, `/latest`, rutas MIDI test/panic, `/music/config`, `/music/scale/*`, `/music/root/*`, `/music/main/*`, socket | Cambiar rutas rompe `app.js`. |
 | `web_server.py` | `GET /status` (`get_status`) | HTTP | `{ok,state,window_ready}` | `status.state`, `status.window_ready` | Estado compacto | Bajo. |
 | `web_server.py` | `GET /latest` (`get_latest`) | HTTP | snapshot | Todo snapshot | Carga inicial/polling | Cambiar contrato rompe UI. |
 | `web_server.py` | `POST /midi/panic` | HTTP | `{ok,sent_events}` | N/A | Boton Panic | Si transporte disabled, sent=0 esperado. |
+| `web_server.py` | `POST /midi/test-note*`, `/midi/test-sequence*`, `/midi/test-loop/*` | HTTP | payload diagnostico MIDI | N/A | Pruebas MIDI sin EEG | Puede sonar en sintetizador fisico si MIDI live esta activo. |
+| `web_server.py` | `POST /music/config` | JSON/kwargs | `{ok,music}` | N/A | Actualiza root/main/scale juntos | Debe validar escala y notas. |
+| `web_server.py` | `POST /music/scale/{key}` | HTTP | `{ok,music}` | N/A | Cambia escala | Claves deben coincidir con `MUSIC_SCALE_OPTIONS`. |
+| `web_server.py` | `POST /music/root/{note}`, `/music/main/{note}` | HTTP | `{ok,music}` | N/A | Cambia root o main note C3..B5 | Mapeo de sostenidos usa `s` en URL. |
 | `web_server.py` | `on_connect` | sid | Socket emit opcional | snapshot actual | Primer snapshot al cliente | Bajo. |
 | `web_server.py` | `on_disconnect` | sid | log | N/A | Ninguno | Bajo. |
 | `web_server.py` | `publish_snapshot` | snapshot | socket `eeg_snapshot` | snapshot completo | Update live | Frecuencia excesiva afecta UI. |
@@ -21,7 +25,7 @@ La Web UI muestra adquisicion, DSP, calidad, sonificacion, MIDI status, panic, p
 | `assets/index.html` | Adquisicion | DOM | Visual | `rx`, `status`, `config.channels` | Rates, indices, perdidas | Cambiar IDs rompe render. |
 | `assets/index.html` | Features EEG | DOM | Visual | `features` | RMS, peaks, bands | Unidades deben ser claras. |
 | `assets/index.html` | Diagnostico | DOM/canvas | Visual | `diagnostics` | Waveform, 50Hz, warnings | Canvas depende de waveform_uV. |
-| `assets/index.html` | Sonificacion | DOM | Visual | `sonification`, `music` | Controles musicales derivados | No hay controles editables. |
+| `assets/index.html` | Sonificacion | DOM | Visual + POST music | `sonification`, `music` | Controles musicales derivados y editables | IDs deben coincidir con `app.js`. |
 | `assets/index.html` | MIDI Live | DOM/button | Visual + POST panic | `midi` | Estado scheduler/transport | Panic debe conservarse. |
 | `assets/index.html` | Piano roll | DOM | Visual | `music.recent_notes`, `performance.recent_notes_window_sec` | Scroll notas | Tiempos monotonic. |
 | `assets/app.js` | `fmt` | value,n | string | N/A | Formato numerico | Bajo. |
@@ -32,7 +36,8 @@ La Web UI muestra adquisicion, DSP, calidad, sonificacion, MIDI status, panic, p
 | `assets/app.js` | `renderWarnings` | snapshot | DOM | `sonification.valid`, `midi`, `config.channels` | Warnings | Puede alarmar por drops acumulados. |
 | `assets/app.js` | `renderChannelStatus` | snapshot | DOM | `config.ads_diagnostic_mode`, `config.channels` | CH activo/apagado | Importante para modo 5. |
 | `assets/app.js` | `renderDiagnostics` | snapshot | DOM/canvas | `diagnostics.*`, `waveform_uV` | Calidad CH1 | Canvas no hace downsample extra. |
-| `assets/app.js` | `renderSonification` | snapshot | DOM | `sonification`, `music`, `midi.scheduler/transport` | Sonificacion/MIDI | Sin controles WebUI. |
+| `assets/app.js` | `renderSonification` | snapshot | DOM | `sonification`, `music`, `midi.scheduler/transport` | Sonificacion/MIDI | Debe sincronizar selects sin pisar foco activo. |
+| `assets/app.js` | `setupMusicControls`, `applyMusicConfig` | DOM/click | POST endpoints music | `/music/scale/*`, `/music/root/*`, `/music/main/*` | Config musical WebUI | Secuencia parcial puede aplicar escala/root antes de fallar en main. |
 | `assets/app.js` | `setPanicStatus` | text,error | DOM | N/A | Feedback panic | Bajo. |
 | `assets/app.js` | `sendMidiPanic` | click | POST | `/midi/panic` | Panic | Ruta debe existir. |
 | `assets/app.js` | `setupMidiPanicButton` | DOM | listener | N/A | Boton | Bajo. |
@@ -59,4 +64,4 @@ La Web UI muestra adquisicion, DSP, calidad, sonificacion, MIDI status, panic, p
 
 - `assets/app.js` contiene mucho contrato de snapshot implicito. Antes de cambiar claves backend, crear prueba de schema.
 - WebUI no debe alojar DSP ni adquisicion.
-- La ruta de panic es la unica accion activa actual; controles musicales quedan fuera hasta rediseño MIDI/UI.
+- Las acciones activas actuales son panic MIDI, pruebas MIDI y controles root/main/scale. No hay controles para habilitar/deshabilitar MIDI/LED ni para cambiar parametros internos de densidad.

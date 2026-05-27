@@ -6,7 +6,7 @@
 | `sketch/sketch.ino` | `loop` | CRITICA NO TOCAR SIN HARDWARE | Tiempo real 250 Hz, filtros, streaming | Placa: gen/s 250, blk/s 31.25, drops 0. |
 | `sketch/sketch.ino` | `onDrdyFalling` | CRITICA NO TOCAR SIN HARDWARE | ISR de adquisicion | Ver DRDY/pending/jitter. |
 | `sketch/sketch.ino` | `applyAdsDiagnosticMode` | CRITICA NO TOCAR SIN HARDWARE | Configura BIAS, lead-off, canales | Captura por modo diagnostico. |
-| `sketch/sketch.ino` | `midi_bytes` | CRITICA NO TOCAR SIN HARDWARE | Puente futuro a UART MIDI | Test UART D1/TX y panic. |
+| `sketch/sketch.ino` | `midi_bytes` | CRITICA NO TOCAR SIN HARDWARE | Puente activo a UART MIDI fisica validada | Test UART D1/TX con TX invertido y panic. |
 | `sketch/sketch.ino` | `led_matrix_row` | CRITICA CON TEST DE CONTRATO | Handler Bridge LED | Test packing + LED enabled. |
 | `sketch/streaming.h` | `publishPendingBlocks` | CRITICA CON TEST DE CONTRATO | Emite payload manual `eeg_block_uV` | Parser test + placa receive. |
 | `sketch/streaming.h` | `appendSampleToFillBlock` | CRITICA CON TEST DE CONTRATO | Agrupa 8 muestras | Test sample_count/indices. |
@@ -32,7 +32,7 @@
 | `python/capture_manager.py` | `add_block`, `finish` | CRITICA CON TEST DE CONTRATO | Capturas CSV/metadata | Temp capture test. |
 | `python/app_state.py` | `atomic_write_json` | CRITICA UI/SNAPSHOT | Evita JSON parcial | Temp + NaN test. |
 | `python/midi_live.py` | `event_to_midi_bytes`, `panic_events` | CRITICA CON TEST DE CONTRATO | Bytes y seguridad MIDI | Unit tests. |
-| `python/midi_byte_transport.py` | `send_event` | CRITICA NO TOCAR SIN HARDWARE | Bridge a MCU | Mock + UART placa. |
+| `python/midi_byte_transport.py` | `send_event` | CRITICA NO TOCAR SIN HARDWARE | Bridge a MCU para MIDI fisico | Mock + UART placa con TX invertido. |
 | `python/led_matrix_transport.py` | `_pack_row`, `send_frame` | CRITICA CON TEST DE CONTRATO | Packing LED y Bridge calls | Bit-exact + test visualizer. |
 | `python/led_matrix_visualizer.py` | `build_led_matrix_frame` | CRITICA UI/SNAPSHOT | Piano roll LED fisico | Test existente. |
 | `python/web_server.py` | `_setup_routes`, `post_midi_panic` | CRITICA UI/SNAPSHOT | Endpoints UI | HTTP smoke. |

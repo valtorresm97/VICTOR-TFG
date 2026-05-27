@@ -14,9 +14,11 @@ La captura final `20260524-122200_final_atenuacion_artefactos_mixed_states` resu
 | Bridge MCU-Python | capturas CSV con 250 Hz y bloques de 8 | streaming estable | validado en condiciones probadas |
 | Montaje electrodos | Fp1-Fp2, ear-EEG, BIAS/RLD | ear-EEG y CH1-only más estables | montaje final definido |
 | DSP multitaper | windowed PSD, bandpowers, quality score | features reproducibles offline | validado para diagnóstico |
-| Sonificación | quality gate y controles espectrales | atenuación funciona; diseño musical pendiente | siguiente fase |
+| Sonificación | quality gate, controles espectrales, mapeo musical live | atenuación funciona; acordes menos frecuentes y más variedad melódica en final-v3 | validada funcionalmente, pendiente de tests automáticos |
+| MIDI físico | `Bridge.call("midi_bytes")`, `Serial1`/D1, TX invertido | Behringer PRO VS MINI sonó correctamente con TXINV | validado en placa |
+| WebUI musical | root/main/scale, panic, piano roll | controles acotados disponibles en dashboard | integrado |
 
-Queda fuera del alcance de estos documentos el diseño sonoro definitivo. La evidencia aquí recogida sirve como base para esa fase posterior.
+El diseño sonoro final-v3 ya incluye una primera política musical operativa: quality gate antes de generar música, armonía con histéresis/periodo mínimo, melodía con variedad controlada y salida MIDI física. Quedan fuera la evaluación formal con usuarios, tests automáticos completos y medición de latencia end-to-end.
 
 ## Captura final válida y evolución temporal
 

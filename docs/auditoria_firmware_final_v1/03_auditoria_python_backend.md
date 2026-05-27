@@ -112,7 +112,7 @@ Campos CSV:
 
 MIDI:
 
-- `MIDI_LIVE_ENABLED = EEG_MIDI_LIVE_ENABLED` con default `False`.
+- `MIDI_LIVE_ENABLED = EEG_MIDI_LIVE_ENABLED` con default `True` en final-v3.
 - Si esta desactivado, el scheduler sigue generando y el transporte cuenta `dropped_events_total`.
 - `send_panic()` existe y se llama en `stop()`, pero no hay boton UI.
 

@@ -4,7 +4,7 @@
 
 | Archivo | Responsabilidad | Criticidad |
 | --- | --- | --- |
-| `sketch/sketch.ino` | Inicializa Bridge/Monitor/ADS1299, configura pines, DRDY, filtros, streaming, MIDI dry-run y LED dry-run. | Critico |
+| `sketch/sketch.ino` | Inicializa Bridge/Monitor/ADS1299, configura pines, DRDY, filtros, streaming, MIDI UART fisico y LED dry-run. | Critico |
 | `sketch/ADS1299Plus/src/ADS1299Plus.*` | Driver alto nivel ADS1299: power-up, comandos, registros, RDATAC, unpack signed 24-bit. | Critico |
 | `sketch/ADS1299Plus/src/ADS1299_Registers.h` | Constantes de comandos, registros, mascaras y defaults ADS1299. | Critico |
 | `sketch/ADS1299_SafeSPI/src/ADS1299_SafeSPI.*` | Wrapper SPI 2 MHz, MSBFIRST, SPI_MODE1, CS manual. | Critico |
@@ -29,7 +29,7 @@
 | SPI | 2 MHz, MSBFIRST, SPI_MODE1 | `ADS1299_SafeSPI.cpp` | Configuracion inicial conservadora. |
 | Bridge | RouterBridge | `sketch.ino`, `streaming.h` | `call` para handshake/handlers, `notify` para EEG. |
 | LED Matrix | Arduino_LED_Matrix | `sketch.ino` | Compila solo si `LED_MATRIX_ENABLED=1`. |
-| MIDI UART | `MIDI_SERIAL` externo | `sketch.ino` | Compila solo si `MIDI_UART_ENABLED=1` y se define UART. |
+| MIDI UART | `Serial1`/D1 por defecto | `sketch.ino` | `MIDI_UART_ENABLED=1`; TX invertido obligatorio con `USART_CR2_TXINV`. |
 
 ## Configuracion ADS1299
 
@@ -51,7 +51,7 @@
 | `sketch.ino` | `onDrdyFalling()` | Interrupcion DRDY | Incrementa contador | ISR minima: solo `drdy_count++`. | `drdy_count` no es FIFO; si se acumula se pierde informacion temporal. | Si |
 | `sketch.ino` | `applyAdsDiagnosticMode()` | Macro compile-time | `bool` | Programa modos normal/short/test/no-bias/bias/CH1-only. | Cambia registros de adquisicion; requiere trazabilidad. | Si |
 | `sketch.ino` | `initFilters()` | Constantes FS/fc | Ninguna | Inicializa HP, notch y LP por canal. | Cambia espectro antes de Python. | Si |
-| `sketch.ino` | `midi_bytes()` | `n,b0,b1,b2` | `bool` | Handler Bridge para MIDI; escribe UART solo si habilitada. | Actualmente devuelve `false` por defecto. | Medio |
+| `sketch.ino` | `midi_bytes()` | `n,b0,b1,b2` | `bool` | Handler Bridge para MIDI; escribe bytes por `Serial1`/D1 si UART habilitada. | TXINV es obligatorio para el circuito validado; cambiar polaridad rompe MIDI fisico. | Medio |
 | `sketch.ino` | `led_matrix_row()` | `row_idx, chunk0, chunk1, chunk2` | `bool` | Valida fila/chunks fijos, reconstruye framebuffer estatico 13x8 y dibuja si habilitado. | Mas llamadas Bridge por frame si se sube refresh. | Medio |
 | `sketch.ino` | `checkMpuReady()` | Ninguna | `bool` | Llama `linux_started` a Python. | RPC sincronico, pero solo hasta ready a 1 Hz. | Medio |
 | `streaming.h` | `appendSampleToFillBlock()` | sample idx, status, uV | Ninguna | Llena bloque de 8 muestras. | Si cambia orden rompe receiver. | Si |
@@ -77,7 +77,9 @@
 | `BENCH_REPORT_ENABLED` | `1` | Activa informes benchmark por Monitor. |
 | `BENCH_REPORT_EVERY_MS` | `5000` | Imprime reporte bench cada 5 s si `BENCH_REPORT_ENABLED=1`. |
 | `LED_MATRIX_ENABLED` | `0` | Handler registrado, pero no dibuja. |
-| `MIDI_UART_ENABLED` | `0` | Handler registrado, pero no escribe UART. |
+| `MIDI_UART_ENABLED` | `1` | Handler registrado y escribe UART MIDI fisica por defecto. |
+| `MIDI_SERIAL` | `Serial1` | UART validada en D1/TX. |
+| `MIDI_MCU_SELF_TEST_ENABLED` | `0` | Arpegio diagnostico MCU disponible pero apagado en flujo EEG normal. |
 
 ## Riesgos firmware detectados
 
@@ -85,6 +87,6 @@
 - `BENCH_REPORT_ENABLED` controla solo los reports por Monitor.
 - `DEBUG_MONITOR=true` implica prints durante adquisicion, aunque espaciados.
 - `pending > 1` se cuenta como lag, pero se pierde el numero de frames no leidos como metrica especifica.
-- LED y MIDI comparten Bridge con EEG; si se activan sin medir pueden afectar latencia.
-- `midi_bytes()` devuelve `false` si UART deshabilitada; el transporte Python puede contar fallos si se activa solo Python.
+- LED y MIDI comparten Bridge con EEG; medir latencia/drops si se sube la carga de eventos.
+- `midi_bytes()` devuelve `false` solo si se recompila con UART deshabilitada; final-v3 asume UART habilitada e invertida.
 - No hay ruta raw/unfiltered para separar problemas de adquisicion de filtros MCU.

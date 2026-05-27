@@ -41,18 +41,22 @@ MIDI OUT PCB
 | `music_note.py` | `NoteGenerator` | Genera `NoteEvent`, pitch diatonico, velocity y duracion. | Activo |
 | `midi_live.py` | `MidiScheduler` | Heap de eventos live, pop due, active notes y panic. | Activo |
 | `midi_live.py` | `event_to_midi_bytes()` | Convierte eventos a bytes MIDI estandar. | Activo |
-| `midi_byte_transport.py` | `MidiByteTransport` | Llama `Bridge.call("midi_bytes", n,b0,b1,b2)`. | Activo, disabled por defecto |
+| `midi_byte_transport.py` | `MidiByteTransport` | Llama `Bridge.call("midi_bytes", n,b0,b1,b2)`. | Activo por defecto en final-v3 |
 
-## Configuracion musical fija actual
+## Configuracion musical actual
 
 | Configuracion | Valor | Archivo |
 | --- | --- | --- |
 | Compas live | `MUSIC_BAR_SEC=2.0` | `backend_service.py` |
-| Canal MIDI | `0` | `backend_service.py` |
+| Periodo minimo de acorde | `MUSIC_CHORD_MIN_PERIOD_SEC=12.0` | `backend_service.py` |
+| Umbral cambio acorde | `MUSIC_CHORD_CHANGE_THRESHOLD=0.45` | `backend_service.py` |
+| Canal MIDI | `9` interno = canal MIDI 10 | `backend_service.py` |
 | Programa | `0` | `backend_service.py` |
 | Root note | `C4` | `backend_service.py` |
 | Main note | `G4` | `backend_service.py` |
 | Escala | `Diatonic / Major (Ionian)` | `backend_service.py` |
+| Escalas WebUI | major, minor, blues, spanish, arabic, harmonic_minor, phrygian_dominant, minor_pentatonic, major_pentatonic | `backend_service.py`, `scale_registry.py` |
+| Variedad melodica | `MUSIC_PITCH_VARIETY=0.65` | `backend_service.py` |
 | Notas recientes max | `96` | `backend_service.py` |
 | Ventana piano roll | `20.0 s` | `backend_service.py` |
 | Lookahead MIDI | `0.02 s` | `backend_service.py` |
@@ -76,8 +80,9 @@ Mensajes de seguridad:
 Limitaciones:
 
 - Existe boton Web UI de panic y endpoint `POST /midi/panic` conectado a `send_panic()`.
-- El firmware no implementa panic propio; solo reenvia bytes si UART habilitada.
-- `MIDI_UART_ENABLED=0` por defecto y exige definir `MIDI_SERIAL`.
+- El firmware no implementa panic propio; reenvia los bytes recibidos por Bridge.
+- `MIDI_UART_ENABLED=1` por defecto y `MIDI_SERIAL=Serial1`.
+- El MIDI OUT fisico fue validado con `Serial1`/D1 y TX invertido (`USART_CR2_TXINV`) obligatorio.
 
 ## Jitter y drops
 
@@ -90,22 +95,24 @@ Limitaciones:
 
 Si `EEG_MIDI_LIVE_ENABLED=False`, los eventos se descartan intencionadamente y se contabilizan como dropped para observabilidad.
 
-## Piano scroll
+## Piano scroll y controles WebUI
 
 El piano roll web no lee MIDI real; usa `music.recent_notes`, rellenado por `_remember_recent_notes()` justo despues de generar notas. Esto permite ver la intencion musical aunque el transporte MIDI fisico este desactivado.
+
+La WebUI permite cambiar root note, main note y escala. El cambio pasa por `BackendService.update_music_config()`, envia panic si procede, reconstruye `ScaleConfig`, resetea memoria de segmento/nota y vacia notas recientes. No modifica firmware ni activa/desactiva transporte MIDI.
 
 ## Enabled/disabled
 
 | Capa | Flag | Default | Resultado |
 | --- | --- | --- | --- |
-| Python MIDI | `EEG_MIDI_LIVE_ENABLED` | `False` | Scheduler activo, transporte descarta. |
-| Firmware MIDI | `MIDI_UART_ENABLED` | `0` | Handler registrado, no escribe UART y devuelve `false`. |
-| UART fisica | `MIDI_SERIAL` | No definida | Requerida solo si `MIDI_UART_ENABLED=1`. |
+| Python MIDI | `EEG_MIDI_LIVE_ENABLED` | `True` | Scheduler activo, transporte envia por Bridge. |
+| Firmware MIDI | `MIDI_UART_ENABLED` | `1` | Handler registrado, escribe UART y devuelve `true`. |
+| UART fisica | `MIDI_SERIAL` | `Serial1` | D1/TX validado con TX invertido obligatorio. |
+| Loop test Python | `EEG_MIDI_TEST_LOOP_AUTOSTART` | `False` | La prueba MIDI no tapa la sonificacion EEG al arrancar. |
 
 ## Riesgos
 
-- Activar Python MIDI sin activar firmware UART provoca llamadas Bridge cuyo handler devuelve `false`.
-- Activar firmware UART sin verificar objeto serial D1/TX puede interferir con Bridge/Monitor.
+- Cambiar UART, circuito o polaridad exige repetir validacion fisica MIDI.
 - El scheduler puede generar eventos aunque la calidad sea mala si quedan eventos ya programados de una ventana anterior.
-- Falta una accion manual de panic desde UI.
 - La densidad musical depende de quality gate, pero no existe limite global de notas por segundo mas alla de slots/compas y `max_events`.
+- Los endpoints musicales WebUI necesitan tests de contrato para evitar desincronizar `assets/app.js` y `web_server.py`.

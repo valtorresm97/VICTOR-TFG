@@ -1,8 +1,9 @@
 # 00. Inventario actual post-redundancias
 
-Rama auditada: `eliminacion-redudancias`.
+Rama auditada originalmente: `eliminacion-redudancias`.
+Actualizacion final-v3: contrastada contra `codex/direct-band-sonification` y `firmware-final-v3`.
 
-Alcance: codigo y artefactos relevantes de la aplicacion EEG-MIDI despues de eliminar redundancias. La redundancia de controles WebUI/MIDI queda pendiente y no se reintroduce en esta auditoria.
+Alcance: codigo y artefactos relevantes de la aplicacion EEG-MIDI despues de eliminar redundancias y tras la validacion MIDI fisica final. Los controles WebUI/MIDI ya no son una deuda general: existen controles acotados para root, main note y escala.
 
 | Archivo | Bloque | Rol | Critico | Tipo | Observaciones |
 | --- | --- | --- | --- | --- | --- |
@@ -34,17 +35,17 @@ Alcance: codigo y artefactos relevantes de la aplicacion EEG-MIDI despues de eli
 | `python/music_bar.py` | Generacion musical | Acordes, posiciones ritmicas y barras | Medio | Python | Usa RNG; requiere reproducibilidad. |
 | `python/music_note.py` | Generacion musical | NoteEvent y generacion de notas | Medio | Python | Afecta densidad, pitch, velocity y duraciones. |
 | `python/music_utils.py` | Generacion musical | Parseo nota musical -> MIDI | Bajo | Python | Utilidad compartida. |
-| `python/scale_registry.py` | Generacion musical | Registro minimo de escalas | Bajo | Python | Controles UI futuros dependeran de esto. |
+| `python/scale_registry.py` | Generacion musical | Registro de escalas expuestas en WebUI | Bajo | Python | Incluye mayor, menor, blues, modos heptatonicos y pentatonicas. |
 | `python/midi_live.py` | MIDI live | Eventos MIDI, scheduler, panic, bytes | Si | Python | Evita notas colgadas y define bytes MIDI. |
-| `python/midi_byte_transport.py` | MIDI byte transport | `MidiLiveEvent` -> `Bridge.call("midi_bytes")` | Si | Python | Desactivado por defecto hasta UART verificada. |
+| `python/midi_byte_transport.py` | MIDI byte transport | `MidiLiveEvent` -> `Bridge.call("midi_bytes")` | Si | Python | Activo por defecto en final-v3; depende del handler firmware `midi_bytes`. |
 | `python/led_matrix_visualizer.py` | LED matrix | `recent_notes` -> frame `rows` 13x8 | Medio | Python | `packed_points` legacy eliminado. |
 | `python/led_matrix_transport.py` | LED matrix | `rows` -> chunks `led_matrix_row` | Medio | Python | Desactivado por defecto. |
 | `python/app_state.py` | Estado runtime | JSON atomico snapshot/history | Si | Python | Helper `atomic_write_json` centralizado. |
 | `python/runtime_config.py` | Configuracion App Lab | Env vars y defaults runtime | Medio | Python | Centraliza configuracion Python/LED/MIDI. |
 | `python/capture_manager.py` | Capturas | Captura CSV incremental desde bloques EEG | Si | Python | Escribe `capture_status.json`, `metadata.json`, CSV. |
 | `python/web_server.py` | Web server | WebUI Brick y endpoints | Medio | Python | Solo rutas y snapshots; no DSP pesado. |
-| `assets/index.html` | Assets Web UI | Estructura dashboard | Medio | HTML | Sin controles musicales runtime. |
-| `assets/app.js` | Assets Web UI | Render de snapshot, panic, piano roll | Medio | JS | Depende de nombres de claves del snapshot. |
+| `assets/index.html` | Assets Web UI | Estructura dashboard y controles musicales acotados | Medio | HTML | Root/main/scale, panic y piano roll live. |
+| `assets/app.js` | Assets Web UI | Render de snapshot, controles musicales, panic, piano roll | Medio | JS | Depende de nombres de claves del snapshot y endpoints WebUI. |
 | `assets/styles.css` | Assets Web UI | Estilos dashboard | Bajo | CSS | No afecta backend. |
 | `python/tools/analyze_eeg_capture.py` | Tools CLI | Analisis calidad de una captura | Medio | Python CLI | Usa `DSPCore`; genera reports. |
 | `python/tools/capture_eeg_quality.py` | Tools CLI | Solicita captura a app App Lab en ejecucion | Medio | Python CLI | Escribe `capture_request.json`. |

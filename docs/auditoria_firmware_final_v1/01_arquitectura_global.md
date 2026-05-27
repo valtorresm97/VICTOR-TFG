@@ -56,7 +56,7 @@ Python registra `Bridge.provide("eeg_block_uV", self.rx.eeg_block_uV)` en `backe
 
 `MusicSegmentBuilder` crea un estado musical vivo cada compas. `BarGenerator` genera acorde y slots ritmicos. `NoteGenerator` crea `NoteEvent`. `MidiScheduler` transforma notas en eventos `note_on`/`note_off`, programa `program_change` y ofrece `panic()`.
 
-`MidiByteTransport` convierte `MidiLiveEvent` a bytes MIDI y llama `Bridge.call("midi_bytes", n,b0,b1,b2)`. Por defecto esta desactivado: `EEG_MIDI_LIVE_ENABLED` debe activarse en entorno y el firmware debe compilar `MIDI_UART_ENABLED=1` con `MIDI_SERIAL` verificado.
+`MidiByteTransport` convierte `MidiLiveEvent` a bytes MIDI y llama `Bridge.call("midi_bytes", n,b0,b1,b2)`. En final-v3 esta activo por defecto (`EEG_MIDI_LIVE_ENABLED=True`) y el firmware compila `MIDI_UART_ENABLED=1` usando `Serial1`/D1. El circuito MIDI OUT N-audio requiere TX invertido, por lo que `USART_CR2_TXINV` es obligatorio; si los simbolos no existen, el build debe fallar en vez de emitir con polaridad incorrecta.
 
 ## Web UI y piano scroll
 
@@ -67,6 +67,7 @@ La UI no es Streamlit: usa `arduino.app_bricks.web_ui.WebUI` y assets estaticos.
 - diagnostico CH1,
 - warnings,
 - controles de sonificacion,
+- controles musicales root/main/scale,
 - estado MIDI,
 - piano roll live desde `snapshot["music"]["recent_notes"]`.
 

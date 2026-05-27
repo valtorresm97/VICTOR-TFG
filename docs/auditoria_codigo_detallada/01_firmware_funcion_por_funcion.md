@@ -12,7 +12,8 @@ Configuracion critica:
 - Canales: `ADS1299Plus::NUM_CHANNELS == 4`.
 - Streaming: `BLOCK_SAMPLES=8`, evento `eeg_block_uV`.
 - Default actual: `ADS_DIAGNOSTIC_MODE=5`, CH1 activo con BIAS derivado de CH1P/CH1N y CH2-CH4 apagados.
-- MIDI UART: `MIDI_UART_ENABLED=0` por defecto.
+- MIDI UART: `MIDI_UART_ENABLED=1` por defecto en final-v3.
+- MIDI fisico validado en `Serial1`/D1 con TX invertido obligatorio (`USART_CR2_TXINV`).
 - LED fisico: `LED_MATRIX_ENABLED=0` por defecto.
 
 ## Archivos
@@ -30,7 +31,7 @@ Configuracion critica:
 
 | Archivo | Funcion/struct | Entradas | Salidas | Estado que toca | Que hace | Contratos | Riesgo | Prueba necesaria |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `sketch.ino` | `midi_bytes(n,b0,b1,b2)` | Longitud 1..3 y bytes | `bool` | UART si `MIDI_UART_ENABLED` | Handler Bridge para enviar bytes MIDI al MCU | `Bridge.call("midi_bytes", n,b0,b1,b2)` | Si se activa UART equivocada puede interferir con Bridge | Test placa con UART D1/TX verificada y MIDI panic. |
+| `sketch.ino` | `midi_bytes(n,b0,b1,b2)` | Longitud 1..3 y bytes | `bool` | UART `Serial1`/D1 si `MIDI_UART_ENABLED` | Handler Bridge para enviar bytes MIDI al MCU | `Bridge.call("midi_bytes", n,b0,b1,b2)` | TX invertido es obligatorio para el circuito N-audio; sin TXINV el sintetizador no suena correctamente | Test placa con D1/TX invertido y MIDI panic. |
 | `sketch.ino` | `led_matrix_row(row_idx,chunk0,chunk1,chunk2)` | Fila y 39 bits en 3 chunks | `bool` | `led_frame_buffer`, `led_rows_received_mask`, LED fisico si enabled | Desempaqueta 13 pixeles de 3 bits por fila | `Bridge.call("led_matrix_row", row, c0,c1,c2)` | Multiples calls por frame pueden cargar Bridge; con LED off devuelve false | Test con `EEG_LED_MATRIX_ENABLED=1`, verificar sin perdida EEG. |
 | `sketch.ino` | `checkMpuReady()` | Ninguna | `bool` | Ninguno | `Bridge.call("linux_started")` para handshake | Python expone `linux_started` | Si se llama demasiado podria bloquear | Ver que streaming empieza al arrancar Python. |
 | `sketch.ino` | `onDrdyFalling()` | ISR pin DRDY | Ninguna | Incrementa `drdy_count` | Marca muestras listas sin hacer SPI en ISR | DRDY activo bajo | Contador no es FIFO; pending>1 significa perdida/jitter | Ver `pending>1`, `gen/s~250`. |
@@ -78,4 +79,4 @@ Configuracion critica:
 - `drdy_count` no es FIFO real; si sube por encima de 1 se pierde informacion temporal.
 - `Monitor.print` en rutas criticas puede introducir jitter.
 - `ADS_DIAGNOSTIC_MODE=5` mantiene payload de 4 canales aunque CH2-CH4 esten apagados.
-- `midi_bytes` y `led_matrix_row` son handlers registrados aunque los transportes esten disabled por defecto.
+- `midi_bytes` y `led_matrix_row` son handlers registrados; MIDI esta habilitado por defecto en final-v3 y LED sigue en dry-run salvo `LED_MATRIX_ENABLED=1`.

@@ -1,5 +1,7 @@
 # MIDI OUT inverted TX validation
 
+Relevant final branches: `firmware-final-v3` and `codex/direct-band-sonification`.
+
 ## Confirmed result
 
 The Behringer PRO VS MINI sounded correctly after enabling inverted TX on
@@ -38,6 +40,8 @@ for MIDI bytes.
 - Python MIDI live output is enabled by default again.
 - The Python diagnostic MIDI loop does not autostart by default, so it will not
   mask EEG sonification.
+- The WebUI panic button and MIDI test endpoints use the same `midi_bytes`
+  Bridge path as live sonification.
 
 ## Validated MIDI bytes
 

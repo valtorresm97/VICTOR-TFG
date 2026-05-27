@@ -1,8 +1,10 @@
 # Diseno y justificacion de `spectral_quality_score`
 
 Fecha: 2026-05-24
+Actualizado para final-v3: 2026-05-27
 
-Rama: `captura-datos`
+Rama de diseño original: `captura-datos`
+Ramas relevantes actuales: `firmware-final-v3`, `codex/direct-band-sonification`
 
 ## 1. Objetivo
 
@@ -128,6 +130,13 @@ hacia niveles minimos/neutros. La marca `valid=False` es la que debe impedir que
 esa ventana cree nuevos eventos musicales.
 
 Esto evita que el artefacto produzca mas notas o mas intensidad musical.
+
+En final-v3, este gate alimenta una cadena musical ya operativa:
+
+- `activity`, `rhythmic_density`, `velocity_factor` y `note_probability` determinan densidad/velocity.
+- `harmonic_stability` y `tension` influyen en el acorde, pero los cambios se limitan con periodo minimo e histeresis para evitar pulsos repetitivos.
+- `register` y `tension` desplazan la melodia dentro de la escala elegida por WebUI.
+- `valid=False` bloquea nuevos compases musicales; los eventos ya programados pueden sonar brevemente hasta que el scheduler/panic los limpie.
 
 ## 7. Por que no basta con filtrar mas
 

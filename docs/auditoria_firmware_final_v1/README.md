@@ -4,6 +4,8 @@
 
 Crear un punto de partida estable para la fase final del TFG, sin simplificar ni refactorizar codigo. Esta auditoria documenta firmware, ADS1299, Bridge, backend Python, DSP, sonificacion, MIDI live, Web UI, LED matrix, tools, capturas, configuraciones, redundancias, controles faltantes y criticidad.
 
+Nota final-v3: este directorio nacio en `firmware-final-v1`, pero ha sido revisado documentalmente para no contradecir el estado actual de `firmware-final-v3` y `codex/direct-band-sonification`. El resumen consolidado final esta en [`../configuracion_final_v3.md`](../configuracion_final_v3.md).
+
 ## Rama
 
 - Rama solicitada como base: `matrix-scroll`.
@@ -14,7 +16,7 @@ Crear un punto de partida estable para la fase final del TFG, sin simplificar ni
 
 ## Estado del sistema
 
-El sistema integra adquisicion real ADS1299-4PAG a 250 Hz, streaming por bloques de 8 muestras, backend Python con DSP multitaper, quality gate, sonificacion live, scheduler MIDI, piano roll web y soporte de LED matrix desactivado por defecto.
+El sistema integra adquisicion real ADS1299-4PAG a 250 Hz, streaming por bloques de 8 muestras, backend Python con DSP multitaper, quality gate, sonificacion live, scheduler MIDI, MIDI fisico validado, controles WebUI de root/main/scale, piano roll web y soporte de LED matrix desactivado por defecto.
 
 Arquitectura resumida:
 
@@ -55,20 +57,20 @@ ADS1299 RDATAC
 - Contrato `eeg_block_uV` manual y muy critico.
 - Constantes duplicadas entre firmware, backend y tools.
 - Activar MIDI/LED puede cargar Bridge si no se mide.
-- `BENCH_NOTIFY_ENABLED` mezcla streaming y benchmark.
-- Falta `BENCH_REPORT_ENABLED`.
+- `BENCH_NOTIFY_ENABLED` queda como alias legacy; usar `EEG_STREAMING_NOTIFY_ENABLED`.
+- `BENCH_REPORT_ENABLED` ya existe y controla solo informes por Monitor.
 - Falta modo raw/unfiltered para diagnostico.
 - CH1-only activo por defecto puede confundirse con 4 canales EEG reales.
-- Panic MIDI existe en Python pero no esta expuesto en UI.
+- Panic MIDI esta expuesto en UI, pero falta panic autonomo en firmware.
 - Firmware no se compilo en esta auditoria por ausencia de toolchain verificada.
 
 ## Orden recomendado de refactor futuro
 
 1. Congelar tests de contrato `streaming.h` ↔ `receiver.py`.
 2. Crear tests Python de DSP, quality, sonificacion, MIDI y LED.
-3. Separar flags de streaming/benchmark en firmware.
+3. Mantener separados flags de streaming/benchmark en firmware.
 4. Documentar/mostrar ADS mode y BIAS/RLD en snapshot/UI.
-5. Exponer panic MIDI y clear LED antes de pruebas fisicas.
+5. Anadir tests para panic MIDI, endpoints musicales y clear LED antes de mas UI.
 6. Centralizar configuraciones Python y mapa de constantes.
 7. Reducir duplicacion offline/live de DSP solo despues de tener golden outputs.
 8. Simplificar docs marcando definitivos vs historicos.
