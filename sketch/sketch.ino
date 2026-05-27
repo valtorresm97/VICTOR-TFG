@@ -117,11 +117,11 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// Rama midi-config-v2: probar MIDI OUT fisico por D1/TX usando Serial1.
-// En UNO Q / Zephyr, D0/D1 se exponen como UART de hardware. Si interfiere
-// con Bridge/Monitor, compilar con MIDI_UART_ENABLED=0 para volver a dry-run.
+// Rama diagnostica: probar MIDI OUT fisico usando Serial porque en pruebas
+// previas Serial1 llegaba al handler pero no al sintetizador. Si aparecen
+// caracteres MIDI en Monitor, es una pista de que esta ruta comparte consola.
 #ifndef MIDI_SERIAL
-#define MIDI_SERIAL Serial1
+#define MIDI_SERIAL Serial
 #endif
 
 #ifndef MIDI_UART_ENABLED
