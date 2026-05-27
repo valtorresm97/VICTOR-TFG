@@ -58,8 +58,18 @@ class EEGWebServer:
         self.ui.expose_api("POST", "/midi/test-loop/start-ch10", self.post_midi_test_loop_start_ch10)
         self.ui.expose_api("POST", "/midi/test-loop/stop", self.post_midi_test_loop_stop)
         self.ui.expose_api("POST", "/music/config", self.post_music_config)
-        self.ui.expose_api("POST", "/music/scale/major", self._music_scale_handler("major"))
-        self.ui.expose_api("POST", "/music/scale/minor", self._music_scale_handler("minor"))
+        for scale_key in (
+            "major",
+            "minor",
+            "blues",
+            "spanish",
+            "arabic",
+            "harmonic_minor",
+            "phrygian_dominant",
+            "minor_pentatonic",
+            "major_pentatonic",
+        ):
+            self.ui.expose_api("POST", f"/music/scale/{scale_key}", self._music_scale_handler(scale_key))
         for key, note in _NOTE_ENDPOINTS.items():
             self.ui.expose_api("POST", f"/music/root/{key}", self._music_root_handler(note))
             self.ui.expose_api("POST", f"/music/main/{key}", self._music_main_handler(note))

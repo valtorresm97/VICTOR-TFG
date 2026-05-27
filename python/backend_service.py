@@ -96,6 +96,13 @@ MUSIC_SCALE_NAME = "Major (Ionian)"
 MUSIC_SCALE_OPTIONS = {
     "major": ("Diatonic", "Major (Ionian)"),
     "minor": ("Diatonic", "Natural Minor (Aeolian)"),
+    "blues": ("Pentatonic", "Minor Blues"),
+    "spanish": ("Heptatonic", "Spanish Phrygian"),
+    "arabic": ("Heptatonic", "Arabic Double Harmonic"),
+    "harmonic_minor": ("Heptatonic", "Harmonic Minor"),
+    "phrygian_dominant": ("Heptatonic", "Phrygian Dominant"),
+    "minor_pentatonic": ("Pentatonic", "Minor Pentatonic"),
+    "major_pentatonic": ("Pentatonic", "Major Pentatonic"),
 }
 
 RECENT_NOTES_MAX = 96

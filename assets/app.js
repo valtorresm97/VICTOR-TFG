@@ -228,12 +228,9 @@ async function applyMusicConfig() {
   setMusicConfigStatus("Aplicando...");
 
   try {
-    let payload = await postMusicEndpoint("./music/config", desired);
-    if (!musicConfigMatches(payload, desired)) {
-      await postMusicEndpoint(`./music/scale/${desired.scale_key}`);
-      await postMusicEndpoint(`./music/root/${noteEndpointKey(desired.root_note)}`);
-      payload = await postMusicEndpoint(`./music/main/${noteEndpointKey(desired.main_note)}`);
-    }
+    await postMusicEndpoint(`./music/scale/${desired.scale_key}`);
+    await postMusicEndpoint(`./music/root/${noteEndpointKey(desired.root_note)}`);
+    const payload = await postMusicEndpoint(`./music/main/${noteEndpointKey(desired.main_note)}`);
     if (!musicConfigMatches(payload, desired)) {
       throw new Error("La WebUI no confirmó la configuración aplicada");
     }

@@ -9,6 +9,13 @@ _SCALE_INTERVALS = {
     ("diatonic", "major (ionian)"): MAJOR_INTERVALS,
     ("diatonic", "natural minor (aeolian)"): NAT_MINOR_INTERVALS,
     ("diatonic", "minor (aeolian)"): NAT_MINOR_INTERVALS,
+    ("pentatonic", "minor blues"): [0, 3, 5, 6, 7, 10],
+    ("heptatonic", "spanish phrygian"): [0, 1, 4, 5, 7, 8, 10],
+    ("heptatonic", "arabic double harmonic"): [0, 1, 4, 5, 7, 8, 11],
+    ("heptatonic", "harmonic minor"): [0, 2, 3, 5, 7, 8, 11],
+    ("heptatonic", "phrygian dominant"): [0, 1, 4, 5, 7, 8, 10],
+    ("pentatonic", "minor pentatonic"): [0, 3, 5, 7, 10],
+    ("pentatonic", "major pentatonic"): [0, 2, 4, 7, 9],
 }
 
 
