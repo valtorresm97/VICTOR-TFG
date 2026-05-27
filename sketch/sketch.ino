@@ -187,7 +187,6 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     static_cast<uint8_t>(b2 & 0xFF),
   };
 
-#if (MIDI_BITBANG_D1_CONFIGURED || MIDI_UART_CONFIGURED)
   if (midi_debug_left > 0) {
     Monitor.print("[MIDI TX] n=");
     Monitor.print(n);
