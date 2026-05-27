@@ -88,9 +88,10 @@ MIDI_TEST_LOOP_NOTE_SEC = 0.08
 MIDI_TEST_LOOP_GAP_SEC = 0.02
 
 
-# Rama de diagnóstico MCU: Python no envía MIDI por defecto para no mezclar
-# el self-test directo por Serial1 con eventos Bridge.
-MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, False)
+# MIDI OUT fisico validado en UNO Q por Serial1/D1 con TX invertido en MCU.
+# El loop diagnostico no arranca por defecto, asi que Python puede volver a
+# enviar la sonificacion real por Bridge -> midi_bytes.
+MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, True)
 
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02

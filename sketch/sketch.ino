@@ -117,9 +117,10 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// Rama midi-config-v2: probar MIDI OUT fisico por D1/TX usando Serial1.
-// En UNO Q / Zephyr, D0/D1 se exponen como UART de hardware. Si interfiere
-// con Bridge/Monitor, compilar con MIDI_UART_ENABLED=0 para volver a dry-run.
+// MIDI OUT fisico validado:
+//   - Serial1 expone D1/TX en UNO Q / Zephyr.
+//   - El circuito MIDI OUT N-audio usado en esta PCB requiere TX invertido.
+//   - No usar Serial para MIDI: Serial queda reservado para Monitor/App Lab.
 #ifndef MIDI_SERIAL
 #define MIDI_SERIAL Serial1
 #endif
@@ -129,7 +130,8 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 #endif
 
 #ifndef MIDI_MCU_SELF_TEST_ENABLED
-#define MIDI_MCU_SELF_TEST_ENABLED 1
+// Diagnostico directo desde MCU. Debe permanecer apagado en flujo EEG normal.
+#define MIDI_MCU_SELF_TEST_ENABLED 0
 #endif
 
 #if (MIDI_UART_ENABLED != 0)
@@ -150,7 +152,6 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 static uint8_t midi_debug_left = 16;
 static uint32_t midi_calls_total = 0;
 static uint32_t midi_bytes_total = 0;
-static bool midi_tx_inversion_applied = false;
 
 static void midiConfigureTxPolarity() {
 #if MIDI_UART_CONFIGURED
@@ -166,10 +167,7 @@ static void midiConfigureTxPolarity() {
 #else
   USART1->CR2 |= USART_CR2_TXINV;
 #endif
-  midi_tx_inversion_applied = true;
   Monitor.println("MIDI TX inversion REQUIRED and enabled on USART1 (TXINV)");
-#else
-  midi_tx_inversion_applied = false;
 #endif
 }
 
