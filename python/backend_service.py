@@ -80,6 +80,8 @@ MUSIC_SCALE_NAME = "Major (Ionian)"
 RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
 
+MIDI_TEST_PROGRAM = 9  # Programa visible 10 en sintetizadores 1..128.
+
 
 # Rama midi-config-v2: enviar MIDI live por defecto para validar la salida DIN.
 # Se puede desactivar en placa con EEG_MIDI_LIVE_ENABLED=0.
@@ -721,7 +723,7 @@ class BackendService:
         note: int = 60,
         velocity: int = 100,
         duration_sec: float = 0.5,
-        program: int | None = 0,
+        program: int | None = MIDI_TEST_PROGRAM,
     ) -> dict:
         """
         Envía una nota MIDI fija sin depender de EEG, DSP ni scheduler musical.
@@ -745,7 +747,7 @@ class BackendService:
         velocity: int = 100,
         note_duration_sec: float = 0.25,
         gap_sec: float = 0.05,
-        program: int | None = 0,
+        program: int | None = MIDI_TEST_PROGRAM,
     ) -> dict:
         """
         Envía una secuencia fija de notas sin depender de EEG.

@@ -46,13 +46,13 @@ class EEGWebServer:
         return {"ok": True, "sent_events": int(sent_events)}
 
     def post_midi_test_note(self):
-        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5, program=0)
+        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5)
 
     def post_midi_test_note_ch1(self):
-        return self.backend.send_test_note(channel=1, note=60, velocity=100, duration_sec=0.5, program=0)
+        return self.backend.send_test_note(channel=1, note=60, velocity=100, duration_sec=0.5)
 
     def post_midi_test_note_ch10(self):
-        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5, program=0)
+        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5)
 
     def post_midi_test_sequence(self):
         return self.backend.send_test_sequence(channel=10)
