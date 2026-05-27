@@ -81,16 +81,16 @@ RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
 
 MIDI_TEST_PROGRAM = 9  # Programa visible 10 en sintetizadores 1..128.
-MIDI_TEST_LOOP_AUTOSTART = env_bool("EEG_MIDI_TEST_LOOP_AUTOSTART", True)
+MIDI_TEST_LOOP_AUTOSTART = env_bool("EEG_MIDI_TEST_LOOP_AUTOSTART", False)
 MIDI_TEST_LOOP_CHANNEL = max(1, min(16, int(os.environ.get("EEG_MIDI_TEST_LOOP_CHANNEL", "10"))))
 MIDI_TEST_LOOP_NOTES = [60, 64, 67, 72]
 MIDI_TEST_LOOP_NOTE_SEC = 0.08
 MIDI_TEST_LOOP_GAP_SEC = 0.02
 
 
-# Rama midi-config-v2: enviar MIDI live por defecto para validar la salida DIN.
-# Se puede desactivar en placa con EEG_MIDI_LIVE_ENABLED=0.
-MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, True)
+# Rama de diagnóstico MCU: Python no envía MIDI por defecto para no mezclar
+# el self-test directo por Serial1 con eventos Bridge.
+MIDI_LIVE_ENABLED = env_bool(EEG_MIDI_LIVE_ENABLED_ENV, False)
 
 MIDI_BRIDGE_METHOD = "midi_bytes"
 MIDI_LOOKAHEAD_SEC = 0.02

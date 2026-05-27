@@ -128,6 +128,10 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 #define MIDI_UART_ENABLED 1
 #endif
 
+#ifndef MIDI_MCU_SELF_TEST_ENABLED
+#define MIDI_MCU_SELF_TEST_ENABLED 1
+#endif
+
 #if (MIDI_UART_ENABLED != 0)
 #ifndef MIDI_SERIAL
 #error "Define MIDI_SERIAL as the hardware UART verified for D1/TX MIDI OUT."
@@ -137,9 +141,140 @@ static constexpr uint32_t MIDI_BAUD = 31250;
 #define MIDI_UART_CONFIGURED 0
 #endif
 
+#if MIDI_UART_CONFIGURED
+#if !defined(USART1) || !defined(USART_CR2_TXINV)
+#error "N-audio MIDI OUT hardware requires inverted TX, but USART1/TXINV symbols are unavailable."
+#endif
+#endif
+
 static uint8_t midi_debug_left = 16;
 static uint32_t midi_calls_total = 0;
 static uint32_t midi_bytes_total = 0;
+static bool midi_tx_inversion_applied = false;
+
+static void midiConfigureTxPolarity() {
+#if MIDI_UART_CONFIGURED
+#if defined(USART_CR1_UE)
+  const bool was_enabled = (USART1->CR1 & USART_CR1_UE) != 0;
+  if (was_enabled) {
+    USART1->CR1 &= ~USART_CR1_UE;
+  }
+  USART1->CR2 |= USART_CR2_TXINV;
+  if (was_enabled) {
+    USART1->CR1 |= USART_CR1_UE;
+  }
+#else
+  USART1->CR2 |= USART_CR2_TXINV;
+#endif
+  midi_tx_inversion_applied = true;
+  Monitor.println("MIDI TX inversion REQUIRED and enabled on USART1 (TXINV)");
+#else
+  midi_tx_inversion_applied = false;
+#endif
+}
+
+static void midiWriteRawByte(uint8_t value) {
+#if MIDI_UART_CONFIGURED
+  MIDI_SERIAL.write(value);
+#else
+  (void)value;
+#endif
+}
+
+static void midiWriteRawBytes(const uint8_t* data, int n) {
+  for (int i = 0; i < n; ++i) {
+    midiWriteRawByte(data[i]);
+  }
+}
+
+static void midiSend2(uint8_t status_base, uint8_t channel_zero_based, uint8_t data1) {
+  const uint8_t msg[2] = {
+    static_cast<uint8_t>(status_base | (channel_zero_based & 0x0F)),
+    static_cast<uint8_t>(data1 & 0x7F),
+  };
+  midiWriteRawBytes(msg, 2);
+}
+
+static void midiSend3(uint8_t status_base, uint8_t channel_zero_based, uint8_t data1, uint8_t data2) {
+  const uint8_t msg[3] = {
+    static_cast<uint8_t>(status_base | (channel_zero_based & 0x0F)),
+    static_cast<uint8_t>(data1 & 0x7F),
+    static_cast<uint8_t>(data2 & 0x7F),
+  };
+  midiWriteRawBytes(msg, 3);
+}
+
+static void midiSendControlChange(uint8_t channel_zero_based, uint8_t cc, uint8_t value) {
+  midiSend3(0xB0, channel_zero_based, cc, value);
+}
+
+static void midiSendProgramChange(uint8_t channel_zero_based, uint8_t program) {
+  midiSend2(0xC0, channel_zero_based, program);
+}
+
+static void midiSendNoteOn(uint8_t channel_zero_based, uint8_t note, uint8_t velocity) {
+  midiSend3(0x90, channel_zero_based, note, velocity);
+}
+
+static void midiSendNoteOff(uint8_t channel_zero_based, uint8_t note) {
+  midiSend3(0x80, channel_zero_based, note, 0);
+}
+
+#if MIDI_MCU_SELF_TEST_ENABLED
+static constexpr uint8_t MIDI_SELF_TEST_CHANNEL_ZERO = 9;  // canal MIDI 10
+static constexpr uint8_t MIDI_SELF_TEST_PROGRAM = 9;       // programa visible 10
+static constexpr uint8_t MIDI_SELF_TEST_VELOCITY = 100;
+static constexpr uint32_t MIDI_SELF_TEST_NOTE_MS = 80;
+static constexpr uint32_t MIDI_SELF_TEST_GAP_MS = 20;
+static const uint8_t MIDI_SELF_TEST_NOTES[] = {60, 64, 67, 72};
+static uint8_t midi_self_test_note_idx = 0;
+static bool midi_self_test_note_on = false;
+static uint32_t midi_self_test_next_ms = 0;
+static uint32_t midi_self_test_cycles = 0;
+
+static void midiStartSelfTest() {
+  midiSendControlChange(MIDI_SELF_TEST_CHANNEL_ZERO, 7, 127);   // Volume
+  midiSendControlChange(MIDI_SELF_TEST_CHANNEL_ZERO, 11, 127);  // Expression
+  midiSendControlChange(MIDI_SELF_TEST_CHANNEL_ZERO, 64, 0);    // Sustain off
+  midiSendProgramChange(MIDI_SELF_TEST_CHANNEL_ZERO, MIDI_SELF_TEST_PROGRAM);
+
+  midi_self_test_note_idx = 0;
+  midi_self_test_note_on = false;
+  midi_self_test_next_ms = millis() + 20;
+  midi_self_test_cycles = 0;
+
+  Monitor.println("MIDI MCU self-test enabled: Serial1 channel=10 program=10");
+}
+
+static void midiPumpSelfTest() {
+  const uint32_t now = millis();
+  if (static_cast<int32_t>(now - midi_self_test_next_ms) < 0) {
+    return;
+  }
+
+  const uint8_t note_count = static_cast<uint8_t>(sizeof(MIDI_SELF_TEST_NOTES) / sizeof(MIDI_SELF_TEST_NOTES[0]));
+  const uint8_t note = MIDI_SELF_TEST_NOTES[midi_self_test_note_idx % note_count];
+
+  if (!midi_self_test_note_on) {
+    midiSendNoteOn(MIDI_SELF_TEST_CHANNEL_ZERO, note, MIDI_SELF_TEST_VELOCITY);
+    midi_self_test_note_on = true;
+    midi_self_test_next_ms = now + MIDI_SELF_TEST_NOTE_MS;
+    return;
+  }
+
+  midiSendNoteOff(MIDI_SELF_TEST_CHANNEL_ZERO, note);
+  midi_self_test_note_on = false;
+  midi_self_test_note_idx = static_cast<uint8_t>((midi_self_test_note_idx + 1) % note_count);
+  if (midi_self_test_note_idx == 0) {
+    ++midi_self_test_cycles;
+    if ((midi_self_test_cycles % 32UL) == 0) {
+      Monitor.print("[MIDI SELFTEST] cycles=");
+      Monitor.println(midi_self_test_cycles);
+    }
+  }
+  midi_self_test_next_ms = now + MIDI_SELF_TEST_GAP_MS;
+}
+#endif
 
 static bool midi_bytes(int n, int b0, int b1, int b2) {
   if (n < 1 || n > 3) {
@@ -175,9 +310,7 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     Monitor.println(midi_bytes_total);
   }
 
-  for (int i = 0; i < n; ++i) {
-    MIDI_SERIAL.write(data[i]);
-  }
+  midiWriteRawBytes(data, n);
   return true;
 #else
   (void)data;
@@ -521,8 +654,16 @@ void setup() {
 #endif
 
 #if MIDI_UART_ENABLED
+#if defined(SERIAL_8N1)
+  MIDI_SERIAL.begin(MIDI_BAUD, SERIAL_8N1);
+#else
   MIDI_SERIAL.begin(MIDI_BAUD);
-  Monitor.println("MIDI UART enabled at 31250 baud");
+#endif
+  midiConfigureTxPolarity();
+  Monitor.println("MIDI UART enabled at 31250 baud on Serial1/D1");
+#if MIDI_MCU_SELF_TEST_ENABLED
+  midiStartSelfTest();
+#endif
 #else
   Monitor.println("MIDI UART disabled: midi_bytes handler registered for dry-run only");
 #endif
@@ -599,6 +740,10 @@ void setup() {
 
 void loop() {
   const uint32_t loop_start_us = micros();
+
+#if MIDI_MCU_SELF_TEST_ENABLED
+  midiPumpSelfTest();
+#endif
 
   // Handshake con Python (1 Hz)
   if (!mpu_ready) {
