@@ -81,6 +81,11 @@ RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
 
 MIDI_TEST_PROGRAM = 9  # Programa visible 10 en sintetizadores 1..128.
+MIDI_TEST_LOOP_AUTOSTART = env_bool("EEG_MIDI_TEST_LOOP_AUTOSTART", True)
+MIDI_TEST_LOOP_CHANNEL = max(1, min(16, int(os.environ.get("EEG_MIDI_TEST_LOOP_CHANNEL", "1"))))
+MIDI_TEST_LOOP_NOTES = [60, 64, 67, 72]
+MIDI_TEST_LOOP_NOTE_SEC = 0.25
+MIDI_TEST_LOOP_GAP_SEC = 0.05
 
 
 # Rama midi-config-v2: enviar MIDI live por defecto para validar la salida DIN.
@@ -230,6 +235,23 @@ class BackendService:
 
         self._last_music_t = 0.0
         self._program_change_sent = False
+        self._midi_test_loop = {
+            "active": bool(MIDI_TEST_LOOP_AUTOSTART),
+            "channel": MIDI_TEST_LOOP_CHANNEL,
+            "channel_zero_based": MIDI_TEST_LOOP_CHANNEL - 1,
+            "notes": list(MIDI_TEST_LOOP_NOTES),
+            "note_idx": 0,
+            "phase": "program",
+            "next_due": 0.0,
+            "note_duration_sec": MIDI_TEST_LOOP_NOTE_SEC,
+            "gap_sec": MIDI_TEST_LOOP_GAP_SEC,
+            "program": MIDI_TEST_PROGRAM,
+            "sent_events": 0,
+            "failed_events": 0,
+            "cycles": 0,
+            "last_bytes": [],
+            "last_event": None,
+        }
 
         self._last_notes_count = 0
         self._last_midi_due_count = 0
@@ -394,6 +416,7 @@ class BackendService:
             "midi": {
                 "scheduler": self.midi_scheduler.get_status(),
                 "transport": self.midi_transport.get_status(),
+                "test_loop": self.get_midi_test_loop_status(),
                 "last_due_events": self._last_midi_due_count,
                 "last_sent_events": self._last_midi_sent_count,
                 "pump_errors_total": self._midi_pump_errors_total,
@@ -590,6 +613,82 @@ class BackendService:
             self._midi_pump_errors_total += 1
             logger.exception("[MIDI] pump error: %s", exc)
 
+    def _send_midi_test_event(self, event: MidiLiveEvent) -> bool:
+        data = event_to_midi_bytes(event)
+        ok = self.midi_transport.send_event(event)
+        self._midi_test_loop["last_bytes"] = [int(x) for x in data]
+        self._midi_test_loop["last_event"] = event.type
+        if ok:
+            self._midi_test_loop["sent_events"] += 1
+        else:
+            self._midi_test_loop["failed_events"] += 1
+        return ok
+
+    def _pump_midi_test_loop(self, now: float) -> None:
+        """Emite una secuencia MIDI diagnóstica desde el loop App Lab."""
+        if not self._midi_test_loop.get("active"):
+            return
+        if now < float(self._midi_test_loop.get("next_due", 0.0) or 0.0):
+            return
+
+        channel_zero = int(self._midi_test_loop["channel_zero_based"])
+        phase = str(self._midi_test_loop.get("phase", "program"))
+        notes = list(self._midi_test_loop.get("notes", MIDI_TEST_LOOP_NOTES)) or [60]
+
+        try:
+            if phase == "program":
+                event = MidiLiveEvent(
+                    sort_index=now,
+                    due_time=now,
+                    type=PROGRAM_CHANGE,
+                    channel=channel_zero,
+                    data1=int(self._midi_test_loop.get("program", MIDI_TEST_PROGRAM)),
+                    data2=0,
+                )
+                self._send_midi_test_event(event)
+                self._midi_test_loop["phase"] = "note_on"
+                self._midi_test_loop["next_due"] = now + 0.02
+                return
+
+            note_idx = int(self._midi_test_loop.get("note_idx", 0)) % len(notes)
+            note = int(notes[note_idx])
+
+            if phase == "note_on":
+                event = MidiLiveEvent(
+                    sort_index=now,
+                    due_time=now,
+                    type=NOTE_ON,
+                    channel=channel_zero,
+                    data1=note,
+                    data2=100,
+                )
+                self._send_midi_test_event(event)
+                self._midi_test_loop["phase"] = "note_off"
+                self._midi_test_loop["next_due"] = now + float(self._midi_test_loop["note_duration_sec"])
+                return
+
+            event = MidiLiveEvent(
+                sort_index=now,
+                due_time=now,
+                type=NOTE_OFF,
+                channel=channel_zero,
+                data1=note,
+                data2=0,
+            )
+            self._send_midi_test_event(event)
+
+            note_idx = (note_idx + 1) % len(notes)
+            if note_idx == 0:
+                self._midi_test_loop["cycles"] += 1
+            self._midi_test_loop["note_idx"] = note_idx
+            self._midi_test_loop["phase"] = "note_on"
+            self._midi_test_loop["next_due"] = now + float(self._midi_test_loop["gap_sec"])
+
+        except Exception as exc:
+            self._midi_pump_errors_total += 1
+            self._midi_test_loop["failed_events"] += 1
+            logger.exception("[MIDI] test loop error: %s", exc)
+
     # --------------------------------------------------------
     # Loop principal
     # --------------------------------------------------------
@@ -671,10 +770,13 @@ class BackendService:
 
         now = time.monotonic()
 
-        # Música y MIDI se ejecutan en cada step, pero solo generan
-        # compás nuevo cuando ha pasado MUSIC_GENERATE_PERIOD_SEC.
-        self._maybe_generate_music(now=now)
-        self._pump_midi(now=now)
+        # El loop diagnóstico MIDI sale desde App Lab sin depender de shell ni
+        # EEG. Mientras esté activo no mezclamos la sonificación musical live.
+        if self._midi_test_loop.get("active"):
+            self._pump_midi_test_loop(now=now)
+        else:
+            self._maybe_generate_music(now=now)
+            self._pump_midi(now=now)
         self._maybe_update_led_matrix(now=now)
 
         if (now - self._last_snapshot_t) >= SNAPSHOT_PUBLISH_PERIOD_SEC:
@@ -716,6 +818,51 @@ class BackendService:
             self._midi_pump_errors_total += 1
             logger.exception("[MIDI] panic error: %s", exc)
             return 0
+
+    def start_midi_test_loop(self, channel: int = 1) -> dict:
+        channel_human = max(1, min(16, int(channel)))
+        self._midi_test_loop.update(
+            {
+                "active": True,
+                "channel": channel_human,
+                "channel_zero_based": channel_human - 1,
+                "notes": list(MIDI_TEST_LOOP_NOTES),
+                "note_idx": 0,
+                "phase": "program",
+                "next_due": 0.0,
+                "sent_events": 0,
+                "failed_events": 0,
+                "cycles": 0,
+                "last_bytes": [],
+                "last_event": None,
+            }
+        )
+        self.midi_scheduler.clear()
+        return self.get_midi_test_loop_status()
+
+    def stop_midi_test_loop(self) -> dict:
+        self._midi_test_loop["active"] = False
+        self.send_panic()
+        return self.get_midi_test_loop_status()
+
+    def get_midi_test_loop_status(self) -> dict:
+        return {
+            "active": bool(self._midi_test_loop.get("active")),
+            "autostart": MIDI_TEST_LOOP_AUTOSTART,
+            "channel": int(self._midi_test_loop.get("channel", MIDI_TEST_LOOP_CHANNEL)),
+            "channel_zero_based": int(self._midi_test_loop.get("channel_zero_based", MIDI_TEST_LOOP_CHANNEL - 1)),
+            "notes": list(self._midi_test_loop.get("notes", MIDI_TEST_LOOP_NOTES)),
+            "program": int(self._midi_test_loop.get("program", MIDI_TEST_PROGRAM)),
+            "phase": self._midi_test_loop.get("phase"),
+            "note_idx": int(self._midi_test_loop.get("note_idx", 0)),
+            "cycles": int(self._midi_test_loop.get("cycles", 0)),
+            "sent_events": int(self._midi_test_loop.get("sent_events", 0)),
+            "failed_events": int(self._midi_test_loop.get("failed_events", 0)),
+            "last_event": self._midi_test_loop.get("last_event"),
+            "last_bytes": list(self._midi_test_loop.get("last_bytes", [])),
+            "note_duration_sec": float(self._midi_test_loop.get("note_duration_sec", MIDI_TEST_LOOP_NOTE_SEC)),
+            "gap_sec": float(self._midi_test_loop.get("gap_sec", MIDI_TEST_LOOP_GAP_SEC)),
+        }
 
     def send_test_note(
         self,

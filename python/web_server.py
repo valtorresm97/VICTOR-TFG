@@ -33,6 +33,10 @@ class EEGWebServer:
         self.ui.expose_api("POST", "/midi/test-sequence-30s", self.post_midi_test_sequence_30s)
         self.ui.expose_api("POST", "/midi/test-sequence-30s-ch1", self.post_midi_test_sequence_30s_ch1)
         self.ui.expose_api("POST", "/midi/test-sequence-30s-ch10", self.post_midi_test_sequence_30s_ch10)
+        self.ui.expose_api("POST", "/midi/test-loop/start", self.post_midi_test_loop_start)
+        self.ui.expose_api("POST", "/midi/test-loop/start-ch1", self.post_midi_test_loop_start_ch1)
+        self.ui.expose_api("POST", "/midi/test-loop/start-ch10", self.post_midi_test_loop_start_ch10)
+        self.ui.expose_api("POST", "/midi/test-loop/stop", self.post_midi_test_loop_stop)
         self.ui.on_connect(self.on_connect)
         self.ui.on_disconnect(self.on_disconnect)
 
@@ -74,6 +78,18 @@ class EEGWebServer:
 
     def post_midi_test_sequence_30s_ch10(self):
         return self.backend.send_test_sequence(channel=10, repeat=25)
+
+    def post_midi_test_loop_start(self):
+        return self.backend.start_midi_test_loop(channel=1)
+
+    def post_midi_test_loop_start_ch1(self):
+        return self.backend.start_midi_test_loop(channel=1)
+
+    def post_midi_test_loop_start_ch10(self):
+        return self.backend.start_midi_test_loop(channel=10)
+
+    def post_midi_test_loop_stop(self):
+        return self.backend.stop_midi_test_loop()
 
     def on_connect(self, sid):
         logger.info("[WEB] connected: %s", sid)
