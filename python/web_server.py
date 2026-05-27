@@ -71,13 +71,13 @@ class EEGWebServer:
         return self.backend.send_test_sequence(channel=10)
 
     def post_midi_test_sequence_30s(self):
-        return self.backend.send_test_sequence(channel=10, repeat=25)
+        return self.backend.send_test_sequence(channel=10, repeat=75)
 
     def post_midi_test_sequence_30s_ch1(self):
-        return self.backend.send_test_sequence(channel=1, repeat=25)
+        return self.backend.send_test_sequence(channel=1, repeat=75)
 
     def post_midi_test_sequence_30s_ch10(self):
-        return self.backend.send_test_sequence(channel=10, repeat=25)
+        return self.backend.send_test_sequence(channel=10, repeat=75)
 
     def post_midi_test_loop_start(self):
         return self.backend.start_midi_test_loop(channel=1)

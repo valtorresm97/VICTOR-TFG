@@ -84,8 +84,8 @@ MIDI_TEST_PROGRAM = 9  # Programa visible 10 en sintetizadores 1..128.
 MIDI_TEST_LOOP_AUTOSTART = env_bool("EEG_MIDI_TEST_LOOP_AUTOSTART", True)
 MIDI_TEST_LOOP_CHANNEL = max(1, min(16, int(os.environ.get("EEG_MIDI_TEST_LOOP_CHANNEL", "1"))))
 MIDI_TEST_LOOP_NOTES = [60, 64, 67, 72]
-MIDI_TEST_LOOP_NOTE_SEC = 0.25
-MIDI_TEST_LOOP_GAP_SEC = 0.05
+MIDI_TEST_LOOP_NOTE_SEC = 0.08
+MIDI_TEST_LOOP_GAP_SEC = 0.02
 
 
 # Rama midi-config-v2: enviar MIDI live por defecto para validar la salida DIN.
@@ -892,8 +892,8 @@ class BackendService:
         channel: int = 10,
         notes: list[int] | None = None,
         velocity: int = 100,
-        note_duration_sec: float = 0.25,
-        gap_sec: float = 0.05,
+        note_duration_sec: float = 0.08,
+        gap_sec: float = 0.02,
         program: int | None = MIDI_TEST_PROGRAM,
         repeat: int = 1,
     ) -> dict:

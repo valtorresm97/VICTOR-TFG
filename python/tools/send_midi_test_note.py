@@ -117,7 +117,7 @@ def main() -> int:
         help="Comma-separated MIDI notes. Default: C4,E4,G4,C5.",
     )
     parser.add_argument("--velocity", type=int, default=100, help="MIDI velocity 1..127.")
-    parser.add_argument("--duration", type=float, default=0.25, help="Each note duration seconds.")
+    parser.add_argument("--duration", type=float, default=0.08, help="Each note duration seconds.")
     parser.add_argument(
         "--program",
         type=int,
@@ -126,7 +126,7 @@ def main() -> int:
     )
     parser.add_argument("--no-program", action="store_true", help="Do not send program_change.")
     parser.add_argument("--repeat", type=int, default=1, help="Number of notes to send.")
-    parser.add_argument("--gap", type=float, default=0.5, help="Gap between repeated notes.")
+    parser.add_argument("--gap", type=float, default=0.02, help="Gap between repeated notes.")
     parser.add_argument("--dry-run", action="store_true", help="Print bytes without Bridge.call.")
     args = parser.parse_args()
 
