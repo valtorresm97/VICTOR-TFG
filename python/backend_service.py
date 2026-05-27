@@ -79,10 +79,11 @@ MUSIC_LOW_NOTES_PER_BAR = env_int("EEG_MUSIC_LOW_NOTES_PER_BAR", 2, 1, 16)
 MUSIC_MEDIUM_NOTES_PER_BAR = env_int("EEG_MUSIC_MEDIUM_NOTES_PER_BAR", 6, 1, 16)
 MUSIC_HIGH_NOTES_PER_BAR = env_int("EEG_MUSIC_HIGH_NOTES_PER_BAR", 11, 1, 16)
 
-MUSIC_REGISTER_SPAN_SEMITONES = env_int("EEG_MUSIC_REGISTER_SPAN_SEMITONES", 18, 6, 36)
-MUSIC_SCALE_RADIUS_SEMITONES = env_int("EEG_MUSIC_SCALE_RADIUS_SEMITONES", 20, 8, 48)
-MUSIC_MAX_INTERVAL_LOW_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_LOW_TENSION", 5, 1, 24)
-MUSIC_MAX_INTERVAL_HIGH_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_HIGH_TENSION", 12, 1, 36)
+MUSIC_REGISTER_SPAN_SEMITONES = env_int("EEG_MUSIC_REGISTER_SPAN_SEMITONES", 24, 6, 36)
+MUSIC_SCALE_RADIUS_SEMITONES = env_int("EEG_MUSIC_SCALE_RADIUS_SEMITONES", 28, 8, 48)
+MUSIC_MAX_INTERVAL_LOW_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_LOW_TENSION", 7, 1, 24)
+MUSIC_MAX_INTERVAL_HIGH_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_HIGH_TENSION", 16, 1, 36)
+MUSIC_PITCH_VARIETY = env_float("EEG_MUSIC_PITCH_VARIETY", 0.65, 0.0, 1.0)
 
 # MIDI usa canales internos 0..15. 9 corresponde al canal MIDI 10.
 MUSIC_CHANNEL = 9
@@ -254,6 +255,8 @@ class BackendService:
             max_interval_high_tension=MUSIC_MAX_INTERVAL_HIGH_TENSION,
             register_span_semitones=MUSIC_REGISTER_SPAN_SEMITONES,
             scale_radius_semitones=MUSIC_SCALE_RADIUS_SEMITONES,
+            pitch_variety=MUSIC_PITCH_VARIETY,
+            random_seed=456,
             default_channel=MUSIC_CHANNEL,
             default_program=MUSIC_PROGRAM,
         )
@@ -508,6 +511,7 @@ class BackendService:
                 "music_register_span_semitones": MUSIC_REGISTER_SPAN_SEMITONES,
                 "music_max_interval_low_tension": MUSIC_MAX_INTERVAL_LOW_TENSION,
                 "music_max_interval_high_tension": MUSIC_MAX_INTERVAL_HIGH_TENSION,
+                "music_pitch_variety": MUSIC_PITCH_VARIETY,
                 "recent_notes_window_sec": RECENT_NOTES_WINDOW_SEC,
                 "led_matrix_refresh_rate_hz": self.led_matrix_config.refresh_rate_hz,
             },

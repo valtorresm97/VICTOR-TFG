@@ -36,6 +36,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, Sequence
 import math
+import random
 
 from music_segment import MusicSegment, ScaleConfig
 from music_bar import Bar
@@ -115,6 +116,8 @@ class NoteGenerator:
         max_interval_high_tension: int = 12,
         register_span_semitones: int = 18,
         scale_radius_semitones: int = 20,
+        pitch_variety: float = 0.55,
+        random_seed: int | None = None,
         base_velocity_downbeat: int = 104,
         base_velocity_beat: int = 88,
         base_velocity_offbeat: int = 72,
@@ -134,6 +137,8 @@ class NoteGenerator:
         self.max_interval_high_tension = int(max_interval_high_tension)
         self.register_span_semitones = int(register_span_semitones)
         self.scale_radius_semitones = int(scale_radius_semitones)
+        self.pitch_variety = _clamp(float(pitch_variety), 0.0, 1.0)
+        self.rng = random.Random(random_seed)
 
         self.base_velocity_downbeat = int(base_velocity_downbeat)
         self.base_velocity_beat = int(base_velocity_beat)
@@ -268,24 +273,58 @@ class NoteGenerator:
 
         target = self._pitch_target(segment, center)
         prev = self._prev_pitch
+        variety = self._pitch_variety_for_segment(segment)
 
         if prev is None:
-            best = min(
+            scored = sorted(
                 candidates,
-                key=lambda p: 0.55 * abs(p - center) + 0.45 * abs(p - target),
+                key=lambda p: 0.50 * abs(p - center) + 0.50 * abs(p - target),
             )
         else:
-            best = min(
+            scored = sorted(
                 candidates,
-                key=lambda p: 0.72 * abs(p - prev) + 0.28 * abs(p - target),
+                key=lambda p: 0.52 * abs(p - prev) + 0.30 * abs(p - target) + 0.18 * abs(p - center),
             )
 
+        best = self._pick_ranked_candidate(scored, variety)
         return self._apply_interval_limit(
             int(best),
             prev,
             center,
             self._interval_limit(segment),
         )
+
+    def _pitch_variety_for_segment(self, segment: MusicSegment) -> float:
+        """Más actividad/tensión permite recorrer más notas de la escala."""
+        activity = _clamp(_safe_float(segment.activity, 0.5), 0.0, 1.0)
+        tension = _clamp(_safe_float(segment.tension, 0.5), 0.0, 1.0)
+        probability = _clamp(_safe_float(segment.note_probability, 0.5), 0.0, 1.0)
+        return _clamp(
+            self.pitch_variety
+            * (0.35 + 0.35 * activity + 0.20 * tension + 0.10 * probability),
+            0.0,
+            1.0,
+        )
+
+    def _pick_ranked_candidate(self, ranked: Sequence[int], variety: float) -> int:
+        """Elige entre los mejores candidatos para evitar bucles de 2-3 notas."""
+        if not ranked:
+            return 0
+
+        spread = 2 + int(round(_clamp(variety, 0.0, 1.0) * 5.0))
+        pool = list(ranked[: max(1, min(len(ranked), spread))])
+        if len(pool) <= 1:
+            return int(pool[0])
+
+        weights = [1.0 / ((idx + 1) ** (1.15 - 0.65 * variety)) for idx in range(len(pool))]
+        total = sum(weights)
+        r = self.rng.random() * total
+        acc = 0.0
+        for pitch, weight in zip(pool, weights):
+            acc += weight
+            if acc >= r:
+                return int(pitch)
+        return int(pool[-1])
 
     def _interval_limit(self, segment: MusicSegment) -> int:
         """Permite saltos algo mayores cuando la tensión EEG sube."""
