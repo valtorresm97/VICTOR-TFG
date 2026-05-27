@@ -93,6 +93,10 @@ MUSIC_MAIN_NOTE = "G4"
 
 MUSIC_SCALE_FAMILY = "Diatonic"
 MUSIC_SCALE_NAME = "Major (Ionian)"
+MUSIC_SCALE_OPTIONS = {
+    "major": ("Diatonic", "Major (Ionian)"),
+    "minor": ("Diatonic", "Natural Minor (Aeolian)"),
+}
 
 RECENT_NOTES_MAX = 96
 RECENT_NOTES_WINDOW_SEC = 20.0
@@ -220,12 +224,16 @@ class BackendService:
         # ----------------------------------------------------
         # Estado musical live
         # ----------------------------------------------------
+        self.music_root_note = MUSIC_ROOT_NOTE
+        self.music_main_note = MUSIC_MAIN_NOTE
+        self.music_scale_family = MUSIC_SCALE_FAMILY
+        self.music_scale_name = MUSIC_SCALE_NAME
         self.music_scale = build_scale_config(
-            MUSIC_SCALE_FAMILY,
-            MUSIC_SCALE_NAME,
-            MUSIC_ROOT_NOTE,
+            self.music_scale_family,
+            self.music_scale_name,
+            self.music_root_note,
         )
-        self.music_main_note_midi = note_name_to_midi(MUSIC_MAIN_NOTE)
+        self.music_main_note_midi = note_name_to_midi(self.music_main_note)
 
         self.music_segment_builder = MusicSegmentBuilder(fs=FS_HZ)
         self.bar_gen = BarGenerator(
@@ -435,10 +443,15 @@ class BackendService:
                 "bar_sec": MUSIC_BAR_SEC,
                 "channel": MUSIC_CHANNEL,
                 "program": MUSIC_PROGRAM,
-                "root_note": MUSIC_ROOT_NOTE,
-                "main_note": MUSIC_MAIN_NOTE,
-                "scale_family": MUSIC_SCALE_FAMILY,
-                "scale_name": MUSIC_SCALE_NAME,
+                "root_note": self.music_root_note,
+                "main_note": self.music_main_note,
+                "scale_family": self.music_scale_family,
+                "scale_name": self.music_scale_name,
+                "scale_key": self._music_scale_key(),
+                "scale_options": {
+                    key: {"family": family, "name": name}
+                    for key, (family, name) in MUSIC_SCALE_OPTIONS.items()
+                },
                 "rhythm_cadence": self._last_rhythm_cadence,
                 "current_chord_root_midi": self._last_chord_root_midi,
                 "current_chord_pitches": list(self._last_chord_pitches),
@@ -945,6 +958,93 @@ class BackendService:
             self._midi_pump_errors_total += 1
             logger.exception("[MIDI] panic error: %s", exc)
             return 0
+
+    def _music_scale_key(self) -> str:
+        for key, (family, name) in MUSIC_SCALE_OPTIONS.items():
+            if family == self.music_scale_family and name == self.music_scale_name:
+                return key
+        return "custom"
+
+    def update_music_config(
+        self,
+        root_note: str | None = None,
+        main_note: str | None = None,
+        scale_key: str | None = None,
+    ) -> dict:
+        """
+        Actualiza escala/root/main note para los siguientes compases.
+
+        No toca firmware ni transporte MIDI. Limpia el scheduler con panic para
+        evitar notas colgadas si el cambio ocurre mientras hay eventos activos.
+        """
+        next_root = self.music_root_note if root_note is None else str(root_note).strip()
+        next_main = self.music_main_note if main_note is None else str(main_note).strip()
+        next_scale_key = self._music_scale_key() if scale_key is None else str(scale_key).strip().lower()
+
+        if next_scale_key not in MUSIC_SCALE_OPTIONS:
+            return {
+                "ok": False,
+                "error": f"unsupported scale_key: {next_scale_key}",
+                "music": self._music_config_payload(),
+            }
+
+        try:
+            note_name_to_midi(next_root)
+            next_main_midi = note_name_to_midi(next_main)
+            next_family, next_scale_name = MUSIC_SCALE_OPTIONS[next_scale_key]
+            next_scale = build_scale_config(next_family, next_scale_name, next_root)
+        except Exception as exc:
+            return {
+                "ok": False,
+                "error": str(exc),
+                "music": self._music_config_payload(),
+            }
+
+        changed = (
+            next_root != self.music_root_note
+            or next_main != self.music_main_note
+            or next_family != self.music_scale_family
+            or next_scale_name != self.music_scale_name
+        )
+        if not changed:
+            return {
+                "ok": True,
+                "panic_sent_events": 0,
+                "music": self._music_config_payload(),
+            }
+
+        panic_sent = self.send_panic()
+        self.music_root_note = next_root
+        self.music_main_note = next_main
+        self.music_scale_family = next_family
+        self.music_scale_name = next_scale_name
+        self.music_scale = next_scale
+        self.music_main_note_midi = next_main_midi
+
+        self.music_segment_builder.reset()
+        self.note_gen.reset()
+        self._last_chord_t = None
+        self._last_chord_controls = None
+        self._last_chord_reason = "config_change"
+        self._last_chord_change_score = 0.0
+        self._last_chord_played = False
+        self._recent_notes = []
+        self._last_notes_count = 0
+
+        return {
+            "ok": True,
+            "panic_sent_events": int(panic_sent),
+            "music": self._music_config_payload(),
+        }
+
+    def _music_config_payload(self) -> dict:
+        return {
+            "root_note": self.music_root_note,
+            "main_note": self.music_main_note,
+            "scale_family": self.music_scale_family,
+            "scale_name": self.music_scale_name,
+            "scale_key": self._music_scale_key(),
+        }
 
     def start_midi_test_loop(self, channel: int = 1) -> dict:
         channel_human = max(1, min(16, int(channel)))

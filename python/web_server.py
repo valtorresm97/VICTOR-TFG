@@ -10,6 +10,26 @@ from app_state import read_snapshot
 logger = logging.getLogger("EEG_WEBUI")
 
 
+_NOTE_ENDPOINTS = {
+    f"{name.lower()}{octave}": f"{note}{octave}"
+    for octave in (3, 4, 5)
+    for name, note in (
+        ("c", "C"),
+        ("cs", "C#"),
+        ("d", "D"),
+        ("ds", "D#"),
+        ("e", "E"),
+        ("f", "F"),
+        ("fs", "F#"),
+        ("g", "G"),
+        ("gs", "G#"),
+        ("a", "A"),
+        ("as", "A#"),
+        ("b", "B"),
+    )
+}
+
+
 class EEGWebServer:
     """Servidor WebUI HTML Brick para snapshots EEG."""
 
@@ -37,6 +57,12 @@ class EEGWebServer:
         self.ui.expose_api("POST", "/midi/test-loop/start-ch1", self.post_midi_test_loop_start_ch1)
         self.ui.expose_api("POST", "/midi/test-loop/start-ch10", self.post_midi_test_loop_start_ch10)
         self.ui.expose_api("POST", "/midi/test-loop/stop", self.post_midi_test_loop_stop)
+        self.ui.expose_api("POST", "/music/config", self.post_music_config)
+        self.ui.expose_api("POST", "/music/scale/major", self._music_scale_handler("major"))
+        self.ui.expose_api("POST", "/music/scale/minor", self._music_scale_handler("minor"))
+        for key, note in _NOTE_ENDPOINTS.items():
+            self.ui.expose_api("POST", f"/music/root/{key}", self._music_root_handler(note))
+            self.ui.expose_api("POST", f"/music/main/{key}", self._music_main_handler(note))
         self.ui.on_connect(self.on_connect)
         self.ui.on_disconnect(self.on_disconnect)
 
@@ -90,6 +116,33 @@ class EEGWebServer:
 
     def post_midi_test_loop_stop(self):
         return self.backend.stop_midi_test_loop()
+
+    def post_music_config(self, *args, **kwargs):
+        payload = {}
+        for arg in args:
+            if isinstance(arg, dict):
+                payload.update(arg)
+        payload.update(kwargs)
+        return self.backend.update_music_config(
+            root_note=payload.get("root_note"),
+            main_note=payload.get("main_note"),
+            scale_key=payload.get("scale_key"),
+        )
+
+    def _music_scale_handler(self, scale_key: str):
+        def handler():
+            return self.backend.update_music_config(scale_key=scale_key)
+        return handler
+
+    def _music_root_handler(self, note: str):
+        def handler():
+            return self.backend.update_music_config(root_note=note)
+        return handler
+
+    def _music_main_handler(self, note: str):
+        def handler():
+            return self.backend.update_music_config(main_note=note)
+        return handler
 
     def on_connect(self, sid):
         logger.info("[WEB] connected: %s", sid)

@@ -90,6 +90,25 @@
         <div class="card metric"><h3>Scale</h3><p id="music-scale">n/a</p></div>
         <div class="card metric"><h3>Main note</h3><p id="music-main-note">n/a</p></div>
       </div>
+      <div class="music-controls">
+        <label>
+          <span>Root</span>
+          <select id="music-root-select"></select>
+        </label>
+        <label>
+          <span>Main</span>
+          <select id="music-main-select"></select>
+        </label>
+        <label>
+          <span>Scale</span>
+          <select id="music-scale-select">
+            <option value="major">Major</option>
+            <option value="minor">Natural minor</option>
+          </select>
+        </label>
+        <button id="music-apply-button" type="button">Apply</button>
+        <span id="music-config-status" class="action-status">Listo</span>
+      </div>
     </section>
 
     <section class="section">

@@ -1,4 +1,6 @@
 const bands = ["delta", "theta", "alpha", "beta", "gamma"];
+const musicNoteOptions = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+  .flatMap((note) => [3, 4, 5].map((octave) => `${note}${octave}`));
 
 function fmt(v, n = 3) {
   const x = Number(v);
@@ -155,6 +157,7 @@ function renderSonification(s) {
   setText("music-current-chord", (music.current_chord_notes || []).join(" · ") || "n/a");
   setText("music-scale", `${music.root_note || "n/a"} ${music.scale_name || ""}`.trim());
   setText("music-main-note", music.main_note || "n/a");
+  syncMusicControls(music);
 
   setText("midi-live-enabled", midi.live_enabled ? "enabled" : "disabled");
   setText("midi-queued-events", String(scheduler.queued_events ?? 0));
@@ -162,6 +165,96 @@ function renderSonification(s) {
   setText("midi-sent-events", String(transport.sent_events_total ?? 0));
   setText("midi-dropped-events", String(transport.dropped_events_total ?? 0));
   setText("midi-failed-events", String(transport.failed_events_total ?? 0));
+}
+
+function noteEndpointKey(note) {
+  return String(note || "").trim().toLowerCase().replace("#", "s");
+}
+
+function syncMusicControls(music) {
+  const root = document.getElementById("music-root-select");
+  const main = document.getElementById("music-main-select");
+  const scale = document.getElementById("music-scale-select");
+  const active = document.activeElement;
+  if (root && active !== root && music.root_note) root.value = music.root_note;
+  if (main && active !== main && music.main_note) main.value = music.main_note;
+  if (scale && active !== scale && music.scale_key) scale.value = music.scale_key;
+}
+
+function setMusicConfigStatus(text, isError = false) {
+  const el = document.getElementById("music-config-status");
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle("error", Boolean(isError));
+}
+
+function musicConfigMatches(payload, desired) {
+  const music = payload && payload.music ? payload.music : {};
+  return (
+    music.root_note === desired.root_note &&
+    music.main_note === desired.main_note &&
+    music.scale_key === desired.scale_key
+  );
+}
+
+async function postMusicEndpoint(path, body = null) {
+  const options = { method: "POST" };
+  if (body) {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, options);
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok || payload.ok === false) {
+    throw new Error(payload.error || `HTTP ${res.status}`);
+  }
+  return payload;
+}
+
+async function applyMusicConfig() {
+  const button = document.getElementById("music-apply-button");
+  const root = document.getElementById("music-root-select");
+  const main = document.getElementById("music-main-select");
+  const scale = document.getElementById("music-scale-select");
+  if (!root || !main || !scale) return;
+
+  const desired = {
+    root_note: root.value,
+    main_note: main.value,
+    scale_key: scale.value,
+  };
+
+  if (button) button.disabled = true;
+  setMusicConfigStatus("Aplicando...");
+
+  try {
+    let payload = await postMusicEndpoint("./music/config", desired);
+    if (!musicConfigMatches(payload, desired)) {
+      await postMusicEndpoint(`./music/scale/${desired.scale_key}`);
+      await postMusicEndpoint(`./music/root/${noteEndpointKey(desired.root_note)}`);
+      payload = await postMusicEndpoint(`./music/main/${noteEndpointKey(desired.main_note)}`);
+    }
+    if (!musicConfigMatches(payload, desired)) {
+      throw new Error("La WebUI no confirmó la configuración aplicada");
+    }
+    setMusicConfigStatus("Aplicado");
+    await loadInitial();
+  } catch (e) {
+    console.warn("[WEBUI] music config error", e);
+    setMusicConfigStatus("Error al aplicar", true);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function setupMusicControls() {
+  const root = document.getElementById("music-root-select");
+  const main = document.getElementById("music-main-select");
+  const button = document.getElementById("music-apply-button");
+  const options = musicNoteOptions.map((note) => `<option value="${note}">${note}</option>`).join("");
+  if (root) root.innerHTML = options;
+  if (main) main.innerHTML = options;
+  if (button) button.addEventListener("click", applyMusicConfig);
 }
 
 function setPanicStatus(text, isError = false) {
@@ -295,6 +388,7 @@ function startPollingFallback() {
 }
 
 setupMidiPanicButton();
+setupMusicControls();
 loadInitial();
 startSocket();
 startPollingFallback();
