@@ -251,6 +251,7 @@ class BackendService:
             "cycles": 0,
             "last_bytes": [],
             "last_event": None,
+            "active_note": None,
         }
 
         self._last_notes_count = 0
@@ -478,6 +479,40 @@ class BackendService:
         recent.sort(key=lambda n: (n["abs_start"], n["pitch_midi"]))
         self._recent_notes = recent[-RECENT_NOTES_MAX:]
 
+    def _remember_midi_test_note(
+        self,
+        *,
+        pitch_midi: int,
+        velocity: int,
+        channel: int,
+        program: int,
+        abs_start: float,
+        abs_end: float,
+    ) -> None:
+        """Añade notas del loop diagnóstico al mismo piano roll web."""
+        cutoff = float(abs_end) - RECENT_NOTES_WINDOW_SEC
+        recent = [
+            note
+            for note in self._recent_notes
+            if float(note.get("abs_end", 0.0) or 0.0) >= cutoff
+        ]
+        recent.append(
+            {
+                "abs_start": float(abs_start),
+                "abs_end": max(float(abs_start) + 0.03, float(abs_end)),
+                "t_start": 0.0,
+                "t_end": max(0.03, float(abs_end) - float(abs_start)),
+                "pitch_midi": int(pitch_midi),
+                "note_name": _midi_to_note_name(int(pitch_midi)),
+                "velocity": int(velocity),
+                "channel": int(channel),
+                "program": int(program),
+                "source": "midi_test_loop",
+            }
+        )
+        recent.sort(key=lambda n: (n["abs_start"], n["pitch_midi"]))
+        self._recent_notes = recent[-RECENT_NOTES_MAX:]
+
     def _maybe_generate_music(self, now: float) -> None:
         """
         Genera un compás musical cada MUSIC_GENERATE_PERIOD_SEC.
@@ -663,6 +698,13 @@ class BackendService:
                     data2=100,
                 )
                 self._send_midi_test_event(event)
+                self._midi_test_loop["active_note"] = {
+                    "pitch_midi": note,
+                    "velocity": 100,
+                    "channel": channel_zero,
+                    "program": int(self._midi_test_loop.get("program", MIDI_TEST_PROGRAM)),
+                    "abs_start": now,
+                }
                 self._midi_test_loop["phase"] = "note_off"
                 self._midi_test_loop["next_due"] = now + float(self._midi_test_loop["note_duration_sec"])
                 return
@@ -676,6 +718,16 @@ class BackendService:
                 data2=0,
             )
             self._send_midi_test_event(event)
+            active_note = self._midi_test_loop.get("active_note") or {}
+            self._remember_midi_test_note(
+                pitch_midi=int(active_note.get("pitch_midi", note)),
+                velocity=int(active_note.get("velocity", 100)),
+                channel=int(active_note.get("channel", channel_zero)),
+                program=int(active_note.get("program", MIDI_TEST_PROGRAM)),
+                abs_start=float(active_note.get("abs_start", now)),
+                abs_end=now,
+            )
+            self._midi_test_loop["active_note"] = None
 
             note_idx = (note_idx + 1) % len(notes)
             if note_idx == 0:
@@ -835,6 +887,7 @@ class BackendService:
                 "cycles": 0,
                 "last_bytes": [],
                 "last_event": None,
+                "active_note": None,
             }
         )
         self.midi_scheduler.clear()

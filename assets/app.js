@@ -233,7 +233,8 @@ function renderPianoRoll(s) {
     const y = ((maxPitch - pitch) / pitchSpan) * 100;
     const vel = Math.max(0, Math.min(127, Number(n.velocity || 0)));
     const alpha = 0.35 + 0.65 * (vel / 127);
-    const label = `${n.note_name || pitch} · v${vel} · ch${n.channel ?? 0}`;
+    const channel = Number.isFinite(Number(n.channel)) ? Number(n.channel) + 1 : 0;
+    const label = `${n.note_name || pitch} · v${vel} · ch${channel}`;
     return `<div class="note-bar" title="${label}" style="left:${left.toFixed(2)}%;width:${(right - left).toFixed(2)}%;top:${y.toFixed(2)}%;opacity:${alpha.toFixed(2)}">${n.note_name || pitch}</div>`;
   });
 
