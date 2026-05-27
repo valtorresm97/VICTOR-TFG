@@ -35,7 +35,13 @@ from midi_byte_transport import MidiByteTransport
 from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
 from led_matrix_transport import LedMatrixTransport
 from eeg_contract import EEG_BLOCK_EVENT, FS_HZ, NUM_CH
-from runtime_config import EEG_LED_MATRIX_ENABLED_ENV, EEG_MIDI_LIVE_ENABLED_ENV, env_bool
+from runtime_config import (
+    EEG_LED_MATRIX_ENABLED_ENV,
+    EEG_MIDI_LIVE_ENABLED_ENV,
+    env_bool,
+    env_float,
+    env_int,
+)
 
 
 logging.basicConfig(level=logging.INFO)
@@ -65,7 +71,18 @@ DISK_PUBLISH_PERIOD_SEC = 1.0
 # Estos valores se cambiarán después desde la interfaz.
 # ------------------------------------------------------------
 
-MUSIC_BAR_SEC = 2.0
+MUSIC_BAR_SEC = env_float("EEG_MUSIC_BAR_SEC", 2.0, 0.5, 8.0)
+MUSIC_CHORD_MIN_PERIOD_SEC = env_float("EEG_MUSIC_CHORD_MIN_PERIOD_SEC", 12.0, 2.0, 120.0)
+MUSIC_CHORD_CHANGE_THRESHOLD = env_float("EEG_MUSIC_CHORD_CHANGE_THRESHOLD", 0.45, 0.05, 2.0)
+
+MUSIC_LOW_NOTES_PER_BAR = env_int("EEG_MUSIC_LOW_NOTES_PER_BAR", 2, 1, 16)
+MUSIC_MEDIUM_NOTES_PER_BAR = env_int("EEG_MUSIC_MEDIUM_NOTES_PER_BAR", 6, 1, 16)
+MUSIC_HIGH_NOTES_PER_BAR = env_int("EEG_MUSIC_HIGH_NOTES_PER_BAR", 11, 1, 16)
+
+MUSIC_REGISTER_SPAN_SEMITONES = env_int("EEG_MUSIC_REGISTER_SPAN_SEMITONES", 18, 6, 36)
+MUSIC_SCALE_RADIUS_SEMITONES = env_int("EEG_MUSIC_SCALE_RADIUS_SEMITONES", 20, 8, 48)
+MUSIC_MAX_INTERVAL_LOW_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_LOW_TENSION", 5, 1, 24)
+MUSIC_MAX_INTERVAL_HIGH_TENSION = env_int("EEG_MUSIC_MAX_INTERVAL_HIGH_TENSION", 12, 1, 36)
 
 # MIDI usa canales internos 0..15. 9 corresponde al canal MIDI 10.
 MUSIC_CHANNEL = 9
@@ -211,8 +228,17 @@ class BackendService:
         self.music_main_note_midi = note_name_to_midi(MUSIC_MAIN_NOTE)
 
         self.music_segment_builder = MusicSegmentBuilder(fs=FS_HZ)
-        self.bar_gen = BarGenerator(random_seed=123)
+        self.bar_gen = BarGenerator(
+            low_notes_per_bar=MUSIC_LOW_NOTES_PER_BAR,
+            medium_notes_per_bar=MUSIC_MEDIUM_NOTES_PER_BAR,
+            high_notes_per_bar=MUSIC_HIGH_NOTES_PER_BAR,
+            random_seed=123,
+        )
         self.note_gen = NoteGenerator(
+            max_interval_semitones=MUSIC_MAX_INTERVAL_LOW_TENSION,
+            max_interval_high_tension=MUSIC_MAX_INTERVAL_HIGH_TENSION,
+            register_span_semitones=MUSIC_REGISTER_SPAN_SEMITONES,
+            scale_radius_semitones=MUSIC_SCALE_RADIUS_SEMITONES,
             default_channel=MUSIC_CHANNEL,
             default_program=MUSIC_PROGRAM,
         )
@@ -260,6 +286,15 @@ class BackendService:
         self._last_rhythm_cadence = None
         self._last_chord_root_midi = None
         self._last_chord_pitches: list[int] = []
+        self._last_chord_t: float | None = None
+        self._last_chord_controls: dict[str, float] | None = None
+        self._last_chord_reason = "none"
+        self._last_chord_change_score = 0.0
+        self._last_chord_played = False
+        self._last_pitch_min: int | None = None
+        self._last_pitch_max: int | None = None
+        self._last_pitch_span = 0
+        self._last_interval_avg = 0.0
         self._recent_notes: list[dict] = []
 
         self._music_generation_errors_total = 0
@@ -410,7 +445,19 @@ class BackendService:
                 "current_chord_notes": [
                     _midi_to_note_name(p) for p in self._last_chord_pitches
                 ],
+                "last_chord_played": self._last_chord_played,
+                "last_chord_reason": self._last_chord_reason,
+                "last_chord_age_sec": (
+                    None
+                    if self._last_chord_t is None
+                    else max(0.0, now - float(self._last_chord_t))
+                ),
+                "last_chord_change_score": self._last_chord_change_score,
                 "last_notes_count": self._last_notes_count,
+                "last_pitch_min": self._last_pitch_min,
+                "last_pitch_max": self._last_pitch_max,
+                "last_pitch_span": self._last_pitch_span,
+                "last_interval_avg": self._last_interval_avg,
                 "recent_notes": list(self._recent_notes),
                 "generation_errors_total": self._music_generation_errors_total,
             },
@@ -436,6 +483,11 @@ class BackendService:
                 "snapshot_publish_period_sec": SNAPSHOT_PUBLISH_PERIOD_SEC,
                 "disk_publish_period_sec": DISK_PUBLISH_PERIOD_SEC,
                 "midi_generate_period_sec": MIDI_GENERATE_PERIOD_SEC,
+                "music_chord_min_period_sec": MUSIC_CHORD_MIN_PERIOD_SEC,
+                "music_chord_change_threshold": MUSIC_CHORD_CHANGE_THRESHOLD,
+                "music_register_span_semitones": MUSIC_REGISTER_SPAN_SEMITONES,
+                "music_max_interval_low_tension": MUSIC_MAX_INTERVAL_LOW_TENSION,
+                "music_max_interval_high_tension": MUSIC_MAX_INTERVAL_HIGH_TENSION,
                 "recent_notes_window_sec": RECENT_NOTES_WINDOW_SEC,
                 "led_matrix_refresh_rate_hz": self.led_matrix_config.refresh_rate_hz,
             },
@@ -448,6 +500,70 @@ class BackendService:
     # --------------------------------------------------------
     # Generación musical live
     # --------------------------------------------------------
+
+    def _current_chord_controls(self) -> dict[str, float]:
+        """Controles que justifican un acorde como marcador de estado."""
+        sonif = self._last_sonification
+        return {
+            "activity": float(getattr(sonif, "activity", 0.0) or 0.0),
+            "tension": float(getattr(sonif, "tension", 0.0) or 0.0),
+            "register": float(getattr(sonif, "register", 0.5) or 0.5),
+            "harmonic_stability": float(
+                getattr(sonif, "harmonic_stability", 0.5) or 0.5
+            ),
+        }
+
+    def _should_play_chord(self, now: float) -> tuple[bool, str, float]:
+        """
+        Decide si el acorde completo debe sonar.
+
+        Los bars siguen generando notas cada ciclo; el acorde completo se usa
+        como marcador poco frecuente o como respuesta a un cambio EEG grande.
+        """
+        controls = self._current_chord_controls()
+
+        if self._last_chord_t is None or self._last_chord_controls is None:
+            return True, "first_chord", 0.0
+
+        elapsed = float(now) - float(self._last_chord_t)
+        change_score = sum(
+            abs(controls[key] - self._last_chord_controls.get(key, controls[key]))
+            for key in controls
+        )
+
+        if elapsed >= MUSIC_CHORD_MIN_PERIOD_SEC:
+            return True, "period", change_score
+
+        abrupt_gap = max(float(MUSIC_BAR_SEC), min(4.0, MUSIC_CHORD_MIN_PERIOD_SEC * 0.33))
+        if elapsed >= abrupt_gap and change_score >= MUSIC_CHORD_CHANGE_THRESHOLD:
+            return True, "abrupt_change", change_score
+
+        return False, "melody_only", change_score
+
+    def _summarize_generated_notes(self, notes) -> None:
+        """Métricas ligeras para ver diversidad sin cambiar el sonido."""
+        if not notes:
+            self._last_pitch_min = None
+            self._last_pitch_max = None
+            self._last_pitch_span = 0
+            self._last_interval_avg = 0.0
+            return
+
+        ordered = sorted(notes, key=lambda n: (float(n.t_start), int(n.pitch_midi)))
+        pitches = [int(n.pitch_midi) for n in ordered]
+        self._last_pitch_min = min(pitches)
+        self._last_pitch_max = max(pitches)
+        self._last_pitch_span = self._last_pitch_max - self._last_pitch_min
+
+        intervals = [
+            abs(pitches[i] - pitches[i - 1])
+            for i in range(1, len(pitches))
+        ]
+        self._last_interval_avg = (
+            sum(intervals) / len(intervals)
+            if intervals
+            else 0.0
+        )
 
     def _remember_recent_notes(self, notes, time_origin: float) -> None:
         """Guarda una ventana pequeña de notas para debug/piano roll UI."""
@@ -514,13 +630,22 @@ class BackendService:
             self._last_rhythm_cadence = music_segment.rhythm_cadence.name
             self._last_chord_root_midi = int(bar.chord_root_midi)
             self._last_chord_pitches = [int(p) for p in bar.chord_pitches]
+            play_chord, chord_reason, change_score = self._should_play_chord(now)
+            self._last_chord_played = play_chord
+            self._last_chord_reason = chord_reason
+            self._last_chord_change_score = float(change_score)
 
             notes = self.note_gen.generate_notes_for_bar(
                 segment=music_segment,
                 bar=bar,
                 channel=MUSIC_CHANNEL,
                 program=MUSIC_PROGRAM,
+                play_chord_on_first_slot=play_chord,
             )
+
+            if play_chord:
+                self._last_chord_t = now
+                self._last_chord_controls = self._current_chord_controls()
 
             # Enviar program_change una sola vez al inicio.
             if not self._program_change_sent:
@@ -539,6 +664,7 @@ class BackendService:
             )
 
             self._last_notes_count = len(notes)
+            self._summarize_generated_notes(notes)
             self._remember_recent_notes(notes, time_origin=now)
             self._last_music_t = now
 

@@ -112,6 +112,9 @@ class NoteGenerator:
         beats_per_bar: int = 4,
         slots_per_beat: int = 4,
         max_interval_semitones: int = 7,
+        max_interval_high_tension: int = 12,
+        register_span_semitones: int = 18,
+        scale_radius_semitones: int = 20,
         base_velocity_downbeat: int = 104,
         base_velocity_beat: int = 88,
         base_velocity_offbeat: int = 72,
@@ -128,6 +131,9 @@ class NoteGenerator:
 
         # El paper limitaba intervalos melódicos para evitar melodía caótica.
         self.max_interval = int(max_interval_semitones)
+        self.max_interval_high_tension = int(max_interval_high_tension)
+        self.register_span_semitones = int(register_span_semitones)
+        self.scale_radius_semitones = int(scale_radius_semitones)
 
         self.base_velocity_downbeat = int(base_velocity_downbeat)
         self.base_velocity_beat = int(base_velocity_beat)
@@ -173,8 +179,7 @@ class NoteGenerator:
         base = int(segment.main_note_midi)
         register = _clamp(_safe_float(segment.register_hint, 0.5), 0.0, 1.0)
 
-        # Rango máximo: ±12 semitonos.
-        offset = int(round((register - 0.5) * 24.0))
+        offset = int(round((register - 0.5) * 2.0 * self.register_span_semitones))
         center = base + offset
 
         # Rango musical seguro.
@@ -184,9 +189,11 @@ class NoteGenerator:
         self,
         scale: ScaleConfig,
         center: int,
-        radius: int = 14,
+        radius: Optional[int] = None,
     ) -> list[int]:
         """Crea notas de la escala alrededor del centro."""
+        if radius is None:
+            radius = self.scale_radius_semitones
         low = int(center) - int(radius)
         high = int(center) + int(radius)
 
@@ -273,13 +280,26 @@ class NoteGenerator:
                 key=lambda p: 0.72 * abs(p - prev) + 0.28 * abs(p - target),
             )
 
-        return self._apply_interval_limit(int(best), prev, center)
+        return self._apply_interval_limit(
+            int(best),
+            prev,
+            center,
+            self._interval_limit(segment),
+        )
+
+    def _interval_limit(self, segment: MusicSegment) -> int:
+        """Permite saltos algo mayores cuando la tensión EEG sube."""
+        tension = _clamp(_safe_float(segment.tension, 0.5), 0.0, 1.0)
+        lo = max(1, int(self.max_interval))
+        hi = max(lo, int(self.max_interval_high_tension))
+        return int(round(lo + (hi - lo) * tension))
 
     def _apply_interval_limit(
         self,
         candidate: int,
         prev: Optional[int],
         center: int,
+        max_interval: Optional[int] = None,
     ) -> int:
         """
         Limita saltos melódicos.
@@ -292,13 +312,15 @@ class NoteGenerator:
         if prev is None:
             return _clamp_int(pitch, 0, 127)
 
-        while pitch - prev > self.max_interval:
+        limit = max(1, int(self.max_interval if max_interval is None else max_interval))
+
+        while pitch - prev > limit:
             pitch -= 12
 
-        while prev - pitch > self.max_interval:
+        while prev - pitch > limit:
             pitch += 12
 
-        if abs(pitch - prev) > self.max_interval:
+        if abs(pitch - prev) > limit:
             pitch = int(center)
 
         return _clamp_int(pitch, 0, 127)
@@ -412,6 +434,7 @@ class NoteGenerator:
         bar: Bar,
         channel: Optional[int] = None,
         program: Optional[int] = None,
+        play_chord_on_first_slot: Optional[bool] = None,
     ) -> List[NoteEvent]:
         """
         Genera notas para un único compás live.
@@ -423,6 +446,11 @@ class NoteGenerator:
 
         ch = self.default_channel if channel is None else int(channel)
         prog = self.default_program if program is None else int(program)
+        play_chord = (
+            self.chord_on_first_slot
+            if play_chord_on_first_slot is None
+            else bool(play_chord_on_first_slot)
+        )
 
         note_positions = list(bar.note_positions)
         if len(note_positions) != self.n_slots:
@@ -449,7 +477,7 @@ class NoteGenerator:
             velocity = self._velocity_for_slot(segment, bar, slot_idx)
 
             # Primer slot: opcionalmente generar acorde completo.
-            if slot_idx == 0 and self.chord_on_first_slot:
+            if slot_idx == 0 and play_chord:
                 voices = self._chord_voices(chord_tones, center)
 
                 for voice_idx, pitch in enumerate(voices):
