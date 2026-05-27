@@ -24,6 +24,12 @@ class EEGWebServer:
         self.ui.expose_api("GET", "/status", self.get_status)
         self.ui.expose_api("GET", "/latest", self.get_latest)
         self.ui.expose_api("POST", "/midi/panic", self.post_midi_panic)
+        self.ui.expose_api("POST", "/midi/test-note", self.post_midi_test_note)
+        self.ui.expose_api("POST", "/midi/test-note-ch1", self.post_midi_test_note_ch1)
+        self.ui.expose_api("POST", "/midi/test-note-ch10", self.post_midi_test_note_ch10)
+        self.ui.expose_api("POST", "/midi/test-sequence", self.post_midi_test_sequence)
+        self.ui.expose_api("POST", "/midi/test-sequence-ch1", self.post_midi_test_sequence_ch1)
+        self.ui.expose_api("POST", "/midi/test-sequence-ch10", self.post_midi_test_sequence_ch10)
         self.ui.on_connect(self.on_connect)
         self.ui.on_disconnect(self.on_disconnect)
 
@@ -38,6 +44,24 @@ class EEGWebServer:
     def post_midi_panic(self):
         sent_events = self.backend.send_panic()
         return {"ok": True, "sent_events": int(sent_events)}
+
+    def post_midi_test_note(self):
+        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5, program=0)
+
+    def post_midi_test_note_ch1(self):
+        return self.backend.send_test_note(channel=1, note=60, velocity=100, duration_sec=0.5, program=0)
+
+    def post_midi_test_note_ch10(self):
+        return self.backend.send_test_note(channel=10, note=60, velocity=100, duration_sec=0.5, program=0)
+
+    def post_midi_test_sequence(self):
+        return self.backend.send_test_sequence(channel=10)
+
+    def post_midi_test_sequence_ch1(self):
+        return self.backend.send_test_sequence(channel=1)
+
+    def post_midi_test_sequence_ch10(self):
+        return self.backend.send_test_sequence(channel=10)
 
     def on_connect(self, sid):
         logger.info("[WEB] connected: %s", sid)

@@ -23,7 +23,14 @@ from music_utils import note_name_to_midi
 from music_segment import MusicSegmentBuilder
 from music_bar import BarGenerator
 from music_note import NoteGenerator
-from midi_live import MidiScheduler
+from midi_live import (
+    MidiLiveEvent,
+    MidiScheduler,
+    NOTE_OFF,
+    NOTE_ON,
+    PROGRAM_CHANGE,
+    event_to_midi_bytes,
+)
 from midi_byte_transport import MidiByteTransport
 from led_matrix_visualizer import LedMatrixConfig, build_led_matrix_frame
 from led_matrix_transport import LedMatrixTransport
@@ -707,6 +714,133 @@ class BackendService:
             self._midi_pump_errors_total += 1
             logger.exception("[MIDI] panic error: %s", exc)
             return 0
+
+    def send_test_note(
+        self,
+        channel: int = 10,
+        note: int = 60,
+        velocity: int = 100,
+        duration_sec: float = 0.5,
+        program: int | None = 0,
+    ) -> dict:
+        """
+        Envía una nota MIDI fija sin depender de EEG, DSP ni scheduler musical.
+
+        channel usa numeración humana 1..16. Internamente MIDI codifica 0..15.
+        Internamente reutiliza la ruta de secuencia para evitar divergencias.
+        """
+        return self.send_test_sequence(
+            channel=channel,
+            notes=[note],
+            velocity=velocity,
+            note_duration_sec=duration_sec,
+            gap_sec=0.0,
+            program=program,
+        )
+
+    def send_test_sequence(
+        self,
+        channel: int = 10,
+        notes: list[int] | None = None,
+        velocity: int = 100,
+        note_duration_sec: float = 0.25,
+        gap_sec: float = 0.05,
+        program: int | None = 0,
+    ) -> dict:
+        """
+        Envía una secuencia fija de notas sin depender de EEG.
+
+        La secuencia por defecto es C4-E4-G4-C5, util para distinguir una
+        prueba melodica de un golpe percusivo en canal 10.
+        """
+        channel_human = max(1, min(16, int(channel)))
+        channel_zero = channel_human - 1
+        velocity_value = max(1, min(127, int(velocity)))
+        duration = max(0.03, min(2.0, float(note_duration_sec)))
+        gap = max(0.0, min(2.0, float(gap_sec)))
+        note_values = notes if notes is not None else [60, 64, 67, 72]
+        note_values = [max(0, min(127, int(n))) for n in note_values][:32]
+        if not note_values:
+            note_values = [60]
+
+        sent = 0
+        failed = 0
+        bytes_sent: list[list[int]] = []
+        now = time.monotonic()
+
+        try:
+            if program is not None:
+                program_event = MidiLiveEvent(
+                    sort_index=now,
+                    due_time=now,
+                    type=PROGRAM_CHANGE,
+                    channel=channel_zero,
+                    data1=max(0, min(127, int(program))),
+                    data2=0,
+                )
+                data = event_to_midi_bytes(program_event)
+                if self.midi_transport.send_event(program_event):
+                    sent += 1
+                    bytes_sent.append([int(x) for x in data])
+                else:
+                    failed += 1
+
+            for note_value in note_values:
+                note_on = MidiLiveEvent(
+                    sort_index=now,
+                    due_time=now,
+                    type=NOTE_ON,
+                    channel=channel_zero,
+                    data1=note_value,
+                    data2=velocity_value,
+                )
+                note_off = MidiLiveEvent(
+                    sort_index=now + duration,
+                    due_time=now + duration,
+                    type=NOTE_OFF,
+                    channel=channel_zero,
+                    data1=note_value,
+                    data2=0,
+                )
+
+                data = event_to_midi_bytes(note_on)
+                if self.midi_transport.send_event(note_on):
+                    sent += 1
+                    bytes_sent.append([int(x) for x in data])
+                else:
+                    failed += 1
+
+                time.sleep(duration)
+
+                data = event_to_midi_bytes(note_off)
+                if self.midi_transport.send_event(note_off):
+                    sent += 1
+                    bytes_sent.append([int(x) for x in data])
+                else:
+                    failed += 1
+
+                if gap > 0.0:
+                    time.sleep(gap)
+
+        except Exception as exc:
+            self._midi_pump_errors_total += 1
+            logger.exception("[MIDI] test sequence error: %s", exc)
+            failed += 1
+
+        return {
+            "ok": failed == 0,
+            "channel": channel_human,
+            "channel_zero_based": channel_zero,
+            "notes": note_values,
+            "velocity": velocity_value,
+            "note_duration_sec": duration,
+            "gap_sec": gap,
+            "program": None if program is None else max(0, min(127, int(program))),
+            "sent_events": sent,
+            "failed_events": failed,
+            "bytes": bytes_sent,
+            "transport": self.midi_transport.get_status(),
+        }
 
     def stop(self):
         """Hook explícito de parada: evita notas colgadas si MIDI físico está activo."""
