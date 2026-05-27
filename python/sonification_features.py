@@ -220,15 +220,18 @@ def build_raw_sonification_features(
 
     rms_norm = _clamp01(rms_uV / 50.0)
 
-    activity = _clamp01(0.55 * fast_power + 0.45 * rms_norm)
-    calmness = _clamp01(alpha * (1.0 - beta_over_alpha_beta))
-    tension = _clamp01(0.80 * beta_over_alpha_beta + 0.20 * gamma)
-    rhythmic_density = _clamp01(0.65 * activity + 0.35 * tension)
+    alpha_over_alpha_beta = _clamp01(1.0 - beta_over_alpha_beta)
+    fast_drive = _clamp01(0.65 * beta_over_alpha_beta + 0.35 * fast_power)
+
+    activity = _clamp01(0.45 * fast_drive + 0.35 * rms_norm + 0.20 * (1.0 - alpha_over_alpha_beta))
+    calmness = _clamp01(0.75 * alpha_over_alpha_beta + 0.15 * theta + 0.10 * (1.0 - gamma))
+    tension = _clamp01(0.65 * beta_over_alpha_beta + 0.25 * gamma + 0.10 * rms_norm)
+    rhythmic_density = _clamp01(0.55 * activity + 0.30 * tension + 0.15 * (1.0 - calmness))
 
     register_peak = peak_alpha if peak_alpha is not None else peak_freq
-    register = _norm_freq(register_peak)
+    register = _clamp01(0.65 * _norm_freq(register_peak) + 0.35 * fast_drive)
 
-    harmonic_stability = _clamp01(0.65 * calmness + 0.35 * (1.0 - tension))
+    harmonic_stability = _clamp01(0.70 * calmness + 0.30 * (1.0 - tension))
     velocity_factor = _clamp01(0.30 + 0.70 * activity)
     note_probability = _clamp01(0.15 + 0.80 * rhythmic_density)
 
@@ -288,7 +291,7 @@ class SonificationFeatureAdapter:
 
     def __init__(
         self,
-        ema_alpha: float = 0.18,
+        ema_alpha: float = 0.24,
         rms_baseline_alpha: float = 0.02,
         min_rms_baseline_uV: float = 1.0,
     ) -> None:
@@ -355,10 +358,12 @@ class SonificationFeatureAdapter:
         rms_norm: float,
     ) -> SonificationFeatures:
         """Recalcula controles dependientes de RMS normalizado."""
+        alpha_over_alpha_beta = _clamp01(1.0 - raw.beta_over_alpha_beta)
+        fast_drive = _clamp01(0.65 * raw.beta_over_alpha_beta + 0.35 * raw.fast_power)
         raw.rms_norm = rms_norm
-        raw.activity = _clamp01(0.55 * raw.fast_power + 0.45 * rms_norm)
+        raw.activity = _clamp01(0.45 * fast_drive + 0.35 * rms_norm + 0.20 * (1.0 - alpha_over_alpha_beta))
         raw.velocity_factor = _clamp01(0.30 + 0.70 * raw.activity)
-        raw.rhythmic_density = _clamp01(0.65 * raw.activity + 0.35 * raw.tension)
+        raw.rhythmic_density = _clamp01(0.55 * raw.activity + 0.30 * raw.tension + 0.15 * (1.0 - raw.calmness))
         raw.note_probability = _clamp01(0.15 + 0.80 * raw.rhythmic_density)
         return raw
 
