@@ -748,6 +748,7 @@ class BackendService:
         note_duration_sec: float = 0.25,
         gap_sec: float = 0.05,
         program: int | None = MIDI_TEST_PROGRAM,
+        repeat: int = 1,
     ) -> dict:
         """
         Envía una secuencia fija de notas sin depender de EEG.
@@ -760,6 +761,7 @@ class BackendService:
         velocity_value = max(1, min(127, int(velocity)))
         duration = max(0.03, min(2.0, float(note_duration_sec)))
         gap = max(0.0, min(2.0, float(gap_sec)))
+        repeat_count = max(1, min(64, int(repeat)))
         note_values = notes if notes is not None else [60, 64, 67, 72]
         note_values = [max(0, min(127, int(n))) for n in note_values][:32]
         if not note_values:
@@ -787,42 +789,43 @@ class BackendService:
                 else:
                     failed += 1
 
-            for note_value in note_values:
-                note_on = MidiLiveEvent(
-                    sort_index=now,
-                    due_time=now,
-                    type=NOTE_ON,
-                    channel=channel_zero,
-                    data1=note_value,
-                    data2=velocity_value,
-                )
-                note_off = MidiLiveEvent(
-                    sort_index=now + duration,
-                    due_time=now + duration,
-                    type=NOTE_OFF,
-                    channel=channel_zero,
-                    data1=note_value,
-                    data2=0,
-                )
+            for _ in range(repeat_count):
+                for note_value in note_values:
+                    note_on = MidiLiveEvent(
+                        sort_index=now,
+                        due_time=now,
+                        type=NOTE_ON,
+                        channel=channel_zero,
+                        data1=note_value,
+                        data2=velocity_value,
+                    )
+                    note_off = MidiLiveEvent(
+                        sort_index=now + duration,
+                        due_time=now + duration,
+                        type=NOTE_OFF,
+                        channel=channel_zero,
+                        data1=note_value,
+                        data2=0,
+                    )
 
-                data = event_to_midi_bytes(note_on)
-                if self.midi_transport.send_event(note_on):
-                    sent += 1
-                    bytes_sent.append([int(x) for x in data])
-                else:
-                    failed += 1
+                    data = event_to_midi_bytes(note_on)
+                    if self.midi_transport.send_event(note_on):
+                        sent += 1
+                        bytes_sent.append([int(x) for x in data])
+                    else:
+                        failed += 1
 
-                time.sleep(duration)
+                    time.sleep(duration)
 
-                data = event_to_midi_bytes(note_off)
-                if self.midi_transport.send_event(note_off):
-                    sent += 1
-                    bytes_sent.append([int(x) for x in data])
-                else:
-                    failed += 1
+                    data = event_to_midi_bytes(note_off)
+                    if self.midi_transport.send_event(note_off):
+                        sent += 1
+                        bytes_sent.append([int(x) for x in data])
+                    else:
+                        failed += 1
 
-                if gap > 0.0:
-                    time.sleep(gap)
+                    if gap > 0.0:
+                        time.sleep(gap)
 
         except Exception as exc:
             self._midi_pump_errors_total += 1
@@ -837,6 +840,7 @@ class BackendService:
             "velocity": velocity_value,
             "note_duration_sec": duration,
             "gap_sec": gap,
+            "repeat": repeat_count,
             "program": None if program is None else max(0, min(127, int(program))),
             "sent_events": sent,
             "failed_events": failed,
