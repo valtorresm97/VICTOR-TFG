@@ -113,19 +113,29 @@ static uint32_t last_ready_check_ms = 0;
 // MIDI OUT live
 // ---------------------------
 static constexpr uint32_t MIDI_BAUD = 31250;
+static constexpr uint8_t PIN_MIDI_TX = D1;
 
 // Handler Bridge disponible para Python:
 //   Bridge.call("midi_bytes", n, b0, b1, b2)
 //
-// Rama midi-config-v2: probar MIDI OUT fisico por D1/TX usando Serial1.
-// En UNO Q / Zephyr, D0/D1 se exponen como UART de hardware. Si interfiere
-// con Bridge/Monitor, compilar con MIDI_UART_ENABLED=0 para volver a dry-run.
+// Rama diagnostica: generar MIDI por software directamente en D1. Esto evita
+// depender de que Serial/Serial1 esten mapeados al pin fisico correcto.
+#ifndef MIDI_BITBANG_D1_ENABLED
+#define MIDI_BITBANG_D1_ENABLED 1
+#endif
+
 #ifndef MIDI_SERIAL
 #define MIDI_SERIAL Serial1
 #endif
 
 #ifndef MIDI_UART_ENABLED
-#define MIDI_UART_ENABLED 1
+#define MIDI_UART_ENABLED 0
+#endif
+
+#if (MIDI_BITBANG_D1_ENABLED != 0)
+#define MIDI_BITBANG_D1_CONFIGURED 1
+#else
+#define MIDI_BITBANG_D1_CONFIGURED 0
 #endif
 
 #if (MIDI_UART_ENABLED != 0)
@@ -141,6 +151,28 @@ static uint8_t midi_debug_left = 16;
 static uint32_t midi_calls_total = 0;
 static uint32_t midi_bytes_total = 0;
 
+static void midiBitDelay() {
+  delayMicroseconds(32);
+}
+
+static void midiBitbangWriteByte(uint8_t value) {
+  noInterrupts();
+
+  // MIDI DIN usa UART 31250 8N1, LSB first: idle alto, start bajo.
+  digitalWrite(PIN_MIDI_TX, LOW);
+  midiBitDelay();
+
+  for (uint8_t bit = 0; bit < 8; ++bit) {
+    digitalWrite(PIN_MIDI_TX, (value & (1U << bit)) ? HIGH : LOW);
+    midiBitDelay();
+  }
+
+  digitalWrite(PIN_MIDI_TX, HIGH);
+  midiBitDelay();
+
+  interrupts();
+}
+
 static bool midi_bytes(int n, int b0, int b1, int b2) {
   if (n < 1 || n > 3) {
     return false;
@@ -155,7 +187,7 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     static_cast<uint8_t>(b2 & 0xFF),
   };
 
-#if MIDI_UART_CONFIGURED
+#if (MIDI_BITBANG_D1_CONFIGURED || MIDI_UART_CONFIGURED)
   if (midi_debug_left > 0) {
     Monitor.print("[MIDI TX] n=");
     Monitor.print(n);
@@ -175,6 +207,12 @@ static bool midi_bytes(int n, int b0, int b1, int b2) {
     Monitor.println(midi_bytes_total);
   }
 
+#if MIDI_BITBANG_D1_CONFIGURED
+  for (int i = 0; i < n; ++i) {
+    midiBitbangWriteByte(data[i]);
+  }
+  return true;
+#elif MIDI_UART_CONFIGURED
   for (int i = 0; i < n; ++i) {
     MIDI_SERIAL.write(data[i]);
   }
@@ -520,7 +558,11 @@ void setup() {
   Monitor.println("LED matrix disabled: led_matrix_row handler registered for dry-run only");
 #endif
 
-#if MIDI_UART_ENABLED
+#if MIDI_BITBANG_D1_CONFIGURED
+  pinMode(PIN_MIDI_TX, OUTPUT);
+  digitalWrite(PIN_MIDI_TX, HIGH);
+  Monitor.println("MIDI bitbang enabled on D1 at 31250 baud");
+#elif MIDI_UART_ENABLED
   MIDI_SERIAL.begin(MIDI_BAUD);
   Monitor.println("MIDI UART enabled at 31250 baud");
 #else
