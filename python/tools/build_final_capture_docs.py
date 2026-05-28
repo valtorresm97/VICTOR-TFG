@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import html
 import json
 import math
 import sys
@@ -13,28 +14,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PYTHON_DIR = PROJECT_ROOT / "python"
 if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
-
-
-def _add_cached_site_packages() -> None:
-    lib_dir = PROJECT_ROOT / ".cache" / ".venv" / "lib"
-    if not lib_dir.exists():
-        return
-    for site_packages in lib_dir.glob("python*/site-packages"):
-        site_path = str(site_packages)
-        if site_path not in sys.path:
-            sys.path.insert(0, site_path)
-
-
-_add_cached_site_packages()
-
-import numpy as np
-
-try:
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-except Exception as exc:  # pragma: no cover - depends on board env
-    raise SystemExit(f"matplotlib is required to build figures: {exc}")
 
 
 BANDS = ["delta", "theta", "alpha", "beta", "gamma"]
@@ -82,6 +61,8 @@ CONDITION_NOTES = {
     },
 }
 
+SVG_STROKES = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"]
+
 
 def _safe_float(value: Any, default: float = math.nan) -> float:
     try:
@@ -104,6 +85,19 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return []
     with path.open("r", newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
+
+def _parse_quality_md(path: Path) -> dict[str, str]:
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if not line.startswith("-") or ":" not in line:
+            continue
+        key, value = line[1:].split(":", 1)
+        out[key.strip().lower().replace(" ", "_")] = value.strip()
+    return out
 
 
 def _condition_from_dir(capture_dir: Path) -> str:
@@ -130,179 +124,261 @@ def _discover_session_captures(final_root: Path, subject: str, session: str, mon
     return sorted(captures)
 
 
-def _fig_rel(path: Path, figures_dir: Path) -> str:
+def _fig_rel(path: Path, docs_dir: Path) -> str:
     try:
-        return str(path.relative_to(figures_dir.parent.parent))
+        return str(path.relative_to(docs_dir))
     except Exception:
-        return str(path)
+        try:
+            return str(path.relative_to(PROJECT_ROOT))
+        except Exception:
+            return str(path)
 
 
-def _load_eeg(capture_dir: Path) -> tuple[np.ndarray, np.ndarray]:
+def _load_eeg(capture_dir: Path) -> tuple[list[float], list[float]]:
     rows = _read_csv(capture_dir / "eeg_timeseries.csv")
-    if not rows:
-        return np.asarray([]), np.asarray([])
-    t = np.asarray([_safe_float(r.get("t_capture_sec"), math.nan) for r in rows], dtype=float)
-    ch1 = np.asarray([_safe_float(r.get("ch1_uV"), math.nan) for r in rows], dtype=float)
-    mask = np.isfinite(t) & np.isfinite(ch1)
-    return t[mask], ch1[mask]
+    t: list[float] = []
+    ch1: list[float] = []
+    for r in rows:
+        x = _safe_float(r.get("t_capture_sec"))
+        y = _safe_float(r.get("ch1_uV"))
+        if math.isfinite(x) and math.isfinite(y):
+            t.append(x)
+            ch1.append(y)
+    return t, ch1
 
 
-def _downsample_xy(x: np.ndarray, y: np.ndarray, max_points: int = 5000) -> tuple[np.ndarray, np.ndarray]:
-    if x.size <= max_points:
+def _downsample(x: list[float], y: list[float], max_points: int = 2500) -> tuple[list[float], list[float]]:
+    if len(x) <= max_points:
         return x, y
-    step = max(1, int(math.ceil(x.size / max_points)))
+    step = max(1, math.ceil(len(x) / max_points))
     return x[::step], y[::step]
+
+
+def _finite(values: list[float]) -> list[float]:
+    return [v for v in values if math.isfinite(v)]
+
+
+def _range(values: list[float], default: tuple[float, float] = (0.0, 1.0), pad_ratio: float = 0.05) -> tuple[float, float]:
+    vals = _finite(values)
+    if not vals:
+        return default
+    lo = min(vals)
+    hi = max(vals)
+    if lo == hi:
+        delta = max(1.0, abs(lo) * 0.1)
+        return lo - delta, hi + delta
+    pad = (hi - lo) * pad_ratio
+    return lo - pad, hi + pad
+
+
+def _scale_x(x: float, xmin: float, xmax: float, left: float, width: float) -> float:
+    if xmax <= xmin:
+        return left
+    return left + (x - xmin) / (xmax - xmin) * width
+
+
+def _scale_y(y: float, ymin: float, ymax: float, top: float, height: float) -> float:
+    if ymax <= ymin:
+        return top + height / 2
+    return top + height - (y - ymin) / (ymax - ymin) * height
+
+
+def _polyline(xs: list[float], ys: list[float], xmin: float, xmax: float, ymin: float, ymax: float, left: int, top: int, width: int, height: int, stroke: str) -> str:
+    pts = []
+    for x, y in zip(xs, ys):
+        if not (math.isfinite(x) and math.isfinite(y)):
+            continue
+        pts.append(f"{_scale_x(x, xmin, xmax, left, width):.2f},{_scale_y(y, ymin, ymax, top, height):.2f}")
+    if len(pts) < 2:
+        return ""
+    return f'<polyline points="{" ".join(pts)}" fill="none" stroke="{stroke}" stroke-width="1.3" />'
+
+
+def _svg_header(width: int, height: int, title: str) -> list[str]:
+    return [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        '<rect width="100%" height="100%" fill="white" />',
+        f'<text x="20" y="28" font-family="Arial" font-size="18" font-weight="bold">{html.escape(title)}</text>',
+    ]
+
+
+def _axes(left: int, top: int, width: int, height: int, xlabel: str, ylabel: str) -> list[str]:
+    return [
+        f'<rect x="{left}" y="{top}" width="{width}" height="{height}" fill="none" stroke="#333" stroke-width="1" />',
+        f'<text x="{left + width/2:.1f}" y="{top + height + 42}" text-anchor="middle" font-family="Arial" font-size="12">{html.escape(xlabel)}</text>',
+        f'<text x="{left - 45}" y="{top + height/2:.1f}" text-anchor="middle" transform="rotate(-90 {left - 45},{top + height/2:.1f})" font-family="Arial" font-size="12">{html.escape(ylabel)}</text>',
+    ]
+
+
+def _legend(labels: list[str], left: int, top: int) -> list[str]:
+    lines: list[str] = []
+    x = left
+    y = top
+    for i, label in enumerate(labels):
+        stroke = SVG_STROKES[i % len(SVG_STROKES)]
+        lines.append(f'<line x1="{x}" y1="{y}" x2="{x+22}" y2="{y}" stroke="{stroke}" stroke-width="2" />')
+        lines.append(f'<text x="{x+28}" y="{y+4}" font-family="Arial" font-size="11">{html.escape(label)}</text>')
+        x += 155
+        if x > 900:
+            x = left
+            y += 18
+    return lines
+
+
+def _write_svg_line(path: Path, title: str, series: list[tuple[str, list[float], list[float]]], ylabel: str, y_fixed: tuple[float, float] | None = None) -> None:
+    width, height = 1100, 420
+    left, top, plot_w, plot_h = 80, 58, 980, 285
+    all_x = [v for _, xs, _ in series for v in xs]
+    all_y = [v for _, _, ys in series for v in ys]
+    xmin, xmax = _range(all_x, (0.0, 1.0), 0.0)
+    ymin, ymax = y_fixed if y_fixed is not None else _range(all_y, (0.0, 1.0))
+
+    lines = _svg_header(width, height, title)
+    lines += _axes(left, top, plot_w, plot_h, "Tiempo de captura (s)", ylabel)
+    for i, (label, xs, ys) in enumerate(series):
+        dx, dy = _downsample(xs, ys)
+        lines.append(_polyline(dx, dy, xmin, xmax, ymin, ymax, left, top, plot_w, plot_h, SVG_STROKES[i % len(SVG_STROKES)]))
+    lines += _legend([label for label, _, _ in series], left, 380)
+    lines.append(f'<text x="{left}" y="{top + plot_h + 20}" font-family="Arial" font-size="11">x=[{xmin:.2f}, {xmax:.2f}] y=[{ymin:.3g}, {ymax:.3g}]</text>')
+    lines.append("</svg>")
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def plot_eeg(capture_dir: Path, out_path: Path) -> None:
     t, ch1 = _load_eeg(capture_dir)
-    fig, ax = plt.subplots(figsize=(12, 4))
-    if t.size:
-        tx, yx = _downsample_xy(t, ch1)
-        ax.plot(tx, yx, linewidth=0.8)
-        ax.set_xlim(float(np.nanmin(t)), float(np.nanmax(t)))
-    ax.set_title("EEG CH1 temporal")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("CH1 (uV)")
-    ax.grid(True, alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=150)
-    plt.close(fig)
+    _write_svg_line(out_path, "EEG CH1 temporal", [("CH1 uV", t, ch1)], "CH1 (uV)")
 
 
 def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
     rows = _read_csv(capture_dir / "windowed_bandpowers.csv")
-    fig, ax = plt.subplots(figsize=(12, 4))
-    if rows:
-        t = np.asarray([_safe_float(r.get("window_start_sec"), math.nan) for r in rows], dtype=float)
-        for band in BANDS:
-            y = np.asarray([_safe_float(r.get(f"{band}_rel"), math.nan) for r in rows], dtype=float)
-            ax.plot(t, y, linewidth=1.0, label=band)
-        ax.legend(loc="upper right", ncol=5, fontsize=8)
-    ax.set_title("Bandpowers relativos por ventana")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Potencia relativa")
-    ax.set_ylim(-0.02, 1.02)
-    ax.grid(True, alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=150)
-    plt.close(fig)
+    series = []
+    t = [_safe_float(r.get("window_start_sec")) for r in rows]
+    for band in BANDS:
+        y = [_safe_float(r.get(f"{band}_rel")) for r in rows]
+        series.append((band, t, y))
+    _write_svg_line(out_path, "Bandpowers relativos por ventana", series, "Potencia relativa", (0.0, 1.0))
 
 
 def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     rows = _read_csv(capture_dir / "windowed_sonification_features.csv")
-    fig, ax = plt.subplots(figsize=(12, 5))
-    if rows:
-        t = np.asarray([_safe_float(r.get("window_start_sec"), math.nan) for r in rows], dtype=float)
-        for key in SONIF_CONTROLS:
-            y = np.asarray([_safe_float(r.get(key), math.nan) for r in rows], dtype=float)
-            ax.plot(t, y, linewidth=1.0, label=key)
-        ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=8)
-    ax.set_title("Controles de sonificacion EEG-reportables")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Valor normalizado")
-    ax.set_ylim(-0.05, 1.05)
-    ax.grid(True, alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=150)
-    plt.close(fig)
+    series = []
+    t = [_safe_float(r.get("window_start_sec")) for r in rows]
+    for key in SONIF_CONTROLS:
+        y = [_safe_float(r.get(key)) for r in rows]
+        series.append((key, t, y))
+    _write_svg_line(out_path, "Controles de sonificacion EEG-reportables", series, "Valor normalizado", (0.0, 1.0))
 
 
 def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
     rows = _read_csv(capture_dir / "music_notes.csv")
-    fig, ax = plt.subplots(figsize=(12, 4))
-    if rows:
-        starts = np.asarray([_safe_float(r.get("t_capture_start_sec"), math.nan) for r in rows], dtype=float)
-        ends = np.asarray([_safe_float(r.get("t_capture_end_sec"), math.nan) for r in rows], dtype=float)
-        pitches = np.asarray([_safe_float(r.get("pitch_midi"), math.nan) for r in rows], dtype=float)
-        velocities = np.asarray([_safe_float(r.get("velocity"), 64.0) for r in rows], dtype=float)
-        mask = np.isfinite(starts) & np.isfinite(ends) & np.isfinite(pitches)
-        for start, end, pitch, vel in zip(starts[mask], ends[mask], pitches[mask], velocities[mask]):
-            width = max(0.04, float(end - start))
-            ax.broken_barh([(float(start), width)], (float(pitch) - 0.4, 0.8), alpha=max(0.25, min(1.0, float(vel) / 127.0)))
-        ax.set_ylim(max(0, float(np.nanmin(pitches[mask]) - 2)) if np.any(mask) else 40, float(np.nanmax(pitches[mask]) + 2) if np.any(mask) else 90)
-    ax.set_title("Notas musicales generadas")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Pitch MIDI")
-    ax.grid(True, alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=150)
-    plt.close(fig)
+    width, height = 1100, 420
+    left, top, plot_w, plot_h = 80, 58, 980, 285
+    starts = [_safe_float(r.get("t_capture_start_sec")) for r in rows]
+    ends = [_safe_float(r.get("t_capture_end_sec")) for r in rows]
+    pitches = [_safe_float(r.get("pitch_midi")) for r in rows]
+    velocities = [_safe_float(r.get("velocity"), 64.0) for r in rows]
+    valid_x = [v for v in starts + ends if math.isfinite(v)]
+    valid_p = _finite(pitches)
+    xmin, xmax = _range(valid_x, (0.0, 1.0), 0.0)
+    ymin, ymax = _range(valid_p, (48.0, 84.0), 0.1)
+
+    lines = _svg_header(width, height, "Notas musicales generadas")
+    lines += _axes(left, top, plot_w, plot_h, "Tiempo de captura (s)", "Pitch MIDI")
+    for start, end, pitch, vel in zip(starts, ends, pitches, velocities):
+        if not (math.isfinite(start) and math.isfinite(end) and math.isfinite(pitch)):
+            continue
+        x = _scale_x(start, xmin, xmax, left, plot_w)
+        x2 = _scale_x(max(end, start + 0.04), xmin, xmax, left, plot_w)
+        y = _scale_y(pitch, ymin, ymax, top, plot_h)
+        alpha = max(0.25, min(1.0, vel / 127.0 if math.isfinite(vel) else 0.5))
+        lines.append(f'<rect x="{x:.2f}" y="{y-3:.2f}" width="{max(2.0, x2-x):.2f}" height="6" fill="#1f77b4" opacity="{alpha:.2f}" />')
+    lines.append(f'<text x="{left}" y="{top + plot_h + 20}" font-family="Arial" font-size="11">notas={len(rows)} pitch=[{ymin:.1f}, {ymax:.1f}]</text>')
+    lines.append("</svg>")
+    out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def plot_combined(capture_dir: Path, out_path: Path) -> None:
-    t, ch1 = _load_eeg(capture_dir)
+    t_eeg, ch1 = _load_eeg(capture_dir)
     band_rows = _read_csv(capture_dir / "windowed_bandpowers.csv")
     sonif_rows = _read_csv(capture_dir / "windowed_sonification_features.csv")
     note_rows = _read_csv(capture_dir / "music_notes.csv")
 
-    fig, axes = plt.subplots(4, 1, figsize=(12, 10), sharex=True)
+    width, height = 1100, 900
+    left, plot_w = 80, 980
+    panel_h = 155
+    tops = [58, 258, 458, 658]
+    all_x = t_eeg[:]
+    all_x += [_safe_float(r.get("window_start_sec")) for r in band_rows]
+    all_x += [_safe_float(r.get("window_start_sec")) for r in sonif_rows]
+    all_x += [_safe_float(r.get("t_capture_start_sec")) for r in note_rows]
+    xmin, xmax = _range(all_x, (0.0, 1.0), 0.0)
 
-    if t.size:
-        tx, yx = _downsample_xy(t, ch1)
-        axes[0].plot(tx, yx, linewidth=0.7)
-        axes[0].set_ylabel("CH1 (uV)")
-    axes[0].set_title("Figura combinada EEG + bandpowers + sonificacion + notas")
-    axes[0].grid(True, alpha=0.25)
+    lines = _svg_header(width, height, "Figura combinada EEG + bandpowers + sonificacion + notas")
 
-    if band_rows:
-        tb = np.asarray([_safe_float(r.get("window_start_sec"), math.nan) for r in band_rows], dtype=float)
-        for band in ("alpha", "beta", "gamma"):
-            axes[1].plot(tb, [_safe_float(r.get(f"{band}_rel"), math.nan) for r in band_rows], linewidth=1.0, label=band)
-        axes[1].legend(loc="upper right", fontsize=8)
-    axes[1].set_ylabel("Band rel")
-    axes[1].grid(True, alpha=0.25)
+    # EEG panel
+    ymin, ymax = _range(ch1, (-100.0, 100.0))
+    lines += _axes(left, tops[0], plot_w, panel_h, "", "CH1 uV")
+    dx, dy = _downsample(t_eeg, ch1)
+    lines.append(_polyline(dx, dy, xmin, xmax, ymin, ymax, left, tops[0], plot_w, panel_h, SVG_STROKES[0]))
 
-    if sonif_rows:
-        ts = np.asarray([_safe_float(r.get("window_start_sec"), math.nan) for r in sonif_rows], dtype=float)
-        for key in ("alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"):
-            axes[2].plot(ts, [_safe_float(r.get(key), math.nan) for r in sonif_rows], linewidth=1.0, label=key)
-        axes[2].legend(loc="upper right", fontsize=8)
-    axes[2].set_ylabel("Sonif")
-    axes[2].set_ylim(-0.05, 1.05)
-    axes[2].grid(True, alpha=0.25)
+    # Band panel
+    lines += _axes(left, tops[1], plot_w, panel_h, "", "Band rel")
+    tb = [_safe_float(r.get("window_start_sec")) for r in band_rows]
+    for i, band in enumerate(["alpha", "beta", "gamma"]):
+        y = [_safe_float(r.get(f"{band}_rel")) for r in band_rows]
+        lines.append(_polyline(tb, y, xmin, xmax, 0.0, 1.0, left, tops[1], plot_w, panel_h, SVG_STROKES[i + 1]))
+    lines += _legend(["alpha", "beta", "gamma"], left + 650, tops[1] + 18)
 
-    if note_rows:
-        starts = np.asarray([_safe_float(r.get("t_capture_start_sec"), math.nan) for r in note_rows], dtype=float)
-        ends = np.asarray([_safe_float(r.get("t_capture_end_sec"), math.nan) for r in note_rows], dtype=float)
-        pitches = np.asarray([_safe_float(r.get("pitch_midi"), math.nan) for r in note_rows], dtype=float)
-        mask = np.isfinite(starts) & np.isfinite(ends) & np.isfinite(pitches)
-        for start, end, pitch in zip(starts[mask], ends[mask], pitches[mask]):
-            axes[3].broken_barh([(float(start), max(0.04, float(end - start)))], (float(pitch) - 0.4, 0.8))
-        if np.any(mask):
-            axes[3].set_ylim(float(np.nanmin(pitches[mask]) - 2), float(np.nanmax(pitches[mask]) + 2))
-    axes[3].set_ylabel("MIDI")
-    axes[3].set_xlabel("Tiempo de captura (s)")
-    axes[3].grid(True, alpha=0.25)
+    # Sonification panel
+    lines += _axes(left, tops[2], plot_w, panel_h, "", "Sonif")
+    ts = [_safe_float(r.get("window_start_sec")) for r in sonif_rows]
+    keys = ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]
+    for i, key in enumerate(keys):
+        y = [_safe_float(r.get(key)) for r in sonif_rows]
+        lines.append(_polyline(ts, y, xmin, xmax, 0.0, 1.0, left, tops[2], plot_w, panel_h, SVG_STROKES[i]))
+    lines += _legend(keys, left + 430, tops[2] + 18)
 
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=150)
-    plt.close(fig)
+    # Notes panel
+    lines += _axes(left, tops[3], plot_w, panel_h, "Tiempo de captura (s)", "MIDI")
+    starts = [_safe_float(r.get("t_capture_start_sec")) for r in note_rows]
+    ends = [_safe_float(r.get("t_capture_end_sec")) for r in note_rows]
+    pitches = [_safe_float(r.get("pitch_midi")) for r in note_rows]
+    ymin_p, ymax_p = _range(_finite(pitches), (48.0, 84.0), 0.1)
+    for start, end, pitch in zip(starts, ends, pitches):
+        if not (math.isfinite(start) and math.isfinite(end) and math.isfinite(pitch)):
+            continue
+        x = _scale_x(start, xmin, xmax, left, plot_w)
+        x2 = _scale_x(max(end, start + 0.04), xmin, xmax, left, plot_w)
+        y = _scale_y(pitch, ymin_p, ymax_p, tops[3], panel_h)
+        lines.append(f'<rect x="{x:.2f}" y="{y-3:.2f}" width="{max(2.0, x2-x):.2f}" height="6" fill="#1f77b4" opacity="0.75" />')
+
+    lines.append("</svg>")
+    out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def _quality_summary(capture_dir: Path) -> dict[str, Any]:
     report = _read_json(capture_dir / "quality_report.json")
+    report_md = _parse_quality_md(capture_dir / "quality_report.md")
     music = _read_json(capture_dir / "music_capture_summary.json")
     spectral = _read_json(capture_dir / "spectral_validation_report.json")
-    return {"quality": report, "music": music, "spectral": spectral}
+    return {"quality": report, "quality_md": report_md, "music": music, "spectral": spectral}
 
 
 def _quality_fields(summary: dict[str, Any]) -> dict[str, Any]:
     q = summary.get("quality", {}) or {}
+    md = summary.get("quality_md", {}) or {}
     ch = ((q.get("channels") or {}).get("ch1") or {}) if isinstance(q.get("channels"), dict) else {}
-    # Compatibility with current quality_report formats: also inspect top-level metrics if present.
-    out = {
-        "diagnosis": q.get("diagnosis") or q.get("Diagnosis") or q.get("overall_diagnosis") or "n/a",
-        "duration": q.get("duration_observed_sec") or q.get("duration_sec") or "n/a",
-        "sample_rate": q.get("effective_sample_rate_hz") or q.get("fs_effective_hz") or "n/a",
-        "sample_gaps": q.get("sample_gaps") or q.get("sample_gaps_total") or 0,
-        "invalid_status": q.get("invalid_status") or q.get("invalid_status_total") or 0,
-        "rms_uV": ch.get("rms_uV") or q.get("rms_uV") or "n/a",
-        "ptp_uV": ch.get("ptp_uV") or q.get("ptp_uV") or "n/a",
-        "line_50_ratio": ch.get("line_50_ratio_1_50") or q.get("line_50_ratio_1_50") or "n/a",
-        "artifact_fraction": q.get("artifact_window_fraction") or ch.get("artifact_window_fraction") or "n/a",
+    return {
+        "diagnosis": q.get("diagnosis") or q.get("overall_diagnosis") or md.get("diagnosis", "n/a"),
+        "duration": q.get("duration_observed_sec") or q.get("duration_sec") or md.get("duration_observed", "n/a"),
+        "sample_rate": q.get("effective_sample_rate_hz") or q.get("fs_effective_hz") or md.get("effective_sample_rate", "n/a"),
+        "sample_gaps": q.get("sample_gaps") or q.get("sample_gaps_total") or md.get("sample_gaps", 0),
+        "invalid_status": q.get("invalid_status") or q.get("invalid_status_total") or md.get("invalid_status", 0),
+        "rms_uV": ch.get("rms_uV") or q.get("rms_uV") or md.get("rms_uv", "n/a"),
+        "ptp_uV": ch.get("ptp_uV") or q.get("ptp_uV") or md.get("ptp_uv", "n/a"),
+        "line_50_ratio": ch.get("line_50_ratio_1_50") or q.get("line_50_ratio_1_50") or md.get("line_50_ratio_1_50", "n/a"),
+        "artifact_fraction": q.get("artifact_window_fraction") or ch.get("artifact_window_fraction") or md.get("artifact_window_fraction", "n/a"),
     }
-    return out
 
 
 def _fmt(value: Any) -> str:
@@ -313,7 +389,7 @@ def _fmt(value: Any) -> str:
     return str(value)
 
 
-def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figure_paths: dict[str, Path]) -> Path:
+def write_capture_doc(capture_dir: Path, docs_dir: Path, figure_paths: dict[str, Path]) -> Path:
     cond = _condition_from_dir(capture_dir)
     info = CONDITION_NOTES.get(cond, {"title": cond, "detail": "full", "purpose": "Condicion capturada durante la sesion final."})
     summary = _quality_summary(capture_dir)
@@ -323,12 +399,12 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figu
     sonif = spectral.get("sonification", {}) if isinstance(spectral.get("sonification"), dict) else {}
 
     doc_path = docs_dir / f"{capture_dir.name}.md"
-    rels = {key: _fig_rel(path, figures_dir) for key, path in figure_paths.items()}
+    rels = {key: _fig_rel(path, docs_dir) for key, path in figure_paths.items()}
 
     lines = [
         f"# Captura final: `{cond}`",
         "",
-        f"## 1. Identificacion",
+        "## 1. Identificacion",
         "",
         f"- Carpeta: `{capture_dir}`",
         f"- Tipo: {info['title']}",
@@ -353,7 +429,11 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figu
 
     if info["detail"] == "brief":
         lines.extend([
-            "## 3. Lectura",
+            "## 3. Figuras de comprobacion",
+            "",
+            f"![EEG temporal]({rels['eeg']})",
+            "",
+            "## 4. Lectura",
             "",
             "Esta captura se usa como comprobacion tecnica previa. No se interpreta como condicion EEG principal. Sirve para verificar continuidad, guardado de CSV, metadatos y registro musical antes de las condiciones reportables.",
             "",
@@ -385,7 +465,7 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figu
         ])
 
     lines.extend([
-        "## 4. Datos musicales",
+        "## 5. Datos musicales",
         "",
         "| Metrica | Valor |",
         "| --- | ---: |",
@@ -393,7 +473,7 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figu
         f"| Snapshots con notas | `{_fmt(music.get('snapshots_with_notes', 'n/a'))}` |",
         f"| Notas deduplicadas | `{_fmt(music.get('notes_total_deduplicated', 'n/a'))}` |",
         "",
-        "## 5. Controles de sonificacion disponibles",
+        "## 6. Controles de sonificacion disponibles",
         "",
         "| Control | Mediana | P05 | P95 |",
         "| --- | ---: | ---: | ---: |",
@@ -402,17 +482,13 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, figures_dir: Path, figu
         data = sonif.get(key, {}) if isinstance(sonif.get(key), dict) else {}
         lines.append(f"| `{key}` | `{_fmt(data.get('median', 'n/a'))}` | `{_fmt(data.get('p05', 'n/a'))}` | `{_fmt(data.get('p95', 'n/a'))}` |")
 
-    lines.extend([
-        "",
-        "## 6. Interpretacion para el TFG",
-        "",
-    ])
+    lines.extend(["", "## 7. Interpretacion para el TFG", ""])
     if cond == "blink_artifact_30s":
-        lines.append("Esta captura debe presentarse como condicion de artefacto fisiologico. Su valor principal es mostrar que el sistema registra y conserva una respuesta musical incluso cuando la señal contiene contaminacion esperada por parpadeo.")
+        lines.append("Esta captura debe presentarse como condicion de artefacto fisiologico. Su valor principal es mostrar que el sistema registra y conserva una respuesta musical incluso cuando la senal contiene contaminacion esperada por parpadeo.")
     elif cond == "eyes_open_repeat_30s":
         lines.append("Esta captura es una de las mejores candidatas para figura principal combinada, porque mantiene adquisicion estable, registro musical completo y el diagnostico automatico mas favorable de la sesion.")
     elif cond == "eyes_open_rest_60s":
-        lines.append("Esta captura debe usarse con cautela: contiene sonificacion valida y datos persistidos, pero tambien un artefacto transitorio de gran amplitud. Es util para explicar limitaciones reales de la adquisicion y la necesidad de filtrar/segmentar ventanas artefactadas.")
+        lines.append("Esta captura debe usarse con cautela: contiene sonificacion valida y datos persistidos, pero tambien un artefacto transitorio de gran amplitud. Es util para explicar limitaciones reales de la adquisicion y la necesidad de filtrar o segmentar ventanas artefactadas.")
     elif cond == "eyes_closed_rest_60s":
         lines.append("Esta captura permite documentar una condicion de ojos cerrados real, aunque contaminada por 50 Hz. Conviene interpretarla como evidencia de sistema y no como comparacion neurofisiologica concluyente.")
     elif cond == "quiet_rest_60s":
@@ -445,18 +521,18 @@ def build_session_docs(final_root: Path, subject: str, session: str, montage: st
         fig_dir = out_figures / stem
         fig_dir.mkdir(parents=True, exist_ok=True)
         figure_paths = {
-            "eeg": fig_dir / "eeg_ch1_temporal.png",
-            "bandpowers": fig_dir / "bandpowers_relativos.png",
-            "sonification": fig_dir / "controles_sonificacion.png",
-            "music_notes": fig_dir / "notas_musicales.png",
-            "combined": fig_dir / "figura_combinada_eeg_musica.png",
+            "eeg": fig_dir / "eeg_ch1_temporal.svg",
+            "bandpowers": fig_dir / "bandpowers_relativos.svg",
+            "sonification": fig_dir / "controles_sonificacion.svg",
+            "music_notes": fig_dir / "notas_musicales.svg",
+            "combined": fig_dir / "figura_combinada_eeg_musica.svg",
         }
         plot_eeg(capture_dir, figure_paths["eeg"])
         plot_bandpowers(capture_dir, figure_paths["bandpowers"])
         plot_sonification(capture_dir, figure_paths["sonification"])
         plot_music_notes(capture_dir, figure_paths["music_notes"])
         plot_combined(capture_dir, figure_paths["combined"])
-        doc = write_capture_doc(capture_dir, out_docs, out_figures, figure_paths)
+        doc = write_capture_doc(capture_dir, out_docs, figure_paths)
         written.append(doc)
         index_lines.append(f"| `{capture_dir.name}` | `{cond}` | [`{doc.name}`]({doc.name}) |")
 
@@ -467,7 +543,7 @@ def build_session_docs(final_root: Path, subject: str, session: str, montage: st
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build detailed docs and figures for final EEG-MIDI capture session.")
+    parser = argparse.ArgumentParser(description="Build detailed docs and SVG figures for final EEG-MIDI capture session without matplotlib.")
     parser.add_argument("--final-root", default="captures/capturas finales")
     parser.add_argument("--subject", default="s01")
     parser.add_argument("--session", default="20260528")
