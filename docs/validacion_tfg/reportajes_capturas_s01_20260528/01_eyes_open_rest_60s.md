@@ -59,19 +59,19 @@ Los controles reportables son:
 
 En esta condicion, su valor principal es demostrar que la sonificacion permanece trazable incluso cuando la senal presenta segmentos dudosos. No se deben extraer conclusiones neurofisiologicas fuertes de esta captura aislada.
 
-## 6. Notas musicales generadas
+## 6. Calidad de señal y quality gate
+
+![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/calidad_senal_quality_gate.png)
+
+Esta grafica permite separar la interpretacion musical de la calidad de la señal. En esta captura, el artefacto transitorio obliga a interpretar las ventanas contaminadas con cautela, aunque el pipeline haya seguido funcionando.
+
+## 7. Notas musicales generadas
 
 ![Notas musicales](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/notas_musicales.png)
 
 Se registraron 45 notas deduplicadas. La grafica permite ver la densidad temporal y el rango de pitches generados.
 
 La musica se considera correctamente registrada, pero su patron debe interpretarse como salida del sistema bajo una senal real con artefactos, no como marcador fisiologico directo.
-
-## 7. Figura combinada
-
-![Figura combinada EEG musica](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/figura_combinada_eeg_musica.png)
-
-Esta figura es la mas util para explicar la captura: permite poner en relacion la senal temporal, las bandas, los controles de sonificacion y las notas.
 
 ## 8. Conclusión para el TFG
 
