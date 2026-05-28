@@ -12,7 +12,7 @@ Esta captura es la mejor candidata para figura principal de la sesion final. Aun
 - 65 notas deduplicadas;
 - graficas completas generadas con matplotlib.
 
-Por ello, es la captura mas adecuada para explicar visualmente el sistema completo: EEG real, analisis espectral, controles de sonificacion y notas musicales.
+Por ello, es la captura mas adecuada para explicar visualmente el sistema completo: EEG real, analisis espectral, controles de sonificacion, calidad de senal y notas musicales.
 
 ## 2. Datos tecnicos
 
@@ -64,26 +64,19 @@ Esta figura es central para el TFG porque muestra los nombres reportables defini
 
 Estos controles permiten explicar la sonificacion desde EEG y no desde etiquetas musicales abstractas.
 
-## 6. Notas musicales generadas
+## 6. Calidad de señal y quality gate
+
+![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/calidad_senal_quality_gate.png)
+
+Esta grafica es clave para defender la captura 06: muestra que no se esta interpretando la musica de forma aislada, sino junto con un indicador de calidad de las ventanas. Permite justificar por que la captura se considera la mejor candidata de la sesion aunque conserve transitorios.
+
+## 7. Notas musicales generadas
 
 ![Notas musicales](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/notas_musicales.png)
 
 Se registraron 65 notas deduplicadas. La grafica de notas muestra la salida discreta del sistema musical: pitch MIDI y distribucion temporal.
 
 Esta figura no demuestra por si sola una relacion fisiologica, pero si demuestra que el sistema produjo una salida musical persistente y guardable a partir de los controles calculados.
-
-## 7. Figura combinada recomendada
-
-![Figura combinada EEG musica](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/figura_combinada_eeg_musica.png)
-
-Esta es la figura mas recomendable para incluir en el TFG. Reune en una sola imagen:
-
-1. señal EEG temporal CH1;
-2. bandpowers relativos principales;
-3. controles de sonificacion seleccionados;
-4. notas MIDI generadas.
-
-La figura permite contar la historia completa del sistema: desde el dato bioelectrico hasta la salida musical.
 
 ## 8. Orden sugerido para memoria
 
@@ -93,12 +86,15 @@ Para esta captura, el orden mas claro en el TFG seria:
 2. explicar que la señal es real y no perfecta;
 3. mostrar bandpowers para justificar el analisis espectral;
 4. mostrar controles de sonificacion para justificar el mapeo EEG-musica;
-5. mostrar notas musicales o figura combinada;
-6. cerrar con la limitacion: interpretacion fisiologica preliminar.
+5. mostrar quality score / quality gate para separar respuesta musical y calidad de senal;
+6. mostrar notas musicales o la figura reajustada;
+7. cerrar con la limitacion: interpretacion fisiologica preliminar.
+
+La figura combinada se conserva como PNG y la version reajustada se documenta en `06_eyes_open_repeat_30s_reajustada.md`, pero este reportaje base evita repetirla para mantener una lectura limpia por graficas separadas.
 
 ## 9. Texto sugerido para el TFG
 
-> La repeticion de ojos abiertos fue la captura con mejor diagnostico automatico de la sesion. Durante esta prueba, el sistema mantuvo adquisicion a 250 Hz, sin perdidas de muestras ni estados invalidos, y genero una salida musical persistente. La señal conserva transitorios de amplitud, por lo que no se interpreta como EEG clinicamente limpio; sin embargo, constituye la mejor evidencia visual de integracion completa entre adquisicion EEG, analisis espectral, controles de sonificacion y generacion de notas MIDI.
+> La repeticion de ojos abiertos fue la captura con mejor diagnostico automatico de la sesion. Durante esta prueba, el sistema mantuvo adquisicion a 250 Hz, sin perdidas de muestras ni estados invalidos, y genero una salida musical persistente. La señal conserva transitorios de amplitud, por lo que no se interpreta como EEG clinicamente limpio; sin embargo, constituye la mejor evidencia visual de integracion completa entre adquisicion EEG, analisis espectral, controles de sonificacion, control de calidad y generacion de notas MIDI.
 
 ## 10. Conclusion
 
