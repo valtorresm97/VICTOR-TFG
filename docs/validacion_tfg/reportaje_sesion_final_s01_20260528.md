@@ -39,7 +39,7 @@ El montaje se centra en CH1. Las columnas CH2-CH4 se conservan por contrato de s
 | 02 | `eyes_closed_rest_60s` | 60 s | Ojos cerrados; condicion basal con contaminacion de 50 Hz. |
 | 03 | `quiet_rest_60s` | 60 s | Reposo quieto; condicion de observacion de pipeline y sonificacion sostenida. |
 | 04 | `blink_artifact_30s` | 30 s | Artefacto fisiologico controlado por parpadeo. |
-| 06 | `eyes_open_repeat_30s` | 30 s | Mejor candidata para figura principal combinada. |
+| 06 | `eyes_open_repeat_30s` | 30 s | Mejor candidata para figura principal combinada/reajustada. |
 
 No se incluye captura de movimiento corporal. Tampoco se documenta como presente una condicion `05_jaw_artifact_30s`, porque no aparecio como carpeta final en la sesion subida.
 
@@ -75,9 +75,8 @@ Para cada captura principal se recomienda leer las figuras en este orden:
 2. **Bandpowers relativos**: muestra como se reparte la energia espectral entre delta, theta, alpha, beta y gamma.
 3. **Controles de sonificacion**: traduce los rasgos EEG hacia variables reportables del sistema musical.
 4. **Notas musicales**: muestra la salida discreta generada por la sonificacion.
-5. **Figura combinada**: permite ver simultaneamente EEG, bandpowers, controles y notas.
 
-Los prechecks se pueden mostrar de forma mas breve, porque su objetivo es confirmar que el sistema guardaba datos, no comparar estados neurofisiologicos.
+La figura combinada se conserva como archivo generado para trazabilidad y reportajes especificos, pero en este reportaje global se priorizan las graficas separadas para evitar duplicacion visual y mejorar la lectura.
 
 ## 7. Lectura por captura
 
@@ -95,9 +94,21 @@ Documento detallado:
 
 - [01 - Ojos abiertos](reportajes_capturas_s01_20260528/01_eyes_open_rest_60s.md)
 
-Figura combinada:
+#### EEG temporal
 
-![Figura combinada ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/figura_combinada_eeg_musica.png)
+![EEG temporal ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/eeg_ch1_temporal.png)
+
+#### Bandpowers relativos
+
+![Bandpowers ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/bandpowers_relativos.png)
+
+#### Controles de sonificacion
+
+![Controles ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/controles_sonificacion.png)
+
+#### Notas musicales
+
+![Notas ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/notas_musicales.png)
 
 Esta captura es importante precisamente porque no es perfecta. El sistema registra correctamente la sesion y la musica, pero aparece un artefacto transitorio de amplitud muy elevada. En el TFG debe usarse para explicar que la adquisicion real con electrodos no siempre produce segmentos limpios y que las ventanas contaminadas deben identificarse.
 
@@ -107,9 +118,21 @@ Documento detallado:
 
 - [02 - Ojos cerrados](reportajes_capturas_s01_20260528/02_eyes_closed_rest_60s.md)
 
-Figura combinada:
+#### EEG temporal
 
-![Figura combinada ojos cerrados](figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/figura_combinada_eeg_musica.png)
+![EEG temporal ojos cerrados](figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/eeg_ch1_temporal.png)
+
+#### Bandpowers relativos
+
+![Bandpowers ojos cerrados](figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/bandpowers_relativos.png)
+
+#### Controles de sonificacion
+
+![Controles ojos cerrados](figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/controles_sonificacion.png)
+
+#### Notas musicales
+
+![Notas ojos cerrados](figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/notas_musicales.png)
 
 La condicion de ojos cerrados registro mas notas que ojos abiertos, pero esto no debe interpretarse automaticamente como una conclusion fisiologica. El sistema musical respondio a los controles disponibles, aunque la senal presenta contaminacion de red.
 
@@ -119,9 +142,21 @@ Documento detallado:
 
 - [03 - Reposo quieto](reportajes_capturas_s01_20260528/03_quiet_rest_60s.md)
 
-Figura combinada:
+#### EEG temporal
 
-![Figura combinada reposo quieto](figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/figura_combinada_eeg_musica.png)
+![EEG temporal reposo quieto](figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/eeg_ch1_temporal.png)
+
+#### Bandpowers relativos
+
+![Bandpowers reposo quieto](figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/bandpowers_relativos.png)
+
+#### Controles de sonificacion
+
+![Controles reposo quieto](figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/controles_sonificacion.png)
+
+#### Notas musicales
+
+![Notas reposo quieto](figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/notas_musicales.png)
 
 Esta captura es util como estado intermedio de reposo: no se plantea como control fisiologico perfecto, sino como evidencia de que el pipeline puede sostener adquisicion, features y musica durante una condicion real mantenida.
 
@@ -131,9 +166,21 @@ Documento detallado:
 
 - [04 - Parpadeo](reportajes_capturas_s01_20260528/04_blink_artifact_30s.md)
 
-Figura combinada:
+#### EEG temporal
 
-![Figura combinada parpadeo](figures/capturas_finales_s01_20260528_matplotlib/20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s/figura_combinada_eeg_musica.png)
+![EEG temporal parpadeo](figures/capturas_finales_s01_20260528_matplotlib/20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s/eeg_ch1_temporal.png)
+
+#### Bandpowers relativos
+
+![Bandpowers parpadeo](figures/capturas_finales_s01_20260528_matplotlib/20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s/bandpowers_relativos.png)
+
+#### Controles de sonificacion
+
+![Controles parpadeo](figures/capturas_finales_s01_20260528_matplotlib/20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s/controles_sonificacion.png)
+
+#### Notas musicales
+
+![Notas parpadeo](figures/capturas_finales_s01_20260528_matplotlib/20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s/notas_musicales.png)
 
 Esta condicion debe presentarse como artefacto fisiologico controlado. Su valor es mostrar que el sistema registra y conserva tambien condiciones no limpias, permitiendo analizar como la sonificacion se comporta ante contaminacion esperada.
 
@@ -147,15 +194,27 @@ Documento reajustado recomendado para resultados finales:
 
 - [06 - Repeticion ojos abiertos reajustada](reportajes_capturas_s01_20260528/06_eyes_open_repeat_30s_reajustada.md)
 
-Figura combinada original, con toda la amplitud preservada:
+#### EEG temporal
 
-![Figura combinada repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/figura_combinada_eeg_musica.png)
+![EEG temporal repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/eeg_ch1_temporal.png)
 
-Figura combinada reajustada recomendada para la memoria:
+#### Bandpowers relativos
+
+![Bandpowers repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/bandpowers_relativos.png)
+
+#### Controles de sonificacion
+
+![Controles repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/controles_sonificacion.png)
+
+#### Notas musicales
+
+![Notas repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/notas_musicales.png)
+
+#### Figura reajustada recomendada para memoria
 
 ![Figura combinada reajustada repeticion ojos abiertos](figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_figura_combinada_reajustada_300uv.png)
 
-Esta es la mejor candidata para figura principal de resultados porque combina adquisicion estable, notas registradas y el diagnostico automatico mas favorable de la sesion. La version original conserva el artefacto final; la version reajustada permite ver la dinamica util del EEG sin que el transitorio aplaste la escala. Ambas deben explicarse juntas: no se debe presentar como EEG clinico limpio, sino como ejemplo final de integracion EEG-MIDI real con trazabilidad de artefactos.
+Esta es la mejor candidata para figura principal de resultados porque combina adquisicion estable, notas registradas y el diagnostico automatico mas favorable de la sesion. La version reajustada permite ver la dinamica util del EEG sin que el transitorio aplaste la escala. Debe explicarse junto con la documentacion de artefactos: no se debe presentar como EEG clinico limpio, sino como ejemplo final de integracion EEG-MIDI real con trazabilidad de artefactos.
 
 ## 8. Como usar esta sesion en la memoria
 
@@ -163,7 +222,7 @@ Texto recomendado para la memoria:
 
 > En la sesion final se registro una adquisicion real a 250 Hz con continuidad temporal, sin perdidas de muestras ni estados ADS1299 invalidos. La senal no fue limpia en toda la sesion, ya que aparecieron artefactos electronicos y fisiologicos, pero el sistema mantuvo el procesamiento, genero controles de sonificacion reportables y guardo las notas musicales producidas. Por ello, la sesion se considera valida como evidencia tecnica de integracion EEG-MIDI, aunque la interpretacion neurofisiologica debe realizarse con cautela.
 
-Para la figura principal de resultados se recomienda usar la version reajustada de la captura `06_eyes_open_repeat_30s`, acompanada de la figura completa para demostrar que el transitorio final no se ha ocultado.
+Para la figura principal de resultados se recomienda usar la version reajustada de la captura `06_eyes_open_repeat_30s`, acompanada de la figura completa/metricas de calidad para demostrar que el transitorio final no se ha ocultado.
 
 ## 9. Conclusion
 
