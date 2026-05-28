@@ -1,0 +1,5 @@
+[bench] capture_dir=/home/arduino/ArduinoApps/eeg_midi/captures/20260528-111723_bench_real_rest_60s_mcu
+[bench] rows=8
+[bench] json=/home/arduino/ArduinoApps/eeg_midi/benchmarks/results/20260528-111954_real_capture_bench_real_rest_60s_mcu_20260528-111703_benchmark_results.json
+[bench] csv=/home/arduino/ArduinoApps/eeg_midi/benchmarks/results/20260528-111954_real_capture_bench_real_rest_60s_mcu_20260528-111703_benchmark_results.csv
+[bench] report=/home/arduino/ArduinoApps/eeg_midi/benchmarks/reports/20260528-111954_real_capture_bench_real_rest_60s_mcu_20260528-111703_benchmark_report.md
