@@ -19,7 +19,18 @@ Los reportajes de esta carpeta son una capa interpretativa adicional para el TFG
 | `02_eyes_closed_rest_60s.md` | Ojos cerrados | Completo | Comparacion cualitativa con ojos abiertos, con cautela por 50 Hz. |
 | `03_quiet_rest_60s.md` | Reposo quieto | Completo | Evidencia de pipeline sostenido en reposo. |
 | `04_blink_artifact_30s.md` | Parpadeo | Completo | Artefacto fisiologico controlado. |
-| `06_eyes_open_repeat_30s.md` | Repeticion ojos abiertos | Completo | Mejor candidata para figura principal combinada. |
+| `06_eyes_open_repeat_30s.md` | Repeticion ojos abiertos | Completo | Lectura base de la mejor candidata de la sesion. |
+| `06_eyes_open_repeat_30s_reajustada.md` | Repeticion ojos abiertos reajustada | Completo final | Figura principal recomendada: conserva artefacto y anade vistas robustas, quality score y espectrograma. |
+
+## Figura principal recomendada
+
+Para la memoria del TFG, la figura mas defendible de la sesion es la de la captura `06_eyes_open_repeat_30s` en version reajustada:
+
+```text
+../figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_figura_combinada_reajustada_300uv.png
+```
+
+Debe usarse junto a la figura completa con transitorio para dejar claro que el artefacto existe y no se oculta.
 
 ## Criterio comun de interpretacion
 
