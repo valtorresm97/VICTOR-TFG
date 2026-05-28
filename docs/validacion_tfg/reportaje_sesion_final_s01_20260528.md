@@ -25,6 +25,7 @@ Por tanto, el reportaje no debe vender la sesion como una prueba clinica ni como
 | Carpeta de datos | `captures/capturas finales` |
 | Documentacion detallada | `docs/validacion_tfg/reportajes_capturas_s01_20260528/` |
 | Figuras matplotlib | `docs/validacion_tfg/figures/capturas_finales_s01_20260528_matplotlib/` |
+| Figuras reajustadas captura 06 | `docs/validacion_tfg/figures/capturas_finales_s01_20260528_enhanced/` |
 
 El montaje se centra en CH1. Las columnas CH2-CH4 se conservan por contrato de streaming, pero no se usan como evidencia principal de EEG en esta sesion.
 
@@ -138,21 +139,31 @@ Esta condicion debe presentarse como artefacto fisiologico controlado. Su valor 
 
 ### 7.6 Repeticion de ojos abiertos
 
-Documento detallado:
+Documento base:
 
 - [06 - Repeticion ojos abiertos](reportajes_capturas_s01_20260528/06_eyes_open_repeat_30s.md)
 
-Figura combinada recomendada para el TFG:
+Documento reajustado recomendado para resultados finales:
+
+- [06 - Repeticion ojos abiertos reajustada](reportajes_capturas_s01_20260528/06_eyes_open_repeat_30s_reajustada.md)
+
+Figura combinada original, con toda la amplitud preservada:
 
 ![Figura combinada repeticion ojos abiertos](figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/figura_combinada_eeg_musica.png)
 
-Esta es la mejor candidata para figura principal de resultados porque combina adquisicion estable, notas registradas y el diagnostico automatico mas favorable de la sesion. Aun asi, debe mantenerse la cautela: no se debe presentar como EEG clinico limpio, sino como ejemplo final de integracion EEG-MIDI real.
+Figura combinada reajustada recomendada para la memoria:
+
+![Figura combinada reajustada repeticion ojos abiertos](figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_figura_combinada_reajustada_300uv.png)
+
+Esta es la mejor candidata para figura principal de resultados porque combina adquisicion estable, notas registradas y el diagnostico automatico mas favorable de la sesion. La version original conserva el artefacto final; la version reajustada permite ver la dinamica util del EEG sin que el transitorio aplaste la escala. Ambas deben explicarse juntas: no se debe presentar como EEG clinico limpio, sino como ejemplo final de integracion EEG-MIDI real con trazabilidad de artefactos.
 
 ## 8. Como usar esta sesion en la memoria
 
 Texto recomendado para la memoria:
 
 > En la sesion final se registro una adquisicion real a 250 Hz con continuidad temporal, sin perdidas de muestras ni estados ADS1299 invalidos. La senal no fue limpia en toda la sesion, ya que aparecieron artefactos electronicos y fisiologicos, pero el sistema mantuvo el procesamiento, genero controles de sonificacion reportables y guardo las notas musicales producidas. Por ello, la sesion se considera valida como evidencia tecnica de integracion EEG-MIDI, aunque la interpretacion neurofisiologica debe realizarse con cautela.
+
+Para la figura principal de resultados se recomienda usar la version reajustada de la captura `06_eyes_open_repeat_30s`, acompanada de la figura completa para demostrar que el transitorio final no se ha ocultado.
 
 ## 9. Conclusion
 
