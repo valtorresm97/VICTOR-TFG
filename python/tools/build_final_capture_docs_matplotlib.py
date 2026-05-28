@@ -264,17 +264,29 @@ def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
 def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_sonification_features.csv")
-    plt.figure(figsize=(13, 5.5))
+    fig, ax = plt.subplots(figsize=(13, 5.8))
     for key in SONIF_CONTROLS:
         x, y = rows_xy_windowed(rows, key)
-        plt.plot(x, y, linewidth=1.0, label=key)
-    plt.title("Controles de sonificacion EEG-reportables - tiempo centrado")
-    plt.xlabel("Tiempo de captura (s)")
-    plt.ylabel("Valor normalizado")
-    plt.ylim(-0.03, 1.03)
-    apply_capture_xlim(duration)
-    plt.grid(True, alpha=0.3)
-    plt.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8)
+        ax.plot(x, y, linewidth=1.0, label=key)
+    ax.set_title("Controles de sonificacion EEG-reportables - tiempo centrado")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Valor normalizado")
+    ax.set_ylim(-0.03, 1.03)
+    if duration is not None and math.isfinite(duration) and duration > 0:
+        ax.set_xlim(0.0, duration)
+    ax.grid(True, alpha=0.3)
+    # Keep the legend inside the figure footprint so GitHub/Markdown rendering
+    # does not create a very wide canvas. Placing it below the axes keeps the
+    # plot area comparable to bandpowers_relativos.png across all captures.
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.18),
+        ncol=4,
+        fontsize=8,
+        frameon=True,
+        borderaxespad=0.0,
+    )
+    fig.subplots_adjust(bottom=0.28)
     save_fig(out_path)
 
 
@@ -483,6 +495,7 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
         "- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.",
         "- Bandpowers y controles de sonificacion con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.",
         "- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.",
+        "- Las graficas de controles de sonificacion usan leyenda inferior compacta para evitar lienzos demasiado anchos en GitHub/Markdown.",
         "",
         "| Captura | Condicion | Documento |",
         "| --- | --- | --- |",
