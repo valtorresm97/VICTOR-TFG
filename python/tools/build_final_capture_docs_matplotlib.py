@@ -5,7 +5,6 @@ import csv
 import json
 import math
 import os
-import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -33,7 +32,7 @@ try:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-except Exception as exc:  # pragma: no cover
+except Exception as exc:  # pragma: no cover - depends on environment
     raise SystemExit(
         "matplotlib is required for this tool. "
         "Run it on a PC/venv with matplotlib installed, or install matplotlib in the board environment. "
@@ -62,8 +61,12 @@ CONDITION_INFO = {
     "eyes_open_repeat_30s": ("Repeticion ojos abiertos", "full", "Candidata principal para figura combinada de la sesion final."),
 }
 
+# Standard TFG plots use a fixed EEG scale so large terminal artifacts do not
+# hide the useful signal. Full-amplitude traces remain documented in enhanced
+# reports when needed.
 EEG_STANDARD_YLIM_UV = (-400.0, 400.0)
 FEATURE_WINDOW_SEC = 4.0
+
 FIG_SIZE = (15.0, 5.4)
 COMBINED_SIZE = (15.0, 12.4)
 EXPORT_DPI = 220
@@ -90,30 +93,17 @@ SONIF_COLORS = {
     "rms_band_velocity": "#17becf",
     "band_note_probability": "#e377c2",
 }
-QUALITY_COLORS = {"quality_score": "#1f77b4", "quality_gate": "#ff7f0e"}
-
-# If LaTeX is available, the script can use the real Matplotlib TeX backend.
-# Otherwise it keeps the same descriptive labels with a LaTeX-like serif style.
-# Force behavior with EEG_MIDI_USE_TEX=1 or EEG_MIDI_USE_TEX=0.
-_env_tex = os.environ.get("EEG_MIDI_USE_TEX")
-USE_TEX = (_env_tex == "1") or (_env_tex is None and shutil.which("latex") is not None)
-
-
-def legend_label(text: str) -> str:
-    """Escape labels only when real TeX rendering is active.
-
-    This keeps legend wording descriptive (alpha_drive, quality_score, etc.)
-    while allowing the text backend to be LaTeX when available.
-    """
-    if not USE_TEX:
-        return text
-    return text.replace("_", r"\_")
+QUALITY_COLORS = {
+    "quality_score": "#1f77b4",
+    "quality_gate": "#ff7f0e",
+}
 
 
 def apply_publication_style() -> None:
+    # Use Matplotlib mathtext instead of external LaTeX. This gives LaTeX-like
+    # labels without requiring MiKTeX/TeXLive on Windows.
     plt.rcParams.update(
         {
-            "text.usetex": USE_TEX,
             "figure.facecolor": "white",
             "axes.facecolor": "white",
             "axes.edgecolor": AXIS_COLOR,
@@ -122,9 +112,8 @@ def apply_publication_style() -> None:
             "xtick.color": AXIS_COLOR,
             "ytick.color": AXIS_COLOR,
             "text.color": TEXT_COLOR,
-            "font.family": "serif",
-            "font.serif": ["DejaVu Serif", "Times New Roman", "Times"],
-            "mathtext.fontset": "dejavuserif",
+            "font.family": "DejaVu Sans",
+            "mathtext.fontset": "dejavusans",
             "font.size": 18,
             "axes.titlesize": 18,
             "axes.titleweight": "semibold",
@@ -206,6 +195,7 @@ def discover_captures(final_root: Path, subject: str, session: str, montage: str
 
 
 def posix_rel(path: Path, base: Path) -> str:
+    """Return a portable Markdown link path, even when generated on Windows."""
     try:
         return os.path.relpath(path, start=base).replace(os.sep, "/")
     except Exception:
@@ -260,6 +250,12 @@ def downsample(x: list[float], y: list[float], max_points: int = 7000) -> tuple[
 
 
 def rows_xy_windowed(rows: list[dict[str, str]], y_key: str) -> tuple[list[float], list[float]]:
+    """Use center-of-window time for offline spectral features.
+
+    The CSV stores features computed over finite windows. The plot uses the
+    window center for visual alignment, while keeping the x-axis range equal to
+    the full capture duration.
+    """
     x: list[float] = []
     y: list[float] = []
     for row in rows:
@@ -288,6 +284,8 @@ def style_axes(ax: Any, *, grid: bool = True) -> None:
     ax.spines["left"].set_color("#8b949e")
     ax.spines["bottom"].set_color("#8b949e")
     ax.tick_params(axis="both", which="major", length=5, width=0.9, labelsize=20)
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(20)
 
 
 def save_fig(fig: Any, path: Path) -> None:
@@ -304,15 +302,15 @@ def plot_eeg(capture_dir: Path, out_path: Path) -> None:
     fig, ax = plt.subplots(figsize=FIG_SIZE)
     ax.plot(t, ch1, linewidth=0.92, color=EEG_COLOR)
     ax.set_title("EEG temporal CH1")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Amplitud CH1 (uV)")
+    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
+    ax.set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
     ax.set_ylim(*EEG_STANDARD_YLIM_UV)
     apply_capture_xlim(ax, duration)
     style_axes(ax)
     ax.text(
         0.012,
         0.955,
-        "Escala fija +/- 400 uV",
+        r"Escala fija $\pm 400\,\mu\mathrm{V}$",
         transform=ax.transAxes,
         va="top",
         ha="left",
@@ -328,10 +326,10 @@ def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
     fig, ax = plt.subplots(figsize=FIG_SIZE)
     for band in BANDS:
         x, y = rows_xy_windowed(rows, f"{band}_rel")
-        ax.plot(x, y, linewidth=1.65, color=BAND_COLORS.get(band), label=legend_label(band))
+        ax.plot(x, y, linewidth=1.65, color=BAND_COLORS.get(band), label=band)
     ax.set_title("Bandpowers relativos por ventana")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Potencia relativa")
+    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
+    ax.set_ylabel(r"$p_i(t)$")
     ax.set_ylim(-0.03, 1.03)
     apply_capture_xlim(ax, duration)
     style_axes(ax)
@@ -345,10 +343,10 @@ def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     fig, ax = plt.subplots(figsize=FIG_SIZE)
     for key in SONIF_CONTROLS:
         x, y = rows_xy_windowed(rows, key)
-        ax.plot(x, y, linewidth=1.45, color=SONIF_COLORS.get(key), label=legend_label(key))
+        ax.plot(x, y, linewidth=1.45, color=SONIF_COLORS.get(key), label=key)
     ax.set_title("Controles de sonificacion EEG-reportables")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Valor normalizado")
+    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
+    ax.set_ylabel(r"$u_i(t)$")
     ax.set_ylim(-0.03, 1.03)
     apply_capture_xlim(ax, duration)
     style_axes(ax)
@@ -364,14 +362,14 @@ def plot_quality(capture_dir: Path, out_path: Path) -> None:
     for key, label in [("quality_score", "quality_score"), ("quality_gate", "quality_gate")]:
         x, y = rows_xy_windowed(rows, key)
         if x and y:
-            ax.plot(x, y, linewidth=1.65, color=QUALITY_COLORS[key], label=legend_label(label))
+            ax.plot(x, y, linewidth=1.65, color=QUALITY_COLORS[key], label=label)
             plotted += 1
     if plotted:
         for y_thr, label in [(0.85, "clean 0.85"), (0.70, "usable 0.70"), (0.50, "artifact 0.50")]:
-            ax.axhline(y_thr, linestyle="--", linewidth=1.05, color="#6b7280", alpha=0.72, label=legend_label(label))
+            ax.axhline(y_thr, linestyle="--", linewidth=1.05, color="#6b7280", alpha=0.72, label=label)
     ax.set_title("Calidad de senal y gate de sonificacion")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Score / gate")
+    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
+    ax.set_ylabel(r"$q(t)$")
     ax.set_ylim(-0.03, 1.03)
     apply_capture_xlim(ax, duration)
     style_axes(ax)
@@ -404,8 +402,8 @@ def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
         )
         pitches.append(pitch)
     ax.set_title("Notas musicales generadas")
-    ax.set_xlabel("Tiempo de captura (s)")
-    ax.set_ylabel("Pitch MIDI")
+    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
+    ax.set_ylabel(r"$\mathrm{pitch}_{\mathrm{MIDI}}$")
     apply_capture_xlim(ax, duration)
     if pitches:
         p_min = max(0, math.floor(min(pitches) - 2))
@@ -427,12 +425,12 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     fig, axes = plt.subplots(4, 1, figsize=COMBINED_SIZE, sharex=True)
     axes[0].plot(eeg_t, eeg_y, linewidth=0.8, color=EEG_COLOR)
     axes[0].set_ylim(*EEG_STANDARD_YLIM_UV)
-    axes[0].set_ylabel("Amplitud CH1 (uV)")
+    axes[0].set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
     axes[0].set_title("EEG, espectro, sonificacion y notas MIDI")
     axes[0].text(
         0.012,
         0.94,
-        "Escala fija +/- 400 uV",
+        r"Escala fija $\pm 400\,\mu\mathrm{V}$",
         transform=axes[0].transAxes,
         va="top",
         fontsize=11.5,
@@ -442,16 +440,16 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
 
     for band in ["alpha", "beta", "gamma"]:
         x, y = rows_xy_windowed(band_rows, f"{band}_rel")
-        axes[1].plot(x, y, linewidth=1.35, color=BAND_COLORS.get(band), label=legend_label(band))
-    axes[1].set_ylabel("Potencia relativa")
+        axes[1].plot(x, y, linewidth=1.35, color=BAND_COLORS.get(band), label=band)
+    axes[1].set_ylabel(r"$p_i(t)$")
     axes[1].set_ylim(-0.03, 1.03)
     style_axes(axes[1])
     axes[1].legend(loc="upper right", fontsize=9.5, ncol=3)
 
     for key in ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]:
         x, y = rows_xy_windowed(sonif_rows, key)
-        axes[2].plot(x, y, linewidth=1.32, color=SONIF_COLORS.get(key), label=legend_label(key))
-    axes[2].set_ylabel("Valor normalizado")
+        axes[2].plot(x, y, linewidth=1.32, color=SONIF_COLORS.get(key), label=key)
+    axes[2].set_ylabel(r"$u_i(t)$")
     axes[2].set_ylim(-0.03, 1.03)
     style_axes(axes[2])
     axes[2].legend(loc="upper right", fontsize=9, ncol=2)
@@ -472,8 +470,8 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
             alpha=0.72,
         )
         pitches.append(pitch)
-    axes[3].set_ylabel("Pitch MIDI")
-    axes[3].set_xlabel("Tiempo de captura (s)")
+    axes[3].set_ylabel(r"$\mathrm{pitch}_{\mathrm{MIDI}}$")
+    axes[3].set_xlabel(r"$t\,\mathrm{(s)}$")
     if pitches:
         axes[3].set_ylim(max(0, math.floor(min(pitches) - 2)), min(127, math.ceil(max(pitches) + 2)))
     style_axes(axes[3])
@@ -619,7 +617,7 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
         "- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.",
         "- Bandpowers, controles de sonificacion y calidad usan tiempos de ventana alineados con la duracion total de la captura.",
         "- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.",
-        "- Las graficas mantienen etiquetas descriptivas y usan tipografia estilo LaTeX/serif; si existe LaTeX instalado, se activa automaticamente el backend TeX de Matplotlib.",
+        "- Las graficas usan etiquetas tipo LaTeX con mathtext de Matplotlib para no depender de una instalacion externa de LaTeX.",
         "",
         "| Captura | Condicion | Documento |",
         "| --- | --- | --- |",
