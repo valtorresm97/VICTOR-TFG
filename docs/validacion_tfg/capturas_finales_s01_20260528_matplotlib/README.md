@@ -2,6 +2,12 @@
 
 Figuras generadas con matplotlib a partir de la sesion real reportada en el TFG.
 
+Criterios de representacion aplicados:
+
+- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.
+- Bandpowers y controles de sonificacion con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.
+- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.
+
 | Captura | Condicion | Documento |
 | --- | --- | --- |
 | `20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s` | `precheck_10s` | [`20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s.md`](20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s.md) |
