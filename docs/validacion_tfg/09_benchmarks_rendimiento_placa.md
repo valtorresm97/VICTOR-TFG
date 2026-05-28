@@ -12,6 +12,25 @@ ADS1299 -> SPI/RDATAC -> firmware MCU -> filtros MCU -> Bridge.notify("eeg_block
 
 El análisis no pretende validar fisiológicamente la señal EEG por sí solo. Su finalidad principal es evaluar el coste computacional real del pipeline en la placa usando datos capturados por el hardware.
 
+## Por qué el margen temporal de Python es de 256 ms
+
+El cálculo de características espectrales en Python no se ejecuta para cada muestra individual recibida. El backend mantiene un buffer temporal y calcula nuevas características cuando se acumula un avance mínimo de muestras, definido por:
+
+```text
+FEATURE_HOP_SAMPLES = 64
+FS_HZ = 250 Hz
+```
+
+Esto significa que, aunque la ventana analizada para extraer las características espectrales es de 4 s, la actualización de dichas características se produce cada 64 muestras nuevas. Con una frecuencia de muestreo de 250 Hz, el tiempo físico correspondiente a 64 muestras es:
+
+```text
+64 muestras / 250 muestras/s = 0.256 s = 256 ms
+```
+
+Por tanto, 256 ms es el presupuesto temporal aproximado disponible para completar un ciclo de procesamiento live antes de que llegue la siguiente actualización de features. Dentro de ese ciclo se incluyen las operaciones relevantes del lado Python/Linux: recepción del bloque, actualización del buffer, cálculo de características espectrales, diagnóstico de calidad y adaptación de los controles de sonificación.
+
+La interpretación del benchmark se basa en comparar el tiempo medido de las funciones críticas con esos 256 ms. Si `compute_live_features` o el ciclo completo de procesamiento quedan claramente por debajo de ese valor, el sistema dispone de margen temporal para operar en tiempo real. En las pruebas realizadas, los tiempos medidos se sitúan en el orden de 5-13 ms, por lo que el procesamiento Python/Linux queda muy por debajo del presupuesto temporal disponible.
+
 ## Rama, commits y entorno
 
 Los benchmarks se ejecutaron en la rama:
