@@ -1,14 +1,21 @@
 # Reportajes por captura - sesion final `s01_20260528`
 
-Esta carpeta contiene una version narrativa de las capturas finales de la sesion `s01_20260528`.
+Esta carpeta queda como **documentacion principal por captura** para el TFG. Es la version narrativa, revisada y defendible de la sesion final `s01_20260528`.
 
-La documentacion automatica generada con matplotlib se conserva en:
+La carpeta automatica:
 
 ```text
 /docs/validacion_tfg/capturas_finales_s01_20260528_matplotlib/
 ```
 
-Los reportajes de esta carpeta son una capa interpretativa adicional para el TFG. Su objetivo es ordenar las graficas y explicar que se observa en cada estado.
+se mantiene solo como salida generada/reproducible del script de matplotlib. No debe usarse como documentacion final principal porque su texto es automatico y menos explicativo.
+
+Las imagenes que usan estos reportajes se conservan en:
+
+```text
+/docs/validacion_tfg/figures/capturas_finales_s01_20260528_matplotlib/
+/docs/validacion_tfg/figures/capturas_finales_s01_20260528_enhanced/
+```
 
 ## Indice
 
@@ -22,6 +29,18 @@ Los reportajes de esta carpeta son una capa interpretativa adicional para el TFG
 | `06_eyes_open_repeat_30s.md` | Repeticion ojos abiertos | Completo | Lectura base de la mejor candidata de la sesion. |
 | `06_eyes_open_repeat_30s_reajustada.md` | Repeticion ojos abiertos reajustada | Completo final | Figura principal recomendada: conserva artefacto y anade vistas robustas, quality score y espectrograma. |
 
+## Orden comun de figuras
+
+En los reportajes principales se usa el mismo orden:
+
+1. EEG temporal.
+2. Bandpowers relativos.
+3. Controles de sonificacion.
+4. Calidad de senal / quality gate.
+5. Notas musicales.
+
+La figura combinada queda reservada para casos concretos, especialmente la version reajustada de la captura 06. En los reportajes base se evita insertarla para no duplicar informacion visual.
+
 ## Figura principal recomendada
 
 Para la memoria del TFG, la figura mas defendible de la sesion es la de la captura `06_eyes_open_repeat_30s` en version reajustada:
@@ -30,7 +49,7 @@ Para la memoria del TFG, la figura mas defendible de la sesion es la de la captu
 ../figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_figura_combinada_reajustada_300uv.png
 ```
 
-Debe usarse junto a la figura completa con transitorio para dejar claro que el artefacto existe y no se oculta.
+Debe usarse junto a la figura completa o a las metricas de calidad para dejar claro que el artefacto existe y no se oculta.
 
 ## Criterio comun de interpretacion
 
