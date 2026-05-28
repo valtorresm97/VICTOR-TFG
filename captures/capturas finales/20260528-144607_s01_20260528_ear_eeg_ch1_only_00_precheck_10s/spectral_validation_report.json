@@ -1,0 +1,279 @@
+{
+  "bands": {
+    "alpha": {
+      "absolute": {
+        "count": 22,
+        "max": 9.30764774998072e-11,
+        "mean": 4.1260648054439626e-11,
+        "median": 4.0235540106643206e-11,
+        "min": 1.7122012028977225e-11,
+        "p05": 1.8995989154099037e-11,
+        "p95": 7.882646599211598e-11
+      },
+      "band": "alpha",
+      "decision": "NECESITA MAS CAPTURAS",
+      "relative": {
+        "count": 22,
+        "max": 0.16623574344856862,
+        "mean": 0.1293417312351546,
+        "median": 0.1464588111951132,
+        "min": 0.07025758225359442,
+        "p05": 0.07716095761082627,
+        "p95": 0.16478314401339406
+      },
+      "relative_good_windows": {
+        "count": 22,
+        "max": 0.16623574344856862,
+        "mean": 0.1293417312351546,
+        "median": 0.1464588111951132,
+        "min": 0.07025758225359442,
+        "p05": 0.07716095761082627,
+        "p95": 0.16478314401339406
+      },
+      "risk": "no validada solo por presencia; requiere open/closed robusto",
+      "sonification_usefulness": "alpha_drive/alpha_stability si aumenta en condiciones limpias"
+    },
+    "beta": {
+      "absolute": {
+        "count": 22,
+        "max": 1.0000718872756996e-10,
+        "mean": 6.456413326813091e-11,
+        "median": 6.255489491774746e-11,
+        "min": 5.2624123229996274e-11,
+        "p05": 5.347259581687414e-11,
+        "p95": 8.62827917487087e-11
+      },
+      "band": "beta",
+      "decision": "USAR SOLO COMO APOYO",
+      "relative": {
+        "count": 22,
+        "max": 0.25170747395603543,
+        "mean": 0.21517546397213164,
+        "median": 0.22850463350870123,
+        "min": 0.1487470446597539,
+        "p05": 0.1614878671012851,
+        "p95": 0.2509698717098356
+      },
+      "relative_good_windows": {
+        "count": 22,
+        "max": 0.25170747395603543,
+        "mean": 0.21517546397213164,
+        "median": 0.22850463350870123,
+        "min": 0.1487470446597539,
+        "p05": 0.1614878671012851,
+        "p95": 0.2509698717098356
+      },
+      "risk": "puede aumentar con mandibula/frente/EMG",
+      "sonification_usefulness": "beta_gamma_drive/rms_beta_activity con suavizado y bloqueo por calidad"
+    },
+    "delta": {
+      "absolute": {
+        "count": 22,
+        "max": 3.4779493099964894e-10,
+        "mean": 8.992548561146882e-11,
+        "median": 6.988398492228195e-11,
+        "min": 3.986211477232371e-11,
+        "p05": 4.229609528763016e-11,
+        "p95": 2.1754142269149604e-10
+      },
+      "band": "delta",
+      "decision": "USAR SOLO COMO APOYO",
+      "relative": {
+        "count": 22,
+        "max": 0.5172974942308216,
+        "mean": 0.2654190011007512,
+        "median": 0.23520147051141688,
+        "min": 0.16168953696163674,
+        "p05": 0.16399823575017602,
+        "p95": 0.4066590412520032
+      },
+      "relative_good_windows": {
+        "count": 22,
+        "max": 0.5172974942308216,
+        "mean": 0.2654190011007512,
+        "median": 0.23520147051141688,
+        "min": 0.16168953696163674,
+        "p05": 0.16399823575017602,
+        "p95": 0.4066590412520032
+      },
+      "risk": "puede reflejar drift, parpadeo o movimiento",
+      "sonification_usefulness": "slow_power si artifact score es bajo"
+    },
+    "gamma": {
+      "absolute": {
+        "count": 22,
+        "max": 1.1011723443475186e-10,
+        "mean": 8.956781849885387e-11,
+        "median": 9.24580646766637e-11,
+        "min": 6.084594821806465e-11,
+        "p05": 6.978829238008472e-11,
+        "p95": 1.0803796239481957e-10
+      },
+      "band": "gamma",
+      "decision": "NO USAR EN TIEMPO REAL",
+      "relative": {
+        "count": 22,
+        "max": 0.40475649157650345,
+        "mean": 0.3058542230217763,
+        "median": 0.3231389605588576,
+        "min": 0.11699927672949575,
+        "p05": 0.17609937031411105,
+        "p95": 0.39287020912006226
+      },
+      "relative_good_windows": {
+        "count": 22,
+        "max": 0.40475649157650345,
+        "mean": 0.3058542230217763,
+        "median": 0.3231389605588576,
+        "min": 0.11699927672949575,
+        "p05": 0.17609937031411105,
+        "p95": 0.39287020912006226
+      },
+      "risk": "muy sensible a EMG y ruido en EEG superficial",
+      "sonification_usefulness": "solo indicador de posible artefacto/actividad muscular"
+    },
+    "theta": {
+      "absolute": {
+        "count": 22,
+        "max": 5.7702647308528864e-11,
+        "mean": 2.699365439757521e-11,
+        "median": 2.5128435902890408e-11,
+        "min": 1.1066959886291488e-11,
+        "p05": 1.2214654956632775e-11,
+        "p95": 5.265556335683647e-11
+      },
+      "band": "theta",
+      "decision": "USAR SOLO COMO APOYO",
+      "relative": {
+        "count": 22,
+        "max": 0.11832276952071506,
+        "mean": 0.08420958067018633,
+        "median": 0.08924233273045751,
+        "min": 0.04541159316980109,
+        "p05": 0.04658618131769892,
+        "p95": 0.11576948239509942
+      },
+      "relative_good_windows": {
+        "count": 22,
+        "max": 0.11832276952071506,
+        "mean": 0.08420958067018633,
+        "median": 0.08924233273045751,
+        "min": 0.04541159316980109,
+        "p05": 0.04658618131769892,
+        "p95": 0.11576948239509942
+      },
+      "risk": "puede reflejar drift, parpadeo o movimiento",
+      "sonification_usefulness": "slow_power si artifact score es bajo"
+    }
+  },
+  "capture_dir": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s",
+  "channel": 0,
+  "condition": "s01_20260528_ear_eeg_ch1_only_00_precheck_10s",
+  "fs_hz": 250.0,
+  "hop_samples": 64,
+  "hop_sec": 0.256,
+  "line_50_ratio_1_50": {
+    "count": 22,
+    "max": 0.2842606886678899,
+    "mean": 0.18458730646644145,
+    "median": 0.19401104109307193,
+    "min": 0.04657417741419339,
+    "p05": 0.09804534090750004,
+    "p95": 0.26323974621565444
+  },
+  "outputs": {
+    "psd_multitaper_csv": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s/psd_multitaper.csv",
+    "windowed_bandpowers_csv": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s/windowed_bandpowers.csv",
+    "windowed_sonification_features_csv": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-144607_s01_20260528_ear_eeg_ch1_only_00_precheck_10s/windowed_sonification_features.csv"
+  },
+  "quality": {
+    "artifact_or_low_quality_fraction": 0.0,
+    "median_score": 1.0,
+    "p05_score": 0.9801403806765183
+  },
+  "rms_uV": {
+    "count": 22,
+    "max": 36.54575214713743,
+    "mean": 28.937381365291547,
+    "median": 28.530991916996882,
+    "min": 19.96274029285559,
+    "p05": 20.271030637278038,
+    "p95": 34.23013141502546
+  },
+  "sonification": {
+    "alpha_drive": {
+      "count": 22,
+      "max": 0.48205256984231576,
+      "mean": 0.40213610483936413,
+      "median": 0.4188714567067033,
+      "min": 0.2824577386789797,
+      "p05": 0.28704963106173065,
+      "p95": 0.4808754622354276
+    },
+    "alpha_stability": {
+      "count": 22,
+      "max": 0.4230766657924295,
+      "mean": 0.3767920966953286,
+      "median": 0.3943244486503161,
+      "min": 0.28900411217546573,
+      "p05": 0.2920376507575272,
+      "p95": 0.42265693707310126
+    },
+    "band_driven_density": {
+      "count": 22,
+      "max": 0.31368295182992295,
+      "mean": 0.2721644100116711,
+      "median": 0.2798251873086931,
+      "min": 0.21700547292418404,
+      "p05": 0.22027812033297334,
+      "p95": 0.31310637994470475
+    },
+    "band_note_probability": {
+      "count": 22,
+      "max": 0.40094636146393836,
+      "mean": 0.3677315280093369,
+      "median": 0.3738601498469545,
+      "min": 0.32360437833934724,
+      "p05": 0.32622249626637867,
+      "p95": 0.40048510395576375
+    },
+    "beta_gamma_drive": {
+      "count": 22,
+      "max": 0.6222074066252098,
+      "mean": 0.516973470020393,
+      "median": 0.5096424914560458,
+      "min": 0.41771039179802566,
+      "p05": 0.4223236554581552,
+      "p95": 0.6216579601349167
+    },
+    "rms_band_velocity": {
+      "count": 22,
+      "max": 0.5162206821865216,
+      "mean": 0.4929875394815167,
+      "median": 0.4904095041067361,
+      "min": 0.485954919840451,
+      "p05": 0.4863224508144103,
+      "p95": 0.5129913534538338
+    },
+    "rms_beta_activity": {
+      "count": 22,
+      "max": 0.2801459907422699,
+      "mean": 0.26275557534676786,
+      "median": 0.26154578138238266,
+      "min": 0.24558949335523528,
+      "p05": 0.24601626559885342,
+      "p95": 0.2793342690961337
+    },
+    "spectral_register": {
+      "count": 22,
+      "max": 0.5983248857507937,
+      "mean": 0.5310573499152429,
+      "median": 0.5253429175193862,
+      "min": 0.4720004547690406,
+      "p05": 0.47349524213712646,
+      "p95": 0.5977388585315286
+    }
+  },
+  "window_count": 22,
+  "window_sec": 4.0
+}

@@ -1,0 +1,43 @@
+{
+  "ads1299": {
+    "bias_drl_used": false,
+    "channels_streamed": 4,
+    "expected_device": "ADS1299-4PAG",
+    "expected_id": "0x3C",
+    "lead_off_impedance_measured": false,
+    "lsb_v_firmware": 2.235e-08,
+    "pga_gain_assumed": 24,
+    "status_mask": "0xF00000",
+    "status_prefix_expected": "0xC00000",
+    "vref_v_assumed_from_lsb_gain": 4.499648794800001
+  },
+  "block_samples_expected": 8,
+  "bridge_event": "eeg_block_uV",
+  "condition": "s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s",
+  "created_at_utc": "2026-05-28T14:53:51.177582+00:00",
+  "duration_observed_sec": 60.01804898099999,
+  "duration_requested_sec": 60.0,
+  "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",
+  "fs_hz_expected": 250,
+  "git": {
+    "branch": null,
+    "commit": null,
+    "dirty": false
+  },
+  "notes": "subject=s01;session=20260528;montage=ear_eeg_ch1_only;model=modelo_captura_final;ads_mode=bias_ch1_only_loff_off;condition=eyes_closed_rest_60s;order=02;instruction=ojos_cerrados_relajado_sin_hablar",
+  "num_channels": 4,
+  "raw_counts_available": false,
+  "rx_summary": {
+    "block_gaps_total": 0,
+    "csv_rows_written": 14368,
+    "invalid_status_total": 0,
+    "last_block_idx": 62237,
+    "last_sample_idx": 500317,
+    "malformed_blocks_total": 0,
+    "rx_blocks_total": 1796,
+    "rx_samples_total": 14368,
+    "sample_gaps_total": 0
+  },
+  "started_unix": 1779979971.1595168,
+  "value_units": "microvolts"
+}

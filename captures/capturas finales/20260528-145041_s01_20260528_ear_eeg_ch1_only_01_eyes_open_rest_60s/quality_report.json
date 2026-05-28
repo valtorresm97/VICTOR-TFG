@@ -1,0 +1,312 @@
+{
+  "channels": {
+    "ch1": {
+      "abrupt_jumps": 26,
+      "bandpower_abs": {
+        "alpha": 18.325087316263982,
+        "beta": 73.04802203535985,
+        "delta": 13.725362007144692,
+        "gamma": 51.31424423073409,
+        "theta": 19.331899802191703
+      },
+      "bandpower_rel": {
+        "alpha": 0.1042711167873996,
+        "beta": 0.4156487063489975,
+        "delta": 0.07809833590949014,
+        "gamma": 0.29198188585389345,
+        "theta": 0.10999995510021941
+      },
+      "flatline": false,
+      "line_50_power": 0.07572025266136882,
+      "line_50_ratio_1_50": 0.00043512046743424316,
+      "max_uV": 16369.0,
+      "mean_uV": -2.373669467787115,
+      "median_uV": -1.0,
+      "min_uV": -91292.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -193.21,
+      "p05_uV": -37.0,
+      "p95_uV": 408.0499999999993,
+      "p99_uV": 2833.889999999992,
+      "peak_by_band_hz": {
+        "alpha": 9.698879551820728,
+        "beta": 14.880952380952381,
+        "delta": 1.3830532212885154,
+        "gamma": 31.25,
+        "theta": 6.705182072829132
+      },
+      "peak_freq_hz": 31.25,
+      "ptp_uV": 107661.0,
+      "rms_uV": 2199.3955170628565,
+      "samples": 14280,
+      "std_uV": 2199.394236186284,
+      "windowed": {
+        "artifact_window_fraction": 0.125,
+        "best_window_rms_uV": 20.513410247932935,
+        "best_window_start_sec": 55.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 107661.0,
+        "max_rms_uV": 9807.186299953722,
+        "median_ptp_uV": 479.0,
+        "median_rms_uV": 38.08239984249515,
+        "median_robust_ptp_uV": 76.07499999999997,
+        "p90_rms_uV": 2942.687478174601,
+        "p95_ptp_uV": 78564.0,
+        "p95_rms_uV": 5901.714128753096,
+        "p95_robust_ptp_uV": 3593.6875,
+        "window_count": 56,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 9807.186299953722,
+        "worst_window_start_sec": 18.0
+      }
+    },
+    "ch2": {
+      "abrupt_jumps": 31,
+      "bandpower_abs": {
+        "alpha": 17.51758909755882,
+        "beta": 59.286464609856864,
+        "delta": 10.268901627394257,
+        "gamma": 35.32840703649353,
+        "theta": 17.88379505775739
+      },
+      "bandpower_rel": {
+        "alpha": 0.12487129371770553,
+        "beta": 0.42261395072986774,
+        "delta": 0.07320020033186345,
+        "gamma": 0.25183282168933896,
+        "theta": 0.1274817335312243
+      },
+      "flatline": false,
+      "line_50_power": 0.1751684822252201,
+      "line_50_ratio_1_50": 0.0012596339759418029,
+      "max_uV": 60966.0,
+      "mean_uV": 0.002380952380952381,
+      "median_uV": 0.0,
+      "min_uV": -65817.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -1006.84,
+      "p05_uV": -32.0,
+      "p95_uV": 4.0,
+      "p99_uV": 1093.2499999999782,
+      "peak_by_band_hz": {
+        "alpha": 10.1015406162465,
+        "beta": 23.35434173669468,
+        "delta": 3.1512605042016806,
+        "gamma": 30.304621848739497,
+        "theta": 7.8956582633053225
+      },
+      "peak_freq_hz": 23.35434173669468,
+      "ptp_uV": 126783.0,
+      "rms_uV": 1951.512220145739,
+      "samples": 14280,
+      "std_uV": 1951.5122201442866,
+      "windowed": {
+        "artifact_window_fraction": 0.125,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 126783.0,
+        "max_rms_uV": 7914.274869752756,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 3385.0881138955674,
+        "p95_ptp_uV": 107285.0,
+        "p95_rms_uV": 5357.530809938042,
+        "p95_robust_ptp_uV": 3775.499999999994,
+        "window_count": 56,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 7914.274869752756,
+        "worst_window_start_sec": 18.0
+      }
+    },
+    "ch3": {
+      "abrupt_jumps": 9,
+      "bandpower_abs": {
+        "alpha": 0.002782951932699171,
+        "beta": 0.010849513419222802,
+        "delta": 0.0026221467579658157,
+        "gamma": 0.0065309764094271475,
+        "theta": 0.0019070003114116576
+      },
+      "bandpower_rel": {
+        "alpha": 0.11270393524862662,
+        "beta": 0.43938339125146925,
+        "delta": 0.10619165029399057,
+        "gamma": 0.2644913603105167,
+        "theta": 0.0772296628953969
+      },
+      "flatline": false,
+      "line_50_power": 2.6393475162838644e-05,
+      "line_50_ratio_1_50": 0.0010812961634652442,
+      "max_uV": 1848.0,
+      "mean_uV": 0.0030112044817927172,
+      "median_uV": 0.0,
+      "min_uV": -378.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -12.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 12.990196078431373,
+        "beta": 15.23109243697479,
+        "delta": 1.7331932773109244,
+        "gamma": 30.84733893557423,
+        "theta": 4.009103641456583
+      },
+      "peak_freq_hz": 15.23109243697479,
+      "ptp_uV": 2226.0,
+      "rms_uV": 24.89789653968464,
+      "samples": 14280,
+      "std_uV": 24.89789635759391,
+      "windowed": {
+        "artifact_window_fraction": 0.0,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 2226.0,
+        "max_rms_uV": 133.05758152018245,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 0.1414213562373095,
+        "p95_ptp_uV": 9.0,
+        "p95_rms_uV": 2.178915052824362,
+        "p95_robust_ptp_uV": 5.512499999999999,
+        "window_count": 56,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 133.05758152018245,
+        "worst_window_start_sec": 22.0
+      }
+    },
+    "ch4": {
+      "abrupt_jumps": 13,
+      "bandpower_abs": {
+        "alpha": 2.2872257842309147,
+        "beta": 7.305005077305664,
+        "delta": 1.4582913047331387,
+        "gamma": 4.286512441163428,
+        "theta": 1.8322557399539559
+      },
+      "bandpower_rel": {
+        "alpha": 0.13321609326613754,
+        "beta": 0.4254692494275031,
+        "delta": 0.08493602677964311,
+        "gamma": 0.24966159663178905,
+        "theta": 0.10671703389492722
+      },
+      "flatline": false,
+      "line_50_power": 0.016950232322009016,
+      "line_50_ratio_1_50": 0.0009937101104670405,
+      "max_uV": 6632.0,
+      "mean_uV": -0.0070028011204481795,
+      "median_uV": 0.0,
+      "min_uV": -35796.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 60.04999999999927,
+      "p99_uV": 451.4699999999939,
+      "peak_by_band_hz": {
+        "alpha": 11.694677871148459,
+        "beta": 13.532913165266107,
+        "delta": 3.8340336134453783,
+        "gamma": 31.390056022408963,
+        "theta": 5.847338935574229
+      },
+      "peak_freq_hz": 5.847338935574229,
+      "ptp_uV": 42428.0,
+      "rms_uV": 693.5653162458167,
+      "samples": 14280,
+      "std_uV": 693.5653162104637,
+      "windowed": {
+        "artifact_window_fraction": 0.10714285714285714,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 42428.0,
+        "max_rms_uV": 2481.2851545116696,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 622.1196773339844,
+        "p95_ptp_uV": 42428.0,
+        "p95_rms_uV": 2480.7654991385984,
+        "p95_robust_ptp_uV": 703.0499999999972,
+        "window_count": 56,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 2481.2851545116696,
+        "worst_window_start_sec": 50.0
+      }
+    }
+  },
+  "diagnosis": {
+    "reasons": [
+      "abrupt jumps or motion artifacts"
+    ],
+    "recommendations": [
+      "Full-capture peak-to-peak is high, but most 2 s windows are stable; inspect transient movement/artifact periods instead of rejecting the whole capture.",
+      "Repeat capture with still posture and verify electrode stability."
+    ],
+    "state": "dudosa"
+  },
+  "metadata": {
+    "ads1299": {
+      "bias_drl_used": false,
+      "channels_streamed": 4,
+      "expected_device": "ADS1299-4PAG",
+      "expected_id": "0x3C",
+      "lead_off_impedance_measured": false,
+      "lsb_v_firmware": 2.235e-08,
+      "pga_gain_assumed": 24,
+      "status_mask": "0xF00000",
+      "status_prefix_expected": "0xC00000",
+      "vref_v_assumed_from_lsb_gain": 4.499648794800001
+    },
+    "block_samples_expected": 8,
+    "bridge_event": "eeg_block_uV",
+    "condition": "s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s",
+    "created_at_utc": "2026-05-28T14:51:41.412552+00:00",
+    "duration_observed_sec": 60.01279190000014,
+    "duration_requested_sec": 60.0,
+    "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",
+    "fs_hz_expected": 250,
+    "git": {
+      "branch": null,
+      "commit": null,
+      "dirty": false
+    },
+    "notes": "subject=s01;session=20260528;montage=ear_eeg_ch1_only;model=modelo_captura_final;ads_mode=bias_ch1_only_loff_off;condition=eyes_open_rest_60s;order=01;instruction=mirar_punto_fijo_sin_hablar",
+    "num_channels": 4,
+    "raw_counts_available": false,
+    "rx_summary": {
+      "block_gaps_total": 0,
+      "csv_rows_written": 14280,
+      "invalid_status_total": 0,
+      "last_block_idx": 58355,
+      "last_sample_idx": 469261,
+      "malformed_blocks_total": 0,
+      "rx_blocks_total": 1785,
+      "rx_samples_total": 14280,
+      "sample_gaps_total": 0
+    },
+    "started_unix": 1779979841.3997471,
+    "value_units": "microvolts"
+  },
+  "status": {
+    "invalid_status_fraction": 0.0,
+    "invalid_status_total": 0,
+    "status_prefix_expected": "0xC00000"
+  },
+  "timing": {
+    "duration_sec": 57.12,
+    "effective_fs_hz": 250.0,
+    "first_sample_idx": 454982,
+    "fs_hz_expected": 250.0,
+    "last_sample_idx": 469261,
+    "sample_gaps_detected": 0,
+    "samples_expected_from_duration": 14280,
+    "samples_received": 14280
+  }
+}

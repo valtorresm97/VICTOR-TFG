@@ -1,0 +1,311 @@
+{
+  "channels": {
+    "ch1": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 0.003300590936583425,
+        "beta": 0.013397955755444209,
+        "delta": 0.019909058123018304,
+        "gamma": 0.09302762086834088,
+        "theta": 0.0030935740297381746
+      },
+      "bandpower_rel": {
+        "alpha": 0.02486717987141598,
+        "beta": 0.10094234095691398,
+        "delta": 0.14999802730115086,
+        "gamma": 0.7008849704766958,
+        "theta": 0.02330748139382341
+      },
+      "flatline": false,
+      "line_50_power": 0.04104845165341476,
+      "line_50_ratio_1_50": 0.3421031413664519,
+      "max_uV": 320.0,
+      "mean_uV": -5.399086378737541,
+      "median_uV": -7.0,
+      "min_uV": -239.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": -124.0,
+      "p05_uV": -46.0,
+      "p95_uV": 40.0,
+      "p99_uV": 110.85999999999967,
+      "peak_by_band_hz": {
+        "alpha": 9.862956810631228,
+        "beta": 22.944352159468437,
+        "delta": 0.5191029900332226,
+        "gamma": 48.48421926910299,
+        "theta": 4.049003322259137
+      },
+      "peak_freq_hz": 0.5191029900332226,
+      "ptp_uV": 559.0,
+      "rms_uV": 37.45945205382424,
+      "samples": 2408,
+      "std_uV": 37.068320901380034,
+      "windowed": {
+        "artifact_window_fraction": 0.0,
+        "best_window_rms_uV": 27.851032296846736,
+        "best_window_start_sec": 5.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 483.0,
+        "max_rms_uV": 45.71783021972937,
+        "median_ptp_uV": 421.0,
+        "median_rms_uV": 36.895902268443365,
+        "median_robust_ptp_uV": 75.14999999999998,
+        "p90_rms_uV": 43.81503976200405,
+        "p95_ptp_uV": 483.0,
+        "p95_rms_uV": 44.766434990866706,
+        "p95_robust_ptp_uV": 105.39999999999996,
+        "window_count": 8,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 45.71783021972937,
+        "worst_window_start_sec": 1.0
+      }
+    },
+    "ch2": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "bandpower_rel": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "flatline": true,
+      "line_50_power": 0.0,
+      "line_50_ratio_1_50": null,
+      "max_uV": 0.0,
+      "mean_uV": 0.0,
+      "median_uV": 0.0,
+      "min_uV": 0.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.098006644518273,
+        "beta": 13.081395348837209,
+        "delta": 0.5191029900332226,
+        "gamma": 30.004152823920265,
+        "theta": 4.049003322259137
+      },
+      "peak_freq_hz": 0.5191029900332226,
+      "ptp_uV": 0.0,
+      "rms_uV": 0.0,
+      "samples": 2408,
+      "std_uV": 0.0,
+      "windowed": {
+        "artifact_window_fraction": 0.0,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 0.0,
+        "max_rms_uV": 0.0,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 0.0,
+        "p95_ptp_uV": 0.0,
+        "p95_rms_uV": 0.0,
+        "p95_robust_ptp_uV": 0.0,
+        "window_count": 8,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 0.0,
+        "worst_window_start_sec": 0.0
+      }
+    },
+    "ch3": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "bandpower_rel": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "flatline": true,
+      "line_50_power": 0.0,
+      "line_50_ratio_1_50": null,
+      "max_uV": 0.0,
+      "mean_uV": 0.0,
+      "median_uV": 0.0,
+      "min_uV": 0.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.098006644518273,
+        "beta": 13.081395348837209,
+        "delta": 0.5191029900332226,
+        "gamma": 30.004152823920265,
+        "theta": 4.049003322259137
+      },
+      "peak_freq_hz": 0.5191029900332226,
+      "ptp_uV": 0.0,
+      "rms_uV": 0.0,
+      "samples": 2408,
+      "std_uV": 0.0,
+      "windowed": {
+        "artifact_window_fraction": 0.0,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 0.0,
+        "max_rms_uV": 0.0,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 0.0,
+        "p95_ptp_uV": 0.0,
+        "p95_rms_uV": 0.0,
+        "p95_robust_ptp_uV": 0.0,
+        "window_count": 8,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 0.0,
+        "worst_window_start_sec": 0.0
+      }
+    },
+    "ch4": {
+      "abrupt_jumps": 0,
+      "bandpower_abs": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "bandpower_rel": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "delta": 0.0,
+        "gamma": 0.0,
+        "theta": 0.0
+      },
+      "flatline": true,
+      "line_50_power": 0.0,
+      "line_50_ratio_1_50": null,
+      "max_uV": 0.0,
+      "mean_uV": 0.0,
+      "median_uV": 0.0,
+      "min_uV": 0.0,
+      "near_adc_limit_fraction": 0.0,
+      "p01_uV": 0.0,
+      "p05_uV": 0.0,
+      "p95_uV": 0.0,
+      "p99_uV": 0.0,
+      "peak_by_band_hz": {
+        "alpha": 8.098006644518273,
+        "beta": 13.081395348837209,
+        "delta": 0.5191029900332226,
+        "gamma": 30.004152823920265,
+        "theta": 4.049003322259137
+      },
+      "peak_freq_hz": 0.5191029900332226,
+      "ptp_uV": 0.0,
+      "rms_uV": 0.0,
+      "samples": 2408,
+      "std_uV": 0.0,
+      "windowed": {
+        "artifact_window_fraction": 0.0,
+        "best_window_rms_uV": 0.0,
+        "best_window_start_sec": 0.0,
+        "hop_sec": 1.0,
+        "max_ptp_uV": 0.0,
+        "max_rms_uV": 0.0,
+        "median_ptp_uV": 0.0,
+        "median_rms_uV": 0.0,
+        "median_robust_ptp_uV": 0.0,
+        "p90_rms_uV": 0.0,
+        "p95_ptp_uV": 0.0,
+        "p95_rms_uV": 0.0,
+        "p95_robust_ptp_uV": 0.0,
+        "window_count": 8,
+        "window_sec": 2.0,
+        "worst_window_rms_uV": 0.0,
+        "worst_window_start_sec": 0.0
+      }
+    }
+  },
+  "diagnosis": {
+    "reasons": [
+      "high 50 Hz power ratio"
+    ],
+    "recommendations": [
+      "Check electrode contact, cable routing, grounding, and notch effectiveness."
+    ],
+    "state": "dudosa"
+  },
+  "metadata": {
+    "ads1299": {
+      "bias_drl_used": false,
+      "channels_streamed": 4,
+      "expected_device": "ADS1299-4PAG",
+      "expected_id": "0x3C",
+      "lead_off_impedance_measured": false,
+      "lsb_v_firmware": 2.235e-08,
+      "pga_gain_assumed": 24,
+      "status_mask": "0xF00000",
+      "status_prefix_expected": "0xC00000",
+      "vref_v_assumed_from_lsb_gain": 4.499648794800001
+    },
+    "block_samples_expected": 8,
+    "bridge_event": "eeg_block_uV",
+    "condition": "s01_20260528_ear_eeg_ch1_only_00_precheck_10s",
+    "created_at_utc": "2026-05-28T14:47:15.066253+00:00",
+    "duration_observed_sec": 10.002776999999924,
+    "duration_requested_sec": 10.0,
+    "firmware_pipeline": "ADS1299 raw counts -> volts -> MCU HP 0.5 Hz -> notch 50 Hz -> LP 40 Hz -> microvolts",
+    "fs_hz_expected": 250,
+    "git": {
+      "branch": null,
+      "commit": null,
+      "dirty": false
+    },
+    "notes": "subject=s01;session=20260528;montage=ear_eeg_ch1_only;model=modelo_captura_final;ads_mode=bias_ch1_only_loff_off;condition=precheck_10s;order=00;instruction=",
+    "num_channels": 4,
+    "raw_counts_available": false,
+    "rx_summary": {
+      "block_gaps_total": 0,
+      "csv_rows_written": 2408,
+      "invalid_status_total": 0,
+      "last_block_idx": 50409,
+      "last_sample_idx": 405693,
+      "malformed_blocks_total": 0,
+      "rx_blocks_total": 301,
+      "rx_samples_total": 2408,
+      "sample_gaps_total": 0
+    },
+    "started_unix": 1779979625.0634615,
+    "value_units": "microvolts"
+  },
+  "status": {
+    "invalid_status_fraction": 0.0,
+    "invalid_status_total": 0,
+    "status_prefix_expected": "0xC00000"
+  },
+  "timing": {
+    "duration_sec": 9.632,
+    "effective_fs_hz": 250.0,
+    "first_sample_idx": 403286,
+    "fs_hz_expected": 250.0,
+    "last_sample_idx": 405693,
+    "sample_gaps_detected": 0,
+    "samples_expected_from_duration": 2408,
+    "samples_received": 2408
+  }
+}

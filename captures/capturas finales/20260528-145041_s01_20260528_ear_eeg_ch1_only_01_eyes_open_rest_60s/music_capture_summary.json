@@ -1,0 +1,9 @@
+{
+  "duration_sec": 60.0,
+  "music_notes_csv": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/music_notes.csv",
+  "music_snapshots_jsonl": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas finales/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/music_snapshots.jsonl",
+  "note": "music_notes.csv is extracted from periodic state/snapshot.json music.recent_notes during the capture",
+  "notes_total_deduplicated": 45,
+  "snapshots_total": 121,
+  "snapshots_with_notes": 121
+}
