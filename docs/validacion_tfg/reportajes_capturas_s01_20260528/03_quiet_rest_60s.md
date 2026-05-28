@@ -41,17 +41,17 @@ Esta figura muestra la evolucion de delta, theta, alpha, beta y gamma en ventana
 
 Los controles de sonificacion permiten explicar que la musica surge de variables normalizadas y suavizadas. La condicion de reposo es una de las mas utiles para observar si estos controles se mantienen en rangos razonables durante una captura sostenida.
 
-## 6. Notas musicales generadas
+## 6. Calidad de señal y quality gate
+
+![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/calidad_senal_quality_gate.png)
+
+Esta figura permite comprobar si las ventanas usadas para sonificacion se mantienen en una zona aceptable o si deben interpretarse con cautela. En esta captura, el diagnostico sigue siendo dudoso por ruido de red, aunque la continuidad temporal del sistema es correcta.
+
+## 7. Notas musicales generadas
 
 ![Notas musicales](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/notas_musicales.png)
 
 Se registraron 72 notas deduplicadas. Esto confirma que la salida musical se produjo durante la condicion de reposo, con persistencia suficiente para analisis posterior.
-
-## 7. Figura combinada
-
-![Figura combinada EEG musica](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/figura_combinada_eeg_musica.png)
-
-La figura combinada permite leer la captura completa en una sola vista. Es especialmente util para relacionar variaciones de controles con la generacion de notas.
 
 ## 8. Conclusión para el TFG
 
