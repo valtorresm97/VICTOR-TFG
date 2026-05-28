@@ -4,12 +4,12 @@ music_segment.py
 
 Bloque 1 - Music Segment LIVE
 
-Este módulo convierte las features musicales ya suavizadas de
+Este módulo convierte los controles de sonificación EEG ya suavizados de
 sonification_features.py en un estado musical usable por:
 
   - music_bar.py
   - music_note.py
-  - motor MIDI live futuro
+  - motor MIDI live
 
 IMPORTANTE:
 - No calcula DSP.
@@ -17,7 +17,20 @@ IMPORTANTE:
 - No segmenta EEG offline.
 - No decide la main note automáticamente.
 - La escala y la nota principal siguen siendo decisión del usuario/UI.
-- El EEG modula densidad, registro, tensión, dinámica y estabilidad.
+- El EEG modula densidad, registro, dinámica, probabilidad y estabilidad.
+
+Contrato público nuevo de sonificación:
+- alpha_drive
+- beta_gamma_drive
+- rms_beta_activity
+- band_driven_density
+- spectral_register
+- alpha_stability
+- rms_band_velocity
+- band_note_probability
+
+Este módulo acepta también claves legacy si recibe snapshots antiguos, pero el
+pipeline actual debe reportar los nombres nuevos.
 """
 
 from __future__ import annotations
@@ -61,6 +74,15 @@ def _get(obj: Any, name: str, default: Any = None) -> Any:
     if isinstance(obj, dict):
         return obj.get(name, default)
     return getattr(obj, name, default)
+
+
+def _get_any(obj: Any, names: Sequence[str], default: Any = None) -> Any:
+    """Lee la primera clave/atributo existente entre varios nombres."""
+    for name in names:
+        value = _get(obj, name, None)
+        if value is not None:
+            return value
+    return default
 
 
 # ------------------------------------------------------------
@@ -164,12 +186,8 @@ class MusicSegment:
     """
     Estado musical para una ventana live.
 
-    Se llama MusicSegment para mantener compatibilidad con:
-      - music_bar.py
-      - music_note.py
-
-    Pero conceptualmente ya no es un segmento EEG offline.
-    Es el estado musical actual derivado de SonificationFeatures.
+    Los nombres internos se mantienen para no reescribir todo el generador
+    musical. Los valores proceden del contrato EEG-reportable nuevo.
     """
 
     segment: LiveSegment
@@ -218,8 +236,8 @@ class MusicSegmentBuilder:
     Solo modula:
       - cadencia rítmica,
       - registro,
-      - tensión,
-      - estabilidad armónica,
+      - drive beta/gamma,
+      - estabilidad alfa,
       - dinámica,
       - probabilidad de nota.
     """
@@ -249,7 +267,7 @@ class MusicSegmentBuilder:
 
     def _map_density_to_cadence(self, density: float) -> RhythmCadence:
         """
-        Convierte rhythmic_density [0,1] en LOW/MEDIUM/HIGH.
+        Convierte band_driven_density [0,1] en LOW/MEDIUM/HIGH.
 
         Usa histéresis para que el ritmo no salte continuamente
         por pequeñas fluctuaciones EEG.
@@ -324,11 +342,14 @@ class MusicSegmentBuilder:
 
         valid = bool(_get(sonification_features, "valid", False))
 
-        rhythmic_density = _clamp01(
-            _safe_float(_get(sonification_features, "rhythmic_density", 0.0), 0.0)
+        band_driven_density = _clamp01(
+            _safe_float(
+                _get_any(sonification_features, ("band_driven_density", "rhythmic_density"), 0.0),
+                0.0,
+            )
         )
 
-        cadence = self._map_density_to_cadence(rhythmic_density)
+        cadence = self._map_density_to_cadence(band_driven_density)
         self._last_cadence = cadence
 
         main_note = (
@@ -342,14 +363,14 @@ class MusicSegmentBuilder:
             main_note_midi=main_note,
             scale=user_scale,
             rhythm_cadence=cadence,
-            register_hint=_clamp01(_safe_float(_get(sonification_features, "register", 0.5), 0.5)),
+            register_hint=_clamp01(_safe_float(_get_any(sonification_features, ("spectral_register", "register"), 0.5), 0.5)),
             features=eeg_features or {},
-            activity=_clamp01(_safe_float(_get(sonification_features, "activity", 0.5), 0.5)),
-            calmness=_clamp01(_safe_float(_get(sonification_features, "calmness", 0.5), 0.5)),
-            tension=_clamp01(_safe_float(_get(sonification_features, "tension", 0.5), 0.5)),
-            harmonic_stability=_clamp01(_safe_float(_get(sonification_features, "harmonic_stability", 0.5), 0.5)),
-            velocity_factor=_clamp01(_safe_float(_get(sonification_features, "velocity_factor", 0.5), 0.5)),
-            note_probability=_clamp01(_safe_float(_get(sonification_features, "note_probability", 0.5), 0.5)),
+            activity=_clamp01(_safe_float(_get_any(sonification_features, ("rms_beta_activity", "activity"), 0.5), 0.5)),
+            calmness=_clamp01(_safe_float(_get_any(sonification_features, ("alpha_drive", "calmness"), 0.5), 0.5)),
+            tension=_clamp01(_safe_float(_get_any(sonification_features, ("beta_gamma_drive", "tension"), 0.5), 0.5)),
+            harmonic_stability=_clamp01(_safe_float(_get_any(sonification_features, ("alpha_stability", "harmonic_stability"), 0.5), 0.5)),
+            velocity_factor=_clamp01(_safe_float(_get_any(sonification_features, ("rms_band_velocity", "velocity_factor"), 0.5), 0.5)),
+            note_probability=_clamp01(_safe_float(_get_any(sonification_features, ("band_note_probability", "note_probability"), 0.5), 0.5)),
             valid=valid,
         )
 
@@ -367,14 +388,14 @@ if __name__ == "__main__":
 
     sonif = {
         "valid": True,
-        "activity": 0.7,
-        "calmness": 0.3,
-        "tension": 0.6,
-        "rhythmic_density": 0.75,
-        "register": 0.65,
-        "harmonic_stability": 0.4,
-        "velocity_factor": 0.8,
-        "note_probability": 0.7,
+        "rms_beta_activity": 0.7,
+        "alpha_drive": 0.3,
+        "beta_gamma_drive": 0.6,
+        "band_driven_density": 0.75,
+        "spectral_register": 0.65,
+        "alpha_stability": 0.4,
+        "rms_band_velocity": 0.8,
+        "band_note_probability": 0.7,
     }
 
     builder = MusicSegmentBuilder(fs=250.0)
