@@ -1,6 +1,6 @@
 # sonification_features.py
 # ------------------------------------------------------------
-# EEG DSP features -> Sonification features
+# EEG DSP features -> controles reportables de sonificación
 #
 # Este módulo NO calcula DSP.
 # Este módulo NO importa EEGSignalProcessor.
@@ -9,11 +9,12 @@
 # Recibe el diccionario ya calculado por:
 #   EEGSignalProcessor.compute_live_features(...)
 #
-# y lo convierte en controles musicales estables para tiempo real.
+# y lo convierte en controles estables para tiempo real, nombrados de forma
+# defendible desde características EEG para snapshot, WebUI, capturas y TFG.
 #
 # Entrada:
 #   {
-#       "rms": float,                  # RMS en voltios
+#       "rms": float,
 #       "peak_freq": float,
 #       "peak_delta": float | None,
 #       "peak_theta": float | None,
@@ -24,11 +25,15 @@
 #       "bandpower_abs": {...},
 #   }
 #
-# Salida:
+# Salida pública:
 #   SonificationFeatures:
-#       activity, calmness, tension, rhythmic_density,
-#       register, harmonic_stability, velocity_factor,
-#       note_probability, etc.
+#       alpha_drive, beta_gamma_drive, rms_beta_activity,
+#       band_driven_density, spectral_register, alpha_stability,
+#       rms_band_velocity, band_note_probability, etc.
+#
+# Compatibilidad:
+#   Se mantienen alias de solo lectura para los nombres antiguos usados por
+#   módulos internos. No aparecen en to_dict()/snapshot.
 # ------------------------------------------------------------
 
 from __future__ import annotations
@@ -45,9 +50,10 @@ BANDS = ("delta", "theta", "alpha", "beta", "gamma")
 @dataclass
 class SonificationFeatures:
     """
-    Features musicales derivadas de las features DSP.
+    Controles de sonificación derivados de features DSP EEG.
 
     Todos los controles principales están normalizados en [0, 1].
+    Los nombres públicos son reportables directamente desde EEG.
     """
 
     valid: bool
@@ -55,14 +61,15 @@ class SonificationFeatures:
     quality_gate: float
     quality_state: str | None
 
-    activity: float
-    calmness: float
-    tension: float
-    rhythmic_density: float
-    register: float
-    harmonic_stability: float
-    velocity_factor: float
-    note_probability: float
+    # Nombres públicos/reportables para snapshot, UI, CSV y TFG.
+    alpha_drive: float
+    beta_gamma_drive: float
+    rms_beta_activity: float
+    band_driven_density: float
+    spectral_register: float
+    alpha_stability: float
+    rms_band_velocity: float
+    band_note_probability: float
 
     rms: float
     rms_uV: float
@@ -84,8 +91,45 @@ class SonificationFeatures:
     bandpower_rel: Dict[str, float]
     bandpower_abs: Dict[str, float]
 
+    # --------------------------------------------------------
+    # Alias internos temporales: evitan cambiar el sonido o romper módulos
+    # consumidores mientras migran a los nombres nuevos.
+    # --------------------------------------------------------
+
+    @property
+    def calmness(self) -> float:
+        return self.alpha_drive
+
+    @property
+    def tension(self) -> float:
+        return self.beta_gamma_drive
+
+    @property
+    def activity(self) -> float:
+        return self.rms_beta_activity
+
+    @property
+    def rhythmic_density(self) -> float:
+        return self.band_driven_density
+
+    @property
+    def register(self) -> float:
+        return self.spectral_register
+
+    @property
+    def harmonic_stability(self) -> float:
+        return self.alpha_stability
+
+    @property
+    def velocity_factor(self) -> float:
+        return self.rms_band_velocity
+
+    @property
+    def note_probability(self) -> float:
+        return self.band_note_probability
+
     def to_dict(self) -> Dict[str, Any]:
-        """Convierte el objeto a dict para snapshot/UI."""
+        """Convierte el objeto a dict para snapshot/UI sin nombres legacy."""
         return asdict(self)
 
 
@@ -135,7 +179,7 @@ def _norm_freq(freq: float, f_min: float = 0.5, f_max: float = 30.0) -> float:
     """
     Normaliza frecuencia EEG a [0, 1].
 
-    Se usa para register:
+    Se usa para spectral_register:
       - frecuencias bajas -> registro grave
       - frecuencias altas -> registro agudo
     """
@@ -180,11 +224,9 @@ def build_raw_sonification_features(
     quality_state: str | None = None,
 ) -> SonificationFeatures:
     """
-    Convierte el dict DSP en features musicales crudas.
+    Convierte el dict DSP en controles de sonificación crudos.
 
-    No suaviza.
-    No usa memoria.
-    No adapta baseline.
+    No suaviza. No usa memoria. No adapta baseline.
     """
 
     valid = _has_valid_features(features)
@@ -224,41 +266,45 @@ def build_raw_sonification_features(
     beta_drive = _ratio01(beta, alpha + beta)
     gamma_drive = gamma
 
-    activity = _clamp01(0.45 * rms_norm + 0.35 * beta + 0.20 * gamma_drive)
-    calmness = alpha_drive
-    tension = _clamp01(0.75 * beta_drive + 0.25 * gamma_drive)
-    rhythmic_density = _clamp01(0.55 * beta + 0.20 * gamma_drive + 0.15 * rms_norm + 0.10 * (1.0 - alpha_drive))
+    # Fórmulas equivalentes a los controles anteriores, solo renombradas.
+    rms_beta_activity = _clamp01(0.45 * rms_norm + 0.35 * beta + 0.20 * gamma_drive)
+    beta_gamma_drive = _clamp01(0.75 * beta_drive + 0.25 * gamma_drive)
+    band_driven_density = _clamp01(
+        0.55 * beta + 0.20 * gamma_drive + 0.15 * rms_norm + 0.10 * (1.0 - alpha_drive)
+    )
 
     register_peak = peak_alpha if peak_alpha is not None else peak_freq
-    register = _clamp01(0.15 + 0.45 * beta_drive + 0.25 * gamma_drive + 0.15 * _norm_freq(register_peak))
+    spectral_register = _clamp01(
+        0.15 + 0.45 * beta_drive + 0.25 * gamma_drive + 0.15 * _norm_freq(register_peak)
+    )
 
-    harmonic_stability = _clamp01(0.75 * alpha_drive + 0.15 * theta + 0.10 * (1.0 - rms_norm))
-    velocity_factor = _clamp01(0.30 + 0.70 * (0.65 * rms_norm + 0.25 * beta + 0.10 * gamma_drive))
-    note_probability = _clamp01(0.15 + 0.80 * rhythmic_density)
+    alpha_stability = _clamp01(0.75 * alpha_drive + 0.15 * theta + 0.10 * (1.0 - rms_norm))
+    rms_band_velocity = _clamp01(0.30 + 0.70 * (0.65 * rms_norm + 0.25 * beta + 0.10 * gamma_drive))
+    band_note_probability = _clamp01(0.15 + 0.80 * band_driven_density)
 
     if not valid:
-        activity = 0.0
-        rhythmic_density = 0.0
-        velocity_factor = 0.0
-        note_probability = 0.0
-        calmness = 0.5
-        tension = 0.5
-        register = 0.5
-        harmonic_stability = 0.5
+        rms_beta_activity = 0.0
+        band_driven_density = 0.0
+        rms_band_velocity = 0.0
+        band_note_probability = 0.0
+        alpha_drive = 0.5
+        beta_gamma_drive = 0.5
+        spectral_register = 0.5
+        alpha_stability = 0.5
 
     return SonificationFeatures(
         valid=valid,
         quality_score=q_score,
         quality_gate=q_gate,
         quality_state=quality_state,
-        activity=activity,
-        calmness=calmness,
-        tension=tension,
-        rhythmic_density=rhythmic_density,
-        register=register,
-        harmonic_stability=harmonic_stability,
-        velocity_factor=velocity_factor,
-        note_probability=note_probability,
+        alpha_drive=alpha_drive,
+        beta_gamma_drive=beta_gamma_drive,
+        rms_beta_activity=rms_beta_activity,
+        band_driven_density=band_driven_density,
+        spectral_register=spectral_register,
+        alpha_stability=alpha_stability,
+        rms_band_velocity=rms_band_velocity,
+        band_note_probability=band_note_probability,
         rms=rms,
         rms_uV=rms_uV,
         rms_norm=rms_norm,
@@ -282,12 +328,6 @@ class SonificationFeatureAdapter:
     Adaptador live con memoria.
 
     Se usa desde BackendService.
-
-    Ejemplo:
-        self.sonif_adapter = SonificationFeatureAdapter()
-
-        feats = self.proc.compute_live_features(...)
-        self._last_sonification = self.sonif_adapter.update(feats)
     """
 
     def __init__(
@@ -363,24 +403,24 @@ class SonificationFeatureAdapter:
         gamma = raw.bandpower_rel.get("gamma", 0.0)
         alpha_drive = _clamp01(1.0 - raw.beta_over_alpha_beta)
         raw.rms_norm = rms_norm
-        raw.activity = _clamp01(0.45 * rms_norm + 0.35 * beta + 0.20 * gamma)
-        raw.velocity_factor = _clamp01(0.30 + 0.70 * (0.65 * rms_norm + 0.25 * beta + 0.10 * gamma))
-        raw.rhythmic_density = _clamp01(0.55 * beta + 0.20 * gamma + 0.15 * rms_norm + 0.10 * (1.0 - alpha_drive))
-        raw.note_probability = _clamp01(0.15 + 0.80 * raw.rhythmic_density)
+        raw.rms_beta_activity = _clamp01(0.45 * rms_norm + 0.35 * beta + 0.20 * gamma)
+        raw.rms_band_velocity = _clamp01(0.30 + 0.70 * (0.65 * rms_norm + 0.25 * beta + 0.10 * gamma))
+        raw.band_driven_density = _clamp01(0.55 * beta + 0.20 * gamma + 0.15 * rms_norm + 0.10 * (1.0 - alpha_drive))
+        raw.band_note_probability = _clamp01(0.15 + 0.80 * raw.band_driven_density)
         return raw
 
     def _apply_quality_gate(self, raw: SonificationFeatures) -> SonificationFeatures:
-        """Atenua controles musicales sensibles cuando la calidad espectral baja."""
+        """Atenua controles sensibles cuando la calidad espectral baja."""
         gate = _clamp01(raw.quality_gate)
         if gate >= 0.999:
             return raw
 
-        raw.activity = _clamp01(raw.activity * gate)
-        raw.tension = _clamp01(0.50 * (1.0 - gate) + raw.tension * gate)
-        raw.rhythmic_density = _clamp01(raw.rhythmic_density * gate)
-        raw.velocity_factor = _clamp01(0.30 + (raw.velocity_factor - 0.30) * gate)
-        raw.note_probability = _clamp01(0.15 + (raw.note_probability - 0.15) * gate)
-        raw.harmonic_stability = _clamp01(0.50 * (1.0 - gate) + raw.harmonic_stability * gate)
+        raw.rms_beta_activity = _clamp01(raw.rms_beta_activity * gate)
+        raw.beta_gamma_drive = _clamp01(0.50 * (1.0 - gate) + raw.beta_gamma_drive * gate)
+        raw.band_driven_density = _clamp01(raw.band_driven_density * gate)
+        raw.rms_band_velocity = _clamp01(0.30 + (raw.rms_band_velocity - 0.30) * gate)
+        raw.band_note_probability = _clamp01(0.15 + (raw.band_note_probability - 0.15) * gate)
+        raw.alpha_stability = _clamp01(0.50 * (1.0 - gate) + raw.alpha_stability * gate)
         return raw
 
     def _smooth(self, raw: SonificationFeatures) -> SonificationFeatures:
@@ -391,14 +431,14 @@ class SonificationFeatureAdapter:
 
         a = self.ema_alpha
 
-        raw.activity = _ema(prev.activity, raw.activity, a)
-        raw.calmness = _ema(prev.calmness, raw.calmness, a)
-        raw.tension = _ema(prev.tension, raw.tension, a)
-        raw.rhythmic_density = _ema(prev.rhythmic_density, raw.rhythmic_density, a)
-        raw.register = _ema(prev.register, raw.register, a)
-        raw.harmonic_stability = _ema(prev.harmonic_stability, raw.harmonic_stability, a)
-        raw.velocity_factor = _ema(prev.velocity_factor, raw.velocity_factor, a)
-        raw.note_probability = _ema(prev.note_probability, raw.note_probability, a)
+        raw.alpha_drive = _ema(prev.alpha_drive, raw.alpha_drive, a)
+        raw.beta_gamma_drive = _ema(prev.beta_gamma_drive, raw.beta_gamma_drive, a)
+        raw.rms_beta_activity = _ema(prev.rms_beta_activity, raw.rms_beta_activity, a)
+        raw.band_driven_density = _ema(prev.band_driven_density, raw.band_driven_density, a)
+        raw.spectral_register = _ema(prev.spectral_register, raw.spectral_register, a)
+        raw.alpha_stability = _ema(prev.alpha_stability, raw.alpha_stability, a)
+        raw.rms_band_velocity = _ema(prev.rms_band_velocity, raw.rms_band_velocity, a)
+        raw.band_note_probability = _ema(prev.band_note_probability, raw.band_note_probability, a)
         raw.rms_norm = _ema(prev.rms_norm, raw.rms_norm, a)
 
         return raw
