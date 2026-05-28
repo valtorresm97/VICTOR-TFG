@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -65,6 +66,70 @@ CONDITION_INFO = {
 # reports when needed.
 EEG_STANDARD_YLIM_UV = (-400.0, 400.0)
 FEATURE_WINDOW_SEC = 4.0
+
+FIG_SIZE = (12.8, 4.35)
+COMBINED_SIZE = (12.8, 10.2)
+EXPORT_DPI = 220
+GRID_ALPHA = 0.22
+GRID_COLOR = "#b9c0c7"
+AXIS_COLOR = "#29323d"
+TEXT_COLOR = "#111827"
+EEG_COLOR = "#1f4e79"
+NOTE_COLOR = "#3657c9"
+BAND_COLORS = {
+    "delta": "#4C78A8",
+    "theta": "#F58518",
+    "alpha": "#54A24B",
+    "beta": "#E45756",
+    "gamma": "#B279A2",
+}
+SONIF_COLORS = {
+    "alpha_drive": "#1f77b4",
+    "beta_gamma_drive": "#d62728",
+    "rms_beta_activity": "#9467bd",
+    "band_driven_density": "#ff7f0e",
+    "spectral_register": "#8c564b",
+    "alpha_stability": "#2ca02c",
+    "rms_band_velocity": "#17becf",
+    "band_note_probability": "#e377c2",
+}
+QUALITY_COLORS = {
+    "quality_score": "#1f77b4",
+    "quality_gate": "#ff7f0e",
+}
+
+
+def apply_publication_style() -> None:
+    plt.rcParams.update(
+        {
+            "figure.facecolor": "white",
+            "axes.facecolor": "white",
+            "axes.edgecolor": AXIS_COLOR,
+            "axes.labelcolor": TEXT_COLOR,
+            "axes.titlecolor": TEXT_COLOR,
+            "xtick.color": AXIS_COLOR,
+            "ytick.color": AXIS_COLOR,
+            "text.color": TEXT_COLOR,
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+            "axes.titlesize": 13,
+            "axes.titleweight": "semibold",
+            "axes.labelsize": 10.5,
+            "xtick.labelsize": 9.5,
+            "ytick.labelsize": 9.5,
+            "legend.fontsize": 8.2,
+            "legend.frameon": True,
+            "legend.framealpha": 0.88,
+            "legend.edgecolor": "#d0d7de",
+            "legend.facecolor": "white",
+            "savefig.dpi": EXPORT_DPI,
+            "savefig.facecolor": "white",
+            "savefig.bbox": "tight",
+        }
+    )
+
+
+apply_publication_style()
 
 
 def safe_float(value: Any, default: float = math.nan) -> float:
@@ -129,7 +194,7 @@ def discover_captures(final_root: Path, subject: str, session: str, montage: str
 def posix_rel(path: Path, base: Path) -> str:
     """Return a portable Markdown link path, even when generated on Windows."""
     try:
-        return path.relative_to(base).as_posix()
+        return os.path.relpath(path, start=base).replace(os.sep, "/")
     except Exception:
         try:
             return path.relative_to(PROJECT_ROOT).as_posix()
@@ -169,9 +234,9 @@ def capture_duration_sec(capture_dir: Path) -> float | None:
     return None
 
 
-def apply_capture_xlim(duration_sec: float | None) -> None:
+def apply_capture_xlim(ax: Any, duration_sec: float | None) -> None:
     if duration_sec is not None and math.isfinite(duration_sec) and duration_sec > 0:
-        plt.xlim(0.0, duration_sec)
+        ax.set_xlim(0.0, duration_sec)
 
 
 def downsample(x: list[float], y: list[float], max_points: int = 7000) -> tuple[list[float], list[float]]:
@@ -181,26 +246,12 @@ def downsample(x: list[float], y: list[float], max_points: int = 7000) -> tuple[
     return x[::step], y[::step]
 
 
-def rows_xy(rows: list[dict[str, str]], x_key: str, y_key: str) -> tuple[list[float], list[float]]:
-    x: list[float] = []
-    y: list[float] = []
-    for row in rows:
-        xx = safe_float(row.get(x_key))
-        yy = safe_float(row.get(y_key))
-        if math.isfinite(xx) and math.isfinite(yy):
-            x.append(xx)
-            y.append(yy)
-    return x, y
-
-
 def rows_xy_windowed(rows: list[dict[str, str]], y_key: str) -> tuple[list[float], list[float]]:
-    """Use a center-of-window time for offline spectral features.
+    """Use center-of-window time for offline spectral features.
 
-    `windowed_bandpowers.csv` and `windowed_sonification_features.csv` store
-    features computed over finite windows. Plotting only `window_start_sec` makes
-    the spectral curves look artificially shifted and shorter than EEG/MIDI.
-    For visual comparison with raw EEG and notes, use the window center when
-    possible and always keep the x-axis range equal to the capture duration.
+    The CSV stores features computed over finite windows. The plot uses the
+    window center for visual alignment, while keeping the x-axis range equal to
+    the full capture duration.
     """
     x: list[float] = []
     y: list[float] = []
@@ -222,97 +273,111 @@ def rows_xy_windowed(rows: list[dict[str, str]], y_key: str) -> tuple[list[float
     return x, y
 
 
-def save_fig(path: Path) -> None:
+def style_axes(ax: Any, *, grid: bool = True) -> None:
+    if grid:
+        ax.grid(True, color=GRID_COLOR, alpha=GRID_ALPHA, linewidth=0.75)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_color("#8b949e")
+    ax.spines["bottom"].set_color("#8b949e")
+    ax.tick_params(axis="both", which="major", length=4, width=0.8)
+
+
+def save_fig(fig: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    plt.tight_layout()
-    plt.savefig(path, dpi=180, bbox_inches="tight")
-    plt.close()
+    fig.tight_layout(pad=1.15)
+    fig.savefig(path, dpi=EXPORT_DPI, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
 
 def plot_eeg(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     t, ch1 = load_eeg(capture_dir)
     t, ch1 = downsample(t, ch1)
-    plt.figure(figsize=(13, 4.2))
-    plt.plot(t, ch1, linewidth=0.7)
-    plt.title("EEG temporal CH1 - escala fija ±400 uV")
-    plt.xlabel("Tiempo de captura (s)")
-    plt.ylabel("CH1 (uV)")
-    plt.ylim(*EEG_STANDARD_YLIM_UV)
-    apply_capture_xlim(duration)
-    plt.grid(True, alpha=0.3)
-    save_fig(out_path)
+    fig, ax = plt.subplots(figsize=FIG_SIZE)
+    ax.plot(t, ch1, linewidth=0.82, color=EEG_COLOR)
+    ax.set_title("EEG temporal CH1")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Amplitud CH1 (uV)")
+    ax.set_ylim(*EEG_STANDARD_YLIM_UV)
+    apply_capture_xlim(ax, duration)
+    style_axes(ax)
+    ax.text(
+        0.012,
+        0.955,
+        "Escala fija ±400 uV",
+        transform=ax.transAxes,
+        va="top",
+        ha="left",
+        fontsize=8.5,
+        bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "edgecolor": "#d0d7de", "alpha": 0.82},
+    )
+    save_fig(fig, out_path)
 
 
 def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_bandpowers.csv")
-    plt.figure(figsize=(13, 4.5))
+    fig, ax = plt.subplots(figsize=FIG_SIZE)
     for band in BANDS:
         x, y = rows_xy_windowed(rows, f"{band}_rel")
-        plt.plot(x, y, linewidth=1.2, label=band)
-    plt.title("Bandpowers relativos por ventana - tiempo centrado")
-    plt.xlabel("Tiempo de captura (s)")
-    plt.ylabel("Potencia relativa")
-    plt.ylim(-0.03, 1.03)
-    apply_capture_xlim(duration)
-    plt.grid(True, alpha=0.3)
-    plt.legend(loc="upper right", ncol=5, fontsize=9, frameon=True)
-    save_fig(out_path)
+        ax.plot(x, y, linewidth=1.55, color=BAND_COLORS.get(band), label=band)
+    ax.set_title("Bandpowers relativos por ventana")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Potencia relativa")
+    ax.set_ylim(-0.03, 1.03)
+    apply_capture_xlim(ax, duration)
+    style_axes(ax)
+    ax.legend(loc="upper right", ncol=5, fontsize=8.0, borderpad=0.45, handlelength=1.7, columnspacing=0.75)
+    save_fig(fig, out_path)
 
 
 def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_sonification_features.csv")
-    fig, ax = plt.subplots(figsize=(13, 4.5))
+    fig, ax = plt.subplots(figsize=FIG_SIZE)
     for key in SONIF_CONTROLS:
         x, y = rows_xy_windowed(rows, key)
-        ax.plot(x, y, linewidth=1.0, label=key)
-    ax.set_title("Controles de sonificacion EEG-reportables - tiempo centrado")
+        ax.plot(x, y, linewidth=1.34, color=SONIF_COLORS.get(key), label=key)
+    ax.set_title("Controles de sonificacion EEG-reportables")
     ax.set_xlabel("Tiempo de captura (s)")
     ax.set_ylabel("Valor normalizado")
     ax.set_ylim(-0.03, 1.03)
-    if duration is not None and math.isfinite(duration) and duration > 0:
-        ax.set_xlim(0.0, duration)
-    ax.grid(True, alpha=0.3)
-    # Same visual convention as bandpowers: legend inside the axes, upper right,
-    # so the PNG keeps the same footprint and does not grow horizontally.
-    ax.legend(loc="upper right", ncol=2, fontsize=7, frameon=True, framealpha=0.90)
-    save_fig(out_path)
+    apply_capture_xlim(ax, duration)
+    style_axes(ax)
+    ax.legend(loc="upper right", ncol=2, fontsize=7.0, borderpad=0.42, handlelength=1.5, columnspacing=0.7)
+    save_fig(fig, out_path)
 
 
 def plot_quality(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_sonification_features.csv")
-    series = [
-        ("quality_score", "quality_score"),
-        ("quality_gate", "quality_gate"),
-    ]
-    plt.figure(figsize=(13, 4.5))
+    fig, ax = plt.subplots(figsize=FIG_SIZE)
     plotted = 0
-    for key, label in series:
+    for key, label in [("quality_score", "quality_score"), ("quality_gate", "quality_gate")]:
         x, y = rows_xy_windowed(rows, key)
         if x and y:
-            plt.plot(x, y, linewidth=1.2, label=label)
+            ax.plot(x, y, linewidth=1.55, color=QUALITY_COLORS[key], label=label)
             plotted += 1
     if plotted:
-        plt.axhline(0.85, linestyle="--", linewidth=0.9, label="clean 0.85")
-        plt.axhline(0.70, linestyle="--", linewidth=0.9, label="usable 0.70")
-        plt.axhline(0.50, linestyle="--", linewidth=0.9, label="artifact 0.50")
-    plt.title("Calidad de señal y gate de sonificacion - tiempo centrado")
-    plt.xlabel("Tiempo de captura (s)")
-    plt.ylabel("Score / gate")
-    plt.ylim(-0.03, 1.03)
-    apply_capture_xlim(duration)
-    plt.grid(True, alpha=0.3)
-    plt.legend(loc="upper right", ncol=2, fontsize=8, frameon=True, framealpha=0.90)
-    save_fig(out_path)
+        for y_thr, label in [(0.85, "clean 0.85"), (0.70, "usable 0.70"), (0.50, "artifact 0.50")]:
+            ax.axhline(y_thr, linestyle="--", linewidth=0.95, color="#6b7280", alpha=0.72, label=label)
+    ax.set_title("Calidad de senal y gate de sonificacion")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Score / gate")
+    ax.set_ylim(-0.03, 1.03)
+    apply_capture_xlim(ax, duration)
+    style_axes(ax)
+    if plotted:
+        ax.legend(loc="upper right", ncol=2, fontsize=7.8, borderpad=0.42, handlelength=1.55, columnspacing=0.72)
+    save_fig(fig, out_path)
 
 
 def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "music_notes.csv")
-    plt.figure(figsize=(13, 4.5))
+    fig, ax = plt.subplots(figsize=FIG_SIZE)
+    pitches: list[float] = []
     for row in rows:
         start = safe_float(row.get("t_capture_start_sec"))
         end = safe_float(row.get("t_capture_end_sec"))
@@ -321,13 +386,27 @@ def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
         if not (math.isfinite(start) and math.isfinite(end) and math.isfinite(pitch)):
             continue
         width = max(0.04, end - start)
-        plt.broken_barh([(start, width)], (pitch - 0.35, 0.7), alpha=max(0.25, min(1.0, vel / 127.0)))
-    plt.title("Notas musicales generadas")
-    plt.xlabel("Tiempo de captura (s)")
-    plt.ylabel("Pitch MIDI")
-    apply_capture_xlim(duration)
-    plt.grid(True, alpha=0.3)
-    save_fig(out_path)
+        alpha = max(0.32, min(0.88, vel / 127.0))
+        ax.broken_barh(
+            [(start, width)],
+            (pitch - 0.36, 0.72),
+            facecolors=NOTE_COLOR,
+            edgecolors="#233a9f",
+            linewidth=0.25,
+            alpha=alpha,
+        )
+        pitches.append(pitch)
+    ax.set_title("Notas musicales generadas")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Pitch MIDI")
+    apply_capture_xlim(ax, duration)
+    if pitches:
+        p_min = max(0, math.floor(min(pitches) - 2))
+        p_max = min(127, math.ceil(max(pitches) + 2))
+        if p_max > p_min:
+            ax.set_ylim(p_min, p_max)
+    style_axes(ax)
+    save_fig(fig, out_path)
 
 
 def plot_combined(capture_dir: Path, out_path: Path) -> None:
@@ -338,45 +417,62 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     sonif_rows = read_csv(capture_dir / "windowed_sonification_features.csv")
     note_rows = read_csv(capture_dir / "music_notes.csv")
 
-    fig, axes = plt.subplots(4, 1, figsize=(13, 10.5), sharex=True)
-    axes[0].plot(eeg_t, eeg_y, linewidth=0.65)
+    fig, axes = plt.subplots(4, 1, figsize=COMBINED_SIZE, sharex=True)
+    axes[0].plot(eeg_t, eeg_y, linewidth=0.74, color=EEG_COLOR)
     axes[0].set_ylim(*EEG_STANDARD_YLIM_UV)
     axes[0].set_ylabel("CH1 (uV)")
-    axes[0].set_title("EEG + bandpowers + controles de sonificacion + notas")
-    axes[0].grid(True, alpha=0.3)
-    axes[0].text(0.01, 0.94, "EEG mostrado con escala fija ±400 uV", transform=axes[0].transAxes, va="top", fontsize=8)
+    axes[0].set_title("EEG, espectro, sonificacion y notas MIDI")
+    axes[0].text(
+        0.012,
+        0.94,
+        "Escala fija ±400 uV",
+        transform=axes[0].transAxes,
+        va="top",
+        fontsize=8.0,
+        bbox={"boxstyle": "round,pad=0.22", "facecolor": "white", "edgecolor": "#d0d7de", "alpha": 0.82},
+    )
+    style_axes(axes[0])
 
     for band in ["alpha", "beta", "gamma"]:
         x, y = rows_xy_windowed(band_rows, f"{band}_rel")
-        axes[1].plot(x, y, linewidth=1.0, label=band)
+        axes[1].plot(x, y, linewidth=1.25, color=BAND_COLORS.get(band), label=band)
     axes[1].set_ylabel("Band rel")
     axes[1].set_ylim(-0.03, 1.03)
-    axes[1].grid(True, alpha=0.3)
-    axes[1].legend(loc="upper right", fontsize=8, ncol=3)
+    style_axes(axes[1])
+    axes[1].legend(loc="upper right", fontsize=7.5, ncol=3)
 
     for key in ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]:
         x, y = rows_xy_windowed(sonif_rows, key)
-        axes[2].plot(x, y, linewidth=1.0, label=key)
+        axes[2].plot(x, y, linewidth=1.22, color=SONIF_COLORS.get(key), label=key)
     axes[2].set_ylabel("Sonif")
     axes[2].set_ylim(-0.03, 1.03)
-    axes[2].grid(True, alpha=0.3)
-    axes[2].legend(loc="upper right", fontsize=8, ncol=2)
+    style_axes(axes[2])
+    axes[2].legend(loc="upper right", fontsize=7.2, ncol=2)
 
+    pitches: list[float] = []
     for row in note_rows:
         start = safe_float(row.get("t_capture_start_sec"))
         end = safe_float(row.get("t_capture_end_sec"))
         pitch = safe_float(row.get("pitch_midi"))
         if not (math.isfinite(start) and math.isfinite(end) and math.isfinite(pitch)):
             continue
-        axes[3].broken_barh([(start, max(0.04, end - start))], (pitch - 0.35, 0.7), alpha=0.75)
+        axes[3].broken_barh(
+            [(start, max(0.04, end - start))],
+            (pitch - 0.35, 0.7),
+            facecolors=NOTE_COLOR,
+            edgecolors="#233a9f",
+            linewidth=0.2,
+            alpha=0.72,
+        )
+        pitches.append(pitch)
     axes[3].set_ylabel("MIDI")
     axes[3].set_xlabel("Tiempo de captura (s)")
-    axes[3].grid(True, alpha=0.3)
+    if pitches:
+        axes[3].set_ylim(max(0, math.floor(min(pitches) - 2)), min(127, math.ceil(max(pitches) + 2)))
+    style_axes(axes[3])
+    apply_capture_xlim(axes[3], duration)
 
-    if duration is not None and math.isfinite(duration) and duration > 0:
-        axes[3].set_xlim(0.0, duration)
-
-    save_fig(out_path)
+    save_fig(fig, out_path)
 
 
 def normalize_diagnosis(value: Any) -> str:
@@ -514,9 +610,9 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
         "Criterios de representacion aplicados:",
         "",
         "- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.",
-        "- Bandpowers, controles de sonificacion y calidad con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.",
+        "- Bandpowers, controles de sonificacion y calidad usan tiempos de ventana alineados con la duracion total de la captura.",
         "- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.",
-        "- Las graficas de controles de sonificacion usan leyenda interna en esquina superior derecha, igual que las graficas de bandpowers, para mantener el mismo tamano de imagen.",
+        "- Las graficas usan un estilo visual comun para que encajen mejor en GitHub, PDF y memoria TFG.",
         "",
         "| Captura | Condicion | Documento |",
         "| --- | --- | --- |",
