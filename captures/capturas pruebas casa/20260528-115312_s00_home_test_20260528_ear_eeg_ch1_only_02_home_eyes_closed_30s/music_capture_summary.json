@@ -1,0 +1,9 @@
+{
+  "duration_sec": 30.0,
+  "music_notes_csv": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas pruebas casa/20260528-115312_s00_home_test_20260528_ear_eeg_ch1_only_02_home_eyes_closed_30s/music_notes.csv",
+  "music_snapshots_jsonl": "/home/arduino/ArduinoApps/eeg_midi/captures/capturas pruebas casa/20260528-115312_s00_home_test_20260528_ear_eeg_ch1_only_02_home_eyes_closed_30s/music_snapshots.jsonl",
+  "note": "music_notes.csv is extracted from periodic state/snapshot.json music.recent_notes during the capture",
+  "notes_total_deduplicated": 42,
+  "snapshots_total": 63,
+  "snapshots_with_notes": 63
+}

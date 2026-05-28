@@ -1,0 +1,16 @@
+subject=s00_home_test
+session=20260528
+hora_inicio=13:50
+entorno=home
+montage=ear_eeg_ch1_only
+model=modelo_captura_final
+ads_mode=bias_ch1_only_loff_off
+final_root=/home/arduino/ArduinoApps/eeg_midi/captures/capturas pruebas casa
+branch=docs/capture-protocol
+commit=7ec0ea21605a4e7200491c5a483ea6eabd2ddc84
+dirty=dirty
+python=3.13.5
+ch1p=mastoide izq
+ch1n=mastoide drch
+bias=muneca izq
+created_at=2026-05-28T11:51:09
