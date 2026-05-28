@@ -257,14 +257,14 @@ def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
     plt.ylim(-0.03, 1.03)
     apply_capture_xlim(duration)
     plt.grid(True, alpha=0.3)
-    plt.legend(ncol=5, fontsize=9)
+    plt.legend(loc="upper right", ncol=5, fontsize=9, frameon=True)
     save_fig(out_path)
 
 
 def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_sonification_features.csv")
-    fig, ax = plt.subplots(figsize=(13, 5.8))
+    fig, ax = plt.subplots(figsize=(13, 4.5))
     for key in SONIF_CONTROLS:
         x, y = rows_xy_windowed(rows, key)
         ax.plot(x, y, linewidth=1.0, label=key)
@@ -275,18 +275,37 @@ def plot_sonification(capture_dir: Path, out_path: Path) -> None:
     if duration is not None and math.isfinite(duration) and duration > 0:
         ax.set_xlim(0.0, duration)
     ax.grid(True, alpha=0.3)
-    # Keep the legend inside the figure footprint so GitHub/Markdown rendering
-    # does not create a very wide canvas. Placing it below the axes keeps the
-    # plot area comparable to bandpowers_relativos.png across all captures.
-    ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.18),
-        ncol=4,
-        fontsize=8,
-        frameon=True,
-        borderaxespad=0.0,
-    )
-    fig.subplots_adjust(bottom=0.28)
+    # Same visual convention as bandpowers: legend inside the axes, upper right,
+    # so the PNG keeps the same footprint and does not grow horizontally.
+    ax.legend(loc="upper right", ncol=2, fontsize=7, frameon=True, framealpha=0.90)
+    save_fig(out_path)
+
+
+def plot_quality(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
+    rows = read_csv(capture_dir / "windowed_sonification_features.csv")
+    series = [
+        ("quality_score", "quality_score"),
+        ("quality_gate", "quality_gate"),
+    ]
+    plt.figure(figsize=(13, 4.5))
+    plotted = 0
+    for key, label in series:
+        x, y = rows_xy_windowed(rows, key)
+        if x and y:
+            plt.plot(x, y, linewidth=1.2, label=label)
+            plotted += 1
+    if plotted:
+        plt.axhline(0.85, linestyle="--", linewidth=0.9, label="clean 0.85")
+        plt.axhline(0.70, linestyle="--", linewidth=0.9, label="usable 0.70")
+        plt.axhline(0.50, linestyle="--", linewidth=0.9, label="artifact 0.50")
+    plt.title("Calidad de señal y gate de sonificacion - tiempo centrado")
+    plt.xlabel("Tiempo de captura (s)")
+    plt.ylabel("Score / gate")
+    plt.ylim(-0.03, 1.03)
+    apply_capture_xlim(duration)
+    plt.grid(True, alpha=0.3)
+    plt.legend(loc="upper right", ncol=2, fontsize=8, frameon=True, framealpha=0.90)
     save_fig(out_path)
 
 
@@ -333,7 +352,7 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     axes[1].set_ylabel("Band rel")
     axes[1].set_ylim(-0.03, 1.03)
     axes[1].grid(True, alpha=0.3)
-    axes[1].legend(fontsize=8, ncol=3)
+    axes[1].legend(loc="upper right", fontsize=8, ncol=3)
 
     for key in ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]:
         x, y = rows_xy_windowed(sonif_rows, key)
@@ -341,7 +360,7 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     axes[2].set_ylabel("Sonif")
     axes[2].set_ylim(-0.03, 1.03)
     axes[2].grid(True, alpha=0.3)
-    axes[2].legend(fontsize=8, ncol=2)
+    axes[2].legend(loc="upper right", fontsize=8, ncol=2)
 
     for row in note_rows:
         start = safe_float(row.get("t_capture_start_sec"))
@@ -440,6 +459,8 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, fig_paths: dict[str, Pa
             "",
             f"![Controles de sonificacion]({posix_rel(fig_paths['sonification'], docs_dir)})",
             "",
+            f"![Calidad de senal y gate]({posix_rel(fig_paths['quality'], docs_dir)})",
+            "",
             f"![Notas musicales]({posix_rel(fig_paths['music_notes'], docs_dir)})",
             "",
         ]
@@ -493,9 +514,9 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
         "Criterios de representacion aplicados:",
         "",
         "- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.",
-        "- Bandpowers y controles de sonificacion con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.",
+        "- Bandpowers, controles de sonificacion y calidad con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.",
         "- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.",
-        "- Las graficas de controles de sonificacion usan leyenda inferior compacta para evitar lienzos demasiado anchos en GitHub/Markdown.",
+        "- Las graficas de controles de sonificacion usan leyenda interna en esquina superior derecha, igual que las graficas de bandpowers, para mantener el mismo tamano de imagen.",
         "",
         "| Captura | Condicion | Documento |",
         "| --- | --- | --- |",
@@ -509,12 +530,14 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
             "eeg": fig_dir / "eeg_ch1_temporal.png",
             "bandpowers": fig_dir / "bandpowers_relativos.png",
             "sonification": fig_dir / "controles_sonificacion.png",
+            "quality": fig_dir / "calidad_senal_quality_gate.png",
             "music_notes": fig_dir / "notas_musicales.png",
             "combined": fig_dir / "figura_combinada_eeg_musica.png",
         }
         plot_eeg(capture_dir, fig_paths["eeg"])
         plot_bandpowers(capture_dir, fig_paths["bandpowers"])
         plot_sonification(capture_dir, fig_paths["sonification"])
+        plot_quality(capture_dir, fig_paths["quality"])
         plot_music_notes(capture_dir, fig_paths["music_notes"])
         plot_combined(capture_dir, fig_paths["combined"])
         doc = write_capture_doc(capture_dir, docs_dir, fig_paths)
