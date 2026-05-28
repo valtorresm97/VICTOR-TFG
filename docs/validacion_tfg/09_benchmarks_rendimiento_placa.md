@@ -31,6 +31,126 @@ Por tanto, 256 ms es el presupuesto temporal aproximado disponible para completa
 
 La interpretación del benchmark se basa en comparar el tiempo medido de las funciones críticas con esos 256 ms. Si `compute_live_features` o el ciclo completo de procesamiento quedan claramente por debajo de ese valor, el sistema dispone de margen temporal para operar en tiempo real. En las pruebas realizadas, los tiempos medidos se sitúan en el orden de 5-13 ms, por lo que el procesamiento Python/Linux queda muy por debajo del presupuesto temporal disponible.
 
+## Metodología de adquisición de benchmarks
+
+La metodología se diseñó para que los resultados fueran trazables y reproducibles dentro del repositorio. El criterio principal fue medir el sistema real ejecutándose en la placa, sin sustituir la entrada por señales sintéticas y sin añadir tráfico extra al transporte principal.
+
+### Principios de la prueba
+
+1. Ejecutar los benchmarks en la Arduino UNO Q/Linux, no en PC.
+2. Usar capturas reales generadas por la aplicación y almacenadas en `captures/`.
+3. Medir el coste Python/Linux sobre datos reales ya adquiridos por el hardware.
+4. Conservar las métricas existentes del firmware/MCU sin modificar el transporte `Bridge.notify("eeg_block_uV")`.
+5. Guardar todos los artefactos en `benchmarks/results/`, `benchmarks/reports/` y `captures/`.
+6. Versionar en Git los resultados y los informes generados.
+
+### Código utilizado o creado para esta validación
+
+| Archivo | Tipo | Función dentro de la validación |
+| --- | --- | --- |
+| `python/tools/capture_eeg_quality.py` | Herramienta existente de captura | Solicita al backend una captura real durante una duración definida y genera una carpeta `captures/<timestamp>_<condition>/`. |
+| `benchmarks/benchmark_core.py` | Código creado para benchmarks | Proporciona utilidades comunes de medición temporal, resumen estadístico y escritura de resultados JSON/CSV/Markdown. |
+| `benchmarks/benchmark_real_capture.py` | Código creado para benchmarks | Lee `eeg_timeseries.csv`, reconstruye bloques reales por `block_idx` y mide funciones críticas Python sobre la captura real. |
+| `benchmarks/run_all_benchmarks.py` | Código creado para benchmarks | Ejecuta el conjunto de benchmarks Python/Linux sobre una captura real y guarda resultados en `benchmarks/results/` y `benchmarks/reports/`. |
+| `python/tools/parse_mcu_bench_monitor.py` | Código creado para benchmarks MCU | Parsea el texto copiado del Monitor/App Lab con bloques `[BENCH] EEG_MIDI` y genera CSV/JSON/Markdown con métricas del firmware. |
+| `sketch/bench.h` | Instrumentación firmware existente | Define los contadores y acumuladores de rendimiento del MCU: muestras, bloques, notify, tiempos de filtro, loop, cola TX, drops y lag. |
+| `sketch/sketch.ino` | Firmware principal | Imprime periódicamente en Monitor/App Lab los bloques `[BENCH] EEG_MIDI` sin añadir tráfico extra por Bridge. |
+
+### Procedimiento de captura Python/Linux
+
+La captura real se tomó con la aplicación App Lab en ejecución y el backend activo. El comando utilizado fue equivalente a:
+
+```bash
+python3 python/tools/capture_eeg_quality.py \
+  --condition bench_real_rest_60s_mcu \
+  --duration 60 \
+  --timeout-extra 180
+```
+
+Esta herramienta no genera una señal artificial. En su lugar, solicita al backend que grabe los datos reales que llegan desde el evento `eeg_block_uV`. El resultado es una carpeta de captura con, como mínimo:
+
+```text
+captures/<timestamp>_<condition>/
+  eeg_timeseries.csv
+  metadata.json
+```
+
+El archivo `eeg_timeseries.csv` contiene las muestras recibidas por Python, agrupadas por bloque y con columnas de estado y canales EEG en microvoltios. Ese CSV es la fuente de entrada de los benchmarks Python/Linux.
+
+### Procedimiento de benchmark Python/Linux
+
+Una vez generada la captura, el benchmark se ejecutó sobre el CSV real:
+
+```bash
+python3 benchmarks/run_all_benchmarks.py \
+  --capture-dir "$CAPTURE_DIR" \
+  --tag "real_capture_${CONDITION}_${TS}"
+```
+
+Internamente, `benchmark_real_capture.py` realiza los siguientes pasos:
+
+1. Lee `eeg_timeseries.csv`.
+2. Agrupa las filas por `block_idx`.
+3. Reconstruye bloques reales compatibles con el contrato `eeg_block_uV`.
+4. Mide el parser `parse_eeg_block_values` sobre payload real.
+5. Reinyecta bloques reales en `EEGReceiver.eeg_block_uV`.
+6. Reinyecta bloques reales en `EEGSignalProcessor.add_block_uV`.
+7. Calcula `compute_live_features` sobre una ventana real de 4 s.
+8. Calcula `compute_quality_diagnostics` sobre la misma ventana.
+9. Mide `DSPCore.compute_features` de forma aislada.
+10. Simula el replay completo con hop real de 64 muestras.
+
+Los resultados se guardan automáticamente en:
+
+```text
+benchmarks/results/<timestamp>_<tag>_benchmark_results.json
+benchmarks/results/<timestamp>_<tag>_benchmark_results.csv
+benchmarks/reports/<timestamp>_<tag>_benchmark_report.md
+```
+
+### Procedimiento de benchmark firmware/MCU
+
+El lado MCU ya imprimía métricas de rendimiento en el Monitor/App Lab mediante los bloques `[BENCH] EEG_MIDI`. Se decidió no añadir un nuevo evento `Bridge.notify("mcu_bench")`, porque eso habría introducido tráfico adicional en el mismo transporte que se quería evaluar.
+
+Por ese motivo, el procedimiento elegido fue:
+
+1. Mantener el firmware sin cambios durante la adquisición.
+2. Copiar manualmente del Monitor/App Lab los bloques `[BENCH] EEG_MIDI` generados durante la prueba.
+3. Guardar el texto original en:
+
+```text
+benchmarks/reports/<TS>_<CONDITION>_firmware_bench_monitor.log
+```
+
+4. Parsear automáticamente ese log con:
+
+```bash
+python3 python/tools/parse_mcu_bench_monitor.py \
+  "benchmarks/reports/${TS}_${CONDITION}_firmware_bench_monitor.log" \
+  --condition "$CONDITION" \
+  --out-csv "benchmarks/results/${TS}_${CONDITION}_mcu_bench.csv" \
+  --out-json "benchmarks/results/${TS}_${CONDITION}_mcu_bench.json" \
+  --out-md "benchmarks/reports/${TS}_${CONDITION}_mcu_bench_report.md"
+```
+
+El parser extrae las métricas de las líneas `rate`, `time`, `queue`, `jitter`, `DRDY`, `total` y `peak`, generando una tabla por ventanas y un resumen estadístico. De esta forma, aunque la copia inicial del Monitor sea manual, la transformación a datos tabulados es automática y reproducible.
+
+### Artefactos conservados
+
+Para que la validación pueda revisarse posteriormente, se conservaron los siguientes tipos de artefactos:
+
+| Tipo de artefacto | Ruta |
+| --- | --- |
+| Captura real | `captures/<timestamp>_<condition>/` |
+| Resultados Python/Linux en JSON/CSV | `benchmarks/results/*benchmark_results.json`, `benchmarks/results/*benchmark_results.csv` |
+| Informe Python/Linux en Markdown | `benchmarks/reports/*benchmark_report.md` |
+| Log crudo MCU copiado del Monitor | `benchmarks/reports/*firmware_bench_monitor.log` |
+| CSV/JSON de métricas MCU | `benchmarks/results/*mcu_bench.csv`, `benchmarks/results/*mcu_bench.json` |
+| Informe MCU en Markdown | `benchmarks/reports/*mcu_bench_report.md` |
+| Snapshot/logs finales del backend | `benchmarks/reports/*snapshot_final.json`, `benchmarks/reports/*backend_stdout_final.log` |
+
+Esta organización permite relacionar cada resultado temporal con la captura real que lo originó y con el estado del sistema durante la prueba.
+
 ## Rama, commits y entorno
 
 Los benchmarks se ejecutaron en la rama:
@@ -46,6 +166,7 @@ Artefactos principales:
 | Commit con parser de monitor MCU | `163dce7 Add MCU monitor benchmark parser` |
 | Commit con primera captura de benchmark Python | `9f305a9 Capture board benchmark results` |
 | Commit con captura MCU + Python | `5514fd9 Capture board benchmark results with MCU monitor metrics` |
+| Commit con documentación MCU + Python | `8406e61 Include MCU benchmark results in board validation document` |
 | Python | `3.13.5` |
 | Plataforma | `Linux-7.0.0-g122c2c22d838-aarch64-with-glibc2.41` |
 | Placa | Arduino UNO Q / Linux App Lab |
