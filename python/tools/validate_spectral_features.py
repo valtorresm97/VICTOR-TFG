@@ -42,6 +42,49 @@ from sonification_features import SonificationFeatureAdapter
 
 FS_HZ_DEFAULT = float(FS_HZ)
 
+SONIFICATION_REPORT_CONTROLS = (
+    "alpha_drive",
+    "beta_gamma_drive",
+    "rms_beta_activity",
+    "band_driven_density",
+    "spectral_register",
+    "alpha_stability",
+    "rms_band_velocity",
+    "band_note_probability",
+)
+
+SONIFICATION_LEGACY_ALIASES = {
+    "alpha_drive": "calmness",
+    "beta_gamma_drive": "tension",
+    "rms_beta_activity": "activity",
+    "band_driven_density": "rhythmic_density",
+    "spectral_register": "register",
+    "alpha_stability": "harmonic_stability",
+    "rms_band_velocity": "velocity_factor",
+    "band_note_probability": "note_probability",
+}
+
+SONIFICATION_TRACE_FIELDS = (
+    "valid",
+    "rms_uV",
+    "alpha_beta_ratio",
+    "beta_over_alpha_beta",
+    "theta_alpha_ratio",
+    "slow_power",
+    "fast_power",
+    "dominant_band",
+)
+
+
+def _sonif_value(sonif: dict[str, Any], key: str, default: Any = None) -> Any:
+    """Return renamed sonification field, accepting legacy aliases as fallback."""
+    if key in sonif:
+        return sonif.get(key)
+    legacy_key = SONIFICATION_LEGACY_ALIASES.get(key)
+    if legacy_key is not None and legacy_key in sonif:
+        return sonif.get(legacy_key)
+    return default
+
 
 def _load_capture_csv(capture_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     path = capture_dir / "eeg_timeseries.csv"
@@ -158,15 +201,15 @@ def _classify_band(name: str, rows: list[dict], condition: str) -> dict:
     elif name == "beta":
         decision = "USAR SOLO COMO APOYO"
         risk = "puede aumentar con mandibula/frente/EMG"
-        usefulness = "tension/actividad con suavizado y bloqueo por calidad"
+        usefulness = "beta_gamma_drive/rms_beta_activity con suavizado y bloqueo por calidad"
     elif name in ("delta", "theta"):
         decision = "USAR SOLO COMO APOYO"
         risk = "puede reflejar drift, parpadeo o movimiento"
-        usefulness = "calma/slow_power si artifact score es bajo"
+        usefulness = "slow_power si artifact score es bajo"
     elif name == "alpha":
         decision = "NECESITA MAS CAPTURAS"
         risk = "no validada solo por presencia; requiere open/closed robusto"
-        usefulness = "calmness si aumenta en condiciones limpias"
+        usefulness = "alpha_drive/alpha_stability si aumenta en condiciones limpias"
 
     if "jaw" in condition_l or "blink" in condition_l or "artifact" in condition_l or "forehead" in condition_l:
         if name in ("beta", "gamma"):
@@ -320,38 +363,20 @@ def validate_capture(
         features_for_sonif.pop("freqs", None)
         features_for_sonif.pop("psd", None)
         sonif = adapter.update(features_for_sonif, quality=quality_obj.to_dict()).to_dict()
-        sonif_rows.append(
-            {
-                "capture": capture_dir.name,
-                "condition": condition,
-                "channel": channel,
-                "window_start_sec": row["window_start_sec"],
-                "quality_score": quality,
-                "quality_gate": sonif.get("quality_gate"),
-                "quality_state": sonif.get("quality_state"),
-                **{
-                    key: sonif.get(key)
-                    for key in (
-                        "valid",
-                        "activity",
-                        "calmness",
-                        "tension",
-                        "rhythmic_density",
-                        "register",
-                        "harmonic_stability",
-                        "velocity_factor",
-                        "note_probability",
-                        "rms_uV",
-                        "alpha_beta_ratio",
-                        "beta_over_alpha_beta",
-                        "theta_alpha_ratio",
-                        "slow_power",
-                        "fast_power",
-                        "dominant_band",
-                    )
-                },
-            }
-        )
+        sonif_row = {
+            "capture": capture_dir.name,
+            "condition": condition,
+            "channel": channel,
+            "window_start_sec": row["window_start_sec"],
+            "quality_score": quality,
+            "quality_gate": sonif.get("quality_gate"),
+            "quality_state": sonif.get("quality_state"),
+        }
+        for key in SONIFICATION_REPORT_CONTROLS:
+            sonif_row[key] = _sonif_value(sonif, key)
+        for key in SONIFICATION_TRACE_FIELDS:
+            sonif_row[key] = sonif.get(key)
+        sonif_rows.append(sonif_row)
 
     _write_csv(capture_dir / "windowed_bandpowers.csv", window_rows)
     _write_csv(capture_dir / "windowed_sonification_features.csv", sonif_rows)
@@ -380,16 +405,7 @@ def validate_capture(
         "bands": {band: _classify_band(band, window_rows, condition) for band in BANDS},
         "sonification": {
             key: _summary([_finite(row.get(key)) for row in sonif_rows])
-            for key in (
-                "activity",
-                "calmness",
-                "tension",
-                "rhythmic_density",
-                "register",
-                "harmonic_stability",
-                "velocity_factor",
-                "note_probability",
-            )
+            for key in SONIFICATION_REPORT_CONTROLS
         },
         "outputs": {
             "windowed_bandpowers_csv": str(capture_dir / "windowed_bandpowers.csv"),
@@ -483,6 +499,10 @@ def _write_aggregate(root: Path, reports: list[dict]) -> None:
                     f"{band}_decision": report["bands"][band]["decision"]
                     for band in BANDS
                 },
+                **{
+                    f"{control}_median": report["sonification"].get(control, {}).get("median")
+                    for control in SONIFICATION_REPORT_CONTROLS
+                },
             }
         )
     _write_csv(out_dir / "spectral_feature_robustness.csv", rows)
@@ -493,8 +513,8 @@ def _write_aggregate(root: Path, reports: list[dict]) -> None:
     lines = [
         "# Spectral feature robustness",
         "",
-        "| Capture | Median quality | Low-quality % | Median RMS uV | Median 50 Hz | Alpha | Beta | Gamma |",
-        "| --- | ---: | ---: | ---: | ---: | --- | --- | --- |",
+        "| Capture | Median quality | Low-quality % | Median RMS uV | Median 50 Hz | Alpha | Beta | Gamma | Alpha drive | Beta/Gamma drive |",
+        "| --- | ---: | ---: | ---: | ---: | --- | --- | --- | ---: | ---: |",
     ]
     for row in rows:
         lowq = row["artifact_or_low_quality_fraction"]
@@ -502,7 +522,8 @@ def _write_aggregate(root: Path, reports: list[dict]) -> None:
         lines.append(
             f"| {row['capture']} | {row['median_quality_score']} | {lowq_pct} | "
             f"{row['median_rms_uV']} | {row['median_50hz_ratio']} | "
-            f"{row['alpha_decision']} | {row['beta_decision']} | {row['gamma_decision']} |"
+            f"{row['alpha_decision']} | {row['beta_decision']} | {row['gamma_decision']} | "
+            f"{row.get('alpha_drive_median')} | {row.get('beta_gamma_drive_median')} |"
         )
     (out_dir / "spectral_feature_robustness.md").write_text(
         "\n".join(lines) + "\n",
