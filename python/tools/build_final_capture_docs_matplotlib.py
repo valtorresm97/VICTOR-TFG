@@ -60,6 +60,12 @@ CONDITION_INFO = {
     "eyes_open_repeat_30s": ("Repeticion ojos abiertos", "full", "Candidata principal para figura combinada de la sesion final."),
 }
 
+# Standard TFG plots use a fixed EEG scale so large terminal artifacts do not
+# hide the useful signal. Full-amplitude traces remain documented in enhanced
+# reports when needed.
+EEG_STANDARD_YLIM_UV = (-400.0, 400.0)
+FEATURE_WINDOW_SEC = 4.0
+
 
 def safe_float(value: Any, default: float = math.nan) -> float:
     try:
@@ -120,14 +126,22 @@ def discover_captures(final_root: Path, subject: str, session: str, montage: str
     return sorted(p for p in final_root.glob(pattern) if p.is_dir())
 
 
-def rel(path: Path, base: Path) -> str:
+def posix_rel(path: Path, base: Path) -> str:
+    """Return a portable Markdown link path, even when generated on Windows."""
     try:
-        return str(path.relative_to(base))
+        return path.relative_to(base).as_posix()
     except Exception:
         try:
-            return str(path.relative_to(PROJECT_ROOT))
+            return path.relative_to(PROJECT_ROOT).as_posix()
         except Exception:
-            return str(path)
+            return path.as_posix()
+
+
+def repo_rel(path: Path) -> str:
+    try:
+        return path.relative_to(PROJECT_ROOT).as_posix()
+    except Exception:
+        return path.as_posix()
 
 
 def load_eeg(capture_dir: Path) -> tuple[list[float], list[float]]:
@@ -141,6 +155,23 @@ def load_eeg(capture_dir: Path) -> tuple[list[float], list[float]]:
             t.append(x)
             ch1.append(y)
     return t, ch1
+
+
+def capture_duration_sec(capture_dir: Path) -> float | None:
+    t, _ = load_eeg(capture_dir)
+    if t:
+        return max(t)
+    metadata = read_json(capture_dir / "metadata.json")
+    for key in ("duration_sec", "requested_duration_sec", "observed_duration_sec"):
+        value = safe_float(metadata.get(key))
+        if math.isfinite(value) and value > 0:
+            return value
+    return None
+
+
+def apply_capture_xlim(duration_sec: float | None) -> None:
+    if duration_sec is not None and math.isfinite(duration_sec) and duration_sec > 0:
+        plt.xlim(0.0, duration_sec)
 
 
 def downsample(x: list[float], y: list[float], max_points: int = 7000) -> tuple[list[float], list[float]]:
@@ -162,6 +193,35 @@ def rows_xy(rows: list[dict[str, str]], x_key: str, y_key: str) -> tuple[list[fl
     return x, y
 
 
+def rows_xy_windowed(rows: list[dict[str, str]], y_key: str) -> tuple[list[float], list[float]]:
+    """Use a center-of-window time for offline spectral features.
+
+    `windowed_bandpowers.csv` and `windowed_sonification_features.csv` store
+    features computed over finite windows. Plotting only `window_start_sec` makes
+    the spectral curves look artificially shifted and shorter than EEG/MIDI.
+    For visual comparison with raw EEG and notes, use the window center when
+    possible and always keep the x-axis range equal to the capture duration.
+    """
+    x: list[float] = []
+    y: list[float] = []
+    for row in rows:
+        yy = safe_float(row.get(y_key))
+        if not math.isfinite(yy):
+            continue
+        center = safe_float(row.get("window_center_sec"))
+        if not math.isfinite(center):
+            start = safe_float(row.get("window_start_sec"))
+            end = safe_float(row.get("window_end_sec"))
+            if math.isfinite(start) and math.isfinite(end):
+                center = 0.5 * (start + end)
+            elif math.isfinite(start):
+                center = start + 0.5 * FEATURE_WINDOW_SEC
+        if math.isfinite(center):
+            x.append(center)
+            y.append(yy)
+    return x, y
+
+
 def save_fig(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
@@ -170,48 +230,56 @@ def save_fig(path: Path) -> None:
 
 
 def plot_eeg(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
     t, ch1 = load_eeg(capture_dir)
     t, ch1 = downsample(t, ch1)
     plt.figure(figsize=(13, 4.2))
     plt.plot(t, ch1, linewidth=0.7)
-    plt.title("EEG temporal CH1")
+    plt.title("EEG temporal CH1 - escala fija ±400 uV")
     plt.xlabel("Tiempo de captura (s)")
     plt.ylabel("CH1 (uV)")
+    plt.ylim(*EEG_STANDARD_YLIM_UV)
+    apply_capture_xlim(duration)
     plt.grid(True, alpha=0.3)
     save_fig(out_path)
 
 
 def plot_bandpowers(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_bandpowers.csv")
     plt.figure(figsize=(13, 4.5))
     for band in BANDS:
-        x, y = rows_xy(rows, "window_start_sec", f"{band}_rel")
+        x, y = rows_xy_windowed(rows, f"{band}_rel")
         plt.plot(x, y, linewidth=1.2, label=band)
-    plt.title("Bandpowers relativos por ventana")
+    plt.title("Bandpowers relativos por ventana - tiempo centrado")
     plt.xlabel("Tiempo de captura (s)")
     plt.ylabel("Potencia relativa")
     plt.ylim(-0.03, 1.03)
+    apply_capture_xlim(duration)
     plt.grid(True, alpha=0.3)
     plt.legend(ncol=5, fontsize=9)
     save_fig(out_path)
 
 
 def plot_sonification(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "windowed_sonification_features.csv")
     plt.figure(figsize=(13, 5.5))
     for key in SONIF_CONTROLS:
-        x, y = rows_xy(rows, "window_start_sec", key)
+        x, y = rows_xy_windowed(rows, key)
         plt.plot(x, y, linewidth=1.0, label=key)
-    plt.title("Controles de sonificacion EEG-reportables")
+    plt.title("Controles de sonificacion EEG-reportables - tiempo centrado")
     plt.xlabel("Tiempo de captura (s)")
     plt.ylabel("Valor normalizado")
     plt.ylim(-0.03, 1.03)
+    apply_capture_xlim(duration)
     plt.grid(True, alpha=0.3)
     plt.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8)
     save_fig(out_path)
 
 
 def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
     rows = read_csv(capture_dir / "music_notes.csv")
     plt.figure(figsize=(13, 4.5))
     for row in rows:
@@ -226,11 +294,13 @@ def plot_music_notes(capture_dir: Path, out_path: Path) -> None:
     plt.title("Notas musicales generadas")
     plt.xlabel("Tiempo de captura (s)")
     plt.ylabel("Pitch MIDI")
+    apply_capture_xlim(duration)
     plt.grid(True, alpha=0.3)
     save_fig(out_path)
 
 
 def plot_combined(capture_dir: Path, out_path: Path) -> None:
+    duration = capture_duration_sec(capture_dir)
     eeg_t, eeg_y = load_eeg(capture_dir)
     eeg_t, eeg_y = downsample(eeg_t, eeg_y)
     band_rows = read_csv(capture_dir / "windowed_bandpowers.csv")
@@ -239,12 +309,14 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
 
     fig, axes = plt.subplots(4, 1, figsize=(13, 10.5), sharex=True)
     axes[0].plot(eeg_t, eeg_y, linewidth=0.65)
+    axes[0].set_ylim(*EEG_STANDARD_YLIM_UV)
     axes[0].set_ylabel("CH1 (uV)")
     axes[0].set_title("EEG + bandpowers + controles de sonificacion + notas")
     axes[0].grid(True, alpha=0.3)
+    axes[0].text(0.01, 0.94, "EEG mostrado con escala fija ±400 uV", transform=axes[0].transAxes, va="top", fontsize=8)
 
     for band in ["alpha", "beta", "gamma"]:
-        x, y = rows_xy(band_rows, "window_start_sec", f"{band}_rel")
+        x, y = rows_xy_windowed(band_rows, f"{band}_rel")
         axes[1].plot(x, y, linewidth=1.0, label=band)
     axes[1].set_ylabel("Band rel")
     axes[1].set_ylim(-0.03, 1.03)
@@ -252,7 +324,7 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     axes[1].legend(fontsize=8, ncol=3)
 
     for key in ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]:
-        x, y = rows_xy(sonif_rows, "window_start_sec", key)
+        x, y = rows_xy_windowed(sonif_rows, key)
         axes[2].plot(x, y, linewidth=1.0, label=key)
     axes[2].set_ylabel("Sonif")
     axes[2].set_ylim(-0.03, 1.03)
@@ -270,7 +342,20 @@ def plot_combined(capture_dir: Path, out_path: Path) -> None:
     axes[3].set_xlabel("Tiempo de captura (s)")
     axes[3].grid(True, alpha=0.3)
 
+    if duration is not None and math.isfinite(duration) and duration > 0:
+        axes[3].set_xlim(0.0, duration)
+
     save_fig(out_path)
+
+
+def normalize_diagnosis(value: Any) -> str:
+    if isinstance(value, dict):
+        state = value.get("state", "n/a")
+        reasons = value.get("reasons") or []
+        if reasons:
+            return f"{state} - {', '.join(map(str, reasons))}"
+        return str(state)
+    return fmt(value)
 
 
 def quality_fields(capture_dir: Path) -> dict[str, Any]:
@@ -310,7 +395,7 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, fig_paths: dict[str, Pa
         "",
         "## 1. Identificacion",
         "",
-        f"- Carpeta: `{capture_dir}`",
+        f"- Carpeta: `{repo_rel(capture_dir)}`",
         f"- Tipo: {title}",
         f"- Nivel de detalle documental: `{detail}`",
         f"- Objetivo: {purpose}",
@@ -319,7 +404,7 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, fig_paths: dict[str, Pa
         "",
         "| Metrica | Valor |",
         "| --- | ---: |",
-        f"| Diagnostico | `{fmt(fields['diagnosis'])}` |",
+        f"| Diagnostico | `{normalize_diagnosis(fields['diagnosis'])}` |",
         f"| Duracion observada | `{fmt(fields['duration'])}` |",
         f"| Frecuencia efectiva | `{fmt(fields['sample_rate'])}` |",
         f"| Sample gaps | `{fmt(fields['sample_gaps'])}` |",
@@ -331,19 +416,19 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, fig_paths: dict[str, Pa
         "",
         "## 3. Figuras",
         "",
-        f"![EEG temporal]({rel(fig_paths['eeg'], docs_dir)})",
+        "Nota: las figuras EEG temporales estandar usan escala fija `±400 uV` para facilitar la inspeccion visual. Los transitorios completos se conservan en las metricas de calidad y, cuando procede, en las figuras enhanced.",
+        "",
+        f"![EEG temporal]({posix_rel(fig_paths['eeg'], docs_dir)})",
         "",
     ]
 
     if detail != "brief":
         lines += [
-            f"![Bandpowers relativos]({rel(fig_paths['bandpowers'], docs_dir)})",
+            f"![Bandpowers relativos]({posix_rel(fig_paths['bandpowers'], docs_dir)})",
             "",
-            f"![Controles de sonificacion]({rel(fig_paths['sonification'], docs_dir)})",
+            f"![Controles de sonificacion]({posix_rel(fig_paths['sonification'], docs_dir)})",
             "",
-            f"![Notas musicales]({rel(fig_paths['music_notes'], docs_dir)})",
-            "",
-            f"![Figura combinada]({rel(fig_paths['combined'], docs_dir)})",
+            f"![Notas musicales]({posix_rel(fig_paths['music_notes'], docs_dir)})",
             "",
         ]
 
@@ -369,7 +454,7 @@ def write_capture_doc(capture_dir: Path, docs_dir: Path, fig_paths: dict[str, Pa
     if cond == "blink_artifact_30s":
         lines.append("Condicion de artefacto fisiologico. No se reporta como EEG limpio; se usa para mostrar respuesta del sistema ante contaminacion esperada por parpadeo.")
     elif cond == "eyes_open_repeat_30s":
-        lines.append("Candidata principal para figura combinada de la sesion final por ser la condicion con mejor diagnostico automatico y sonificacion persistida.")
+        lines.append("Candidata principal de la sesion final por ser la condicion con mejor diagnostico automatico y sonificacion persistida. La figura combinada se conserva como PNG, pero este documento automatico evita repetirla porque las graficas ya aparecen por separado.")
     elif cond == "eyes_open_rest_60s":
         lines.append("Contiene sonificacion valida y datos persistidos, pero tambien un artefacto transitorio de gran amplitud. Es util para explicar limitaciones reales de adquisicion.")
     elif cond == "eyes_closed_rest_60s":
@@ -392,6 +477,12 @@ def build_docs(final_root: Path, subject: str, session: str, montage: str, docs_
         f"# Documentacion matplotlib de capturas finales {subject} {session}",
         "",
         "Figuras generadas con matplotlib a partir de la sesion real reportada en el TFG.",
+        "",
+        "Criterios de representacion aplicados:",
+        "",
+        "- EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.",
+        "- Bandpowers y controles de sonificacion con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.",
+        "- La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.",
         "",
         "| Captura | Condicion | Documento |",
         "| --- | --- | --- |",
