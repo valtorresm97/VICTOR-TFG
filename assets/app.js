@@ -7,6 +7,12 @@ function fmt(v, n = 3) {
   return Number.isFinite(x) ? x.toFixed(n) : "n/a";
 }
 
+function controlValue(obj, primary, legacy = null) {
+  if (obj && obj[primary] !== undefined && obj[primary] !== null) return obj[primary];
+  if (legacy && obj && obj[legacy] !== undefined && obj[legacy] !== null) return obj[legacy];
+  return undefined;
+}
+
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -144,14 +150,14 @@ function renderSonification(s) {
   const scheduler = midi.scheduler || {};
   const transport = midi.transport || {};
 
-  setText("sonif-activity", fmt(sonif.activity, 3));
-  setText("sonif-calmness", fmt(sonif.calmness, 3));
-  setText("sonif-tension", fmt(sonif.tension, 3));
-  setText("sonif-rhythmic-density", fmt(sonif.rhythmic_density, 3));
-  setText("sonif-register", fmt(sonif.register, 3));
-  setText("sonif-harmonic-stability", fmt(sonif.harmonic_stability, 3));
-  setText("sonif-velocity-factor", fmt(sonif.velocity_factor, 3));
-  setText("sonif-note-probability", fmt(sonif.note_probability, 3));
+  setText("sonif-alpha-drive", fmt(controlValue(sonif, "alpha_drive", "calmness"), 3));
+  setText("sonif-beta-gamma-drive", fmt(controlValue(sonif, "beta_gamma_drive", "tension"), 3));
+  setText("sonif-rms-beta-activity", fmt(controlValue(sonif, "rms_beta_activity", "activity"), 3));
+  setText("sonif-band-driven-density", fmt(controlValue(sonif, "band_driven_density", "rhythmic_density"), 3));
+  setText("sonif-spectral-register", fmt(controlValue(sonif, "spectral_register", "register"), 3));
+  setText("sonif-alpha-stability", fmt(controlValue(sonif, "alpha_stability", "harmonic_stability"), 3));
+  setText("sonif-rms-band-velocity", fmt(controlValue(sonif, "rms_band_velocity", "velocity_factor"), 3));
+  setText("sonif-band-note-probability", fmt(controlValue(sonif, "band_note_probability", "note_probability"), 3));
 
   setText("music-rhythm-cadence", music.rhythm_cadence || "n/a");
   setText("music-current-chord", (music.current_chord_notes || []).join(" · ") || "n/a");
