@@ -44,11 +44,12 @@ except Exception as exc:  # pragma: no cover
 
 
 DEFAULT_CAPTURE_NAME = "20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s"
+BANDS = ["delta", "theta", "alpha", "beta", "gamma"]
 SONIF_KEYS = ["alpha_drive", "beta_gamma_drive", "band_driven_density", "band_note_probability"]
 
-FIG_SIZE = (15.0, 5.4)
-SPECTROGRAM_SIZE = (15.0, 6.1)
-COMBINED_SIZE = (15.0, 12.4)
+FIG_SIZE = (12.8, 4.35)
+SPECTROGRAM_SIZE = (12.8, 5.15)
+COMBINED_SIZE = (12.8, 10.2)
 EXPORT_DPI = 220
 GRID_ALPHA = 0.22
 GRID_COLOR = "#b9c0c7"
@@ -67,8 +68,6 @@ QUALITY_COLORS = {"quality_score": "#1f77b4", "quality_gate": "#ff7f0e"}
 
 
 def apply_publication_style() -> None:
-    # Use Matplotlib mathtext instead of external LaTeX so the script works on
-    # Windows without requiring MiKTeX/TeXLive.
     plt.rcParams.update(
         {
             "figure.facecolor": "white",
@@ -80,14 +79,13 @@ def apply_publication_style() -> None:
             "ytick.color": AXIS_COLOR,
             "text.color": TEXT_COLOR,
             "font.family": "DejaVu Sans",
-            "mathtext.fontset": "dejavusans",
-            "font.size": 18,
-            "axes.titlesize": 18,
+            "font.size": 10,
+            "axes.titlesize": 13,
             "axes.titleweight": "semibold",
-            "axes.labelsize": 20,
-            "xtick.labelsize": 20,
-            "ytick.labelsize": 20,
-            "legend.fontsize": 10.5,
+            "axes.labelsize": 10.5,
+            "xtick.labelsize": 9.5,
+            "ytick.labelsize": 9.5,
+            "legend.fontsize": 8.2,
             "legend.frameon": True,
             "legend.framealpha": 0.88,
             "legend.edgecolor": "#d0d7de",
@@ -157,6 +155,18 @@ def apply_capture_xlim(ax: Any, duration_sec: float | None) -> None:
         ax.set_xlim(0.0, duration_sec)
 
 
+def rows_xy(rows: list[dict[str, str]], x_key: str, y_key: str) -> tuple[np.ndarray, np.ndarray]:
+    x: list[float] = []
+    y: list[float] = []
+    for row in rows:
+        xx = safe_float(row.get(x_key))
+        yy = safe_float(row.get(y_key))
+        if math.isfinite(xx) and math.isfinite(yy):
+            x.append(xx)
+            y.append(yy)
+    return np.asarray(x, dtype=float), np.asarray(y, dtype=float)
+
+
 def rows_xy_windowed(rows: list[dict[str, str]], y_key: str) -> tuple[np.ndarray, np.ndarray]:
     x: list[float] = []
     y: list[float] = []
@@ -196,14 +206,12 @@ def style_axes(ax: Any, *, grid: bool = True) -> None:
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_color("#8b949e")
     ax.spines["bottom"].set_color("#8b949e")
-    ax.tick_params(axis="both", which="major", length=5, width=0.9, labelsize=20)
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontsize(20)
+    ax.tick_params(axis="both", which="major", length=4, width=0.8)
 
 
 def save_fig(fig: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.tight_layout(pad=1.2)
+    fig.tight_layout(pad=1.15)
     fig.savefig(path, dpi=EXPORT_DPI, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
@@ -215,41 +223,41 @@ def plot_eeg_full_and_robust(capture_dir: Path, out_dir: Path) -> None:
         return
 
     fig, ax = plt.subplots(figsize=FIG_SIZE)
-    ax.plot(t, y, linewidth=0.92, color=EEG_COLOR)
+    ax.plot(t, y, linewidth=0.82, color=EEG_COLOR)
     ax.set_title("Captura 06 - EEG CH1 completo")
-    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
-    ax.set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Amplitud CH1 (uV)")
     apply_capture_xlim(ax, duration)
     style_axes(ax)
     save_fig(fig, out_dir / "06_eeg_ch1_completo_con_transitorio.png")
 
     lo, hi = robust_ylim(y, percentile=99.0, min_abs=180.0)
     fig, ax = plt.subplots(figsize=FIG_SIZE)
-    ax.plot(t, y, linewidth=0.92, color=EEG_COLOR)
+    ax.plot(t, y, linewidth=0.84, color=EEG_COLOR)
     ax.set_ylim(lo, hi)
     ax.set_title("Captura 06 - EEG CH1 con escala robusta")
-    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
-    ax.set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Amplitud CH1 (uV)")
     apply_capture_xlim(ax, duration)
     style_axes(ax)
     ax.text(
         0.012,
         0.955,
-        rf"Percentil 99: [{lo:.1f}, {hi:.1f}] $\mu\mathrm{{V}}$",
+        f"Percentil 99: [{lo:.1f}, {hi:.1f}] uV",
         transform=ax.transAxes,
         va="top",
         ha="left",
-        fontsize=12,
+        fontsize=8.5,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "edgecolor": "#d0d7de", "alpha": 0.82},
     )
     save_fig(fig, out_dir / "06_eeg_ch1_robusto_p99.png")
 
     fig, ax = plt.subplots(figsize=FIG_SIZE)
-    ax.plot(t, y, linewidth=0.92, color=EEG_COLOR)
+    ax.plot(t, y, linewidth=0.84, color=EEG_COLOR)
     ax.set_ylim(-300, 300)
     ax.set_title("Captura 06 - EEG CH1 en rango fisiologico")
-    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
-    ax.set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Amplitud CH1 (uV)")
     apply_capture_xlim(ax, duration)
     style_axes(ax)
     save_fig(fig, out_dir / "06_eeg_ch1_zoom_300uv.png")
@@ -263,36 +271,36 @@ def plot_combined_robust(capture_dir: Path, out_dir: Path) -> None:
     note_rows = read_csv(capture_dir / "music_notes.csv")
 
     fig, axes = plt.subplots(4, 1, figsize=COMBINED_SIZE, sharex=True)
-    axes[0].plot(eeg_t, eeg_y, linewidth=0.8, color=EEG_COLOR)
+    axes[0].plot(eeg_t, eeg_y, linewidth=0.74, color=EEG_COLOR)
     axes[0].set_ylim(-300, 300)
-    axes[0].set_ylabel(r"$\mathrm{CH1}\;(\mu\mathrm{V})$")
+    axes[0].set_ylabel("CH1 (uV)")
     axes[0].set_title("Captura 06 reajustada: EEG, espectro, sonificacion y notas")
     axes[0].text(
         0.012,
         0.94,
-        r"Vista EEG $\pm 300\,\mu\mathrm{V}$; transitorio documentado por separado",
+        "Vista EEG ±300 uV; transitorio documentado por separado",
         transform=axes[0].transAxes,
         va="top",
-        fontsize=11.5,
+        fontsize=8.0,
         bbox={"boxstyle": "round,pad=0.22", "facecolor": "white", "edgecolor": "#d0d7de", "alpha": 0.82},
     )
     style_axes(axes[0])
 
     for band in ["alpha", "beta", "gamma"]:
         x, y = rows_xy_windowed(band_rows, f"{band}_rel")
-        axes[1].plot(x, y, linewidth=1.35, color=BAND_COLORS.get(band), label=band)
-    axes[1].set_ylabel(r"$p_i(t)$")
+        axes[1].plot(x, y, linewidth=1.25, color=BAND_COLORS.get(band), label=band)
+    axes[1].set_ylabel("Band rel")
     axes[1].set_ylim(-0.03, 1.03)
     style_axes(axes[1])
-    axes[1].legend(loc="upper right", fontsize=9.5, ncol=3)
+    axes[1].legend(loc="upper right", fontsize=7.5, ncol=3)
 
     for key in SONIF_KEYS:
         x, y = rows_xy_windowed(sonif_rows, key)
-        axes[2].plot(x, y, linewidth=1.32, color=SONIF_COLORS.get(key), label=key)
-    axes[2].set_ylabel(r"$u_i(t)$")
+        axes[2].plot(x, y, linewidth=1.22, color=SONIF_COLORS.get(key), label=key)
+    axes[2].set_ylabel("Sonif")
     axes[2].set_ylim(-0.03, 1.03)
     style_axes(axes[2])
-    axes[2].legend(loc="upper right", fontsize=9, ncol=2)
+    axes[2].legend(loc="upper right", fontsize=7.2, ncol=2)
 
     pitches: list[float] = []
     for row in note_rows:
@@ -310,8 +318,8 @@ def plot_combined_robust(capture_dir: Path, out_dir: Path) -> None:
             alpha=0.72,
         )
         pitches.append(pitch)
-    axes[3].set_ylabel(r"$\mathrm{pitch}_{\mathrm{MIDI}}$")
-    axes[3].set_xlabel(r"$t\,\mathrm{(s)}$")
+    axes[3].set_ylabel("MIDI")
+    axes[3].set_xlabel("Tiempo de captura (s)")
     if pitches:
         axes[3].set_ylim(max(0, math.floor(min(pitches) - 2)), min(127, math.ceil(max(pitches) + 2)))
     style_axes(axes[3])
@@ -327,19 +335,19 @@ def plot_quality_score(capture_dir: Path, out_dir: Path) -> None:
     for key, label in [("quality_score", "quality_score"), ("quality_gate", "quality_gate")]:
         x, y = rows_xy_windowed(rows, key)
         if x.size and y.size:
-            ax.plot(x, y, linewidth=1.65, color=QUALITY_COLORS[key], label=label)
+            ax.plot(x, y, linewidth=1.55, color=QUALITY_COLORS[key], label=label)
             plotted += 1
     if plotted:
         for y_thr, label in [(0.85, "clean 0.85"), (0.70, "usable 0.70"), (0.50, "artifact 0.50")]:
-            ax.axhline(y_thr, linestyle="--", linewidth=1.05, color="#6b7280", alpha=0.72, label=label)
+            ax.axhline(y_thr, linestyle="--", linewidth=0.95, color="#6b7280", alpha=0.72, label=label)
     ax.set_ylim(-0.03, 1.03)
     ax.set_title("Captura 06 - calidad de senal y gate")
-    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
-    ax.set_ylabel(r"$q(t)$")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Score / gate")
     apply_capture_xlim(ax, duration)
     style_axes(ax)
     if plotted:
-        ax.legend(loc="upper right", ncol=2, fontsize=9.3, borderpad=0.42, handlelength=1.55, columnspacing=0.72)
+        ax.legend(loc="upper right", ncol=2, fontsize=7.8, borderpad=0.42, handlelength=1.55, columnspacing=0.72)
     save_fig(fig, out_dir / "06_quality_score_gate.png")
 
 
@@ -370,11 +378,11 @@ def render_spectrogram(times: np.ndarray, freqs: np.ndarray, sxx_db: np.ndarray,
         vmax=vmax,
     )
     cbar = fig.colorbar(mesh, ax=ax, pad=0.015)
-    cbar.set_label(r"PSD relativa $\mathrm{(dB)}$", fontsize=18)
-    cbar.ax.tick_params(labelsize=18)
+    cbar.set_label("PSD relativa (dB)", fontsize=9.5)
+    cbar.ax.tick_params(labelsize=8.5)
     ax.set_title(title)
-    ax.set_xlabel(r"$t\,\mathrm{(s)}$")
-    ax.set_ylabel(r"$f\,\mathrm{(Hz)}$")
+    ax.set_xlabel("Tiempo de captura (s)")
+    ax.set_ylabel("Frecuencia (Hz)")
     ax.set_ylim(*ylim)
     style_axes(ax, grid=False)
     save_fig(fig, out_path)
@@ -384,6 +392,7 @@ def plot_spectrogram(capture_dir: Path, out_dir: Path, fs: float = 250.0) -> Non
     _t, y = load_eeg(capture_dir)
     if y.size < int(fs * 4):
         return
+    # Robust clipping only for display so that the final artifact does not hide the whole spectrogram.
     lo, hi = robust_ylim(y, percentile=99.5, min_abs=300.0)
     y_disp = np.clip(y, lo, hi)
     y_disp = y_disp - np.nanmedian(y_disp)
@@ -402,6 +411,8 @@ def plot_spectrogram(capture_dir: Path, out_dir: Path, fs: float = 250.0) -> Non
     mask_50 = (freqs >= 0.5) & (freqs <= 50.0)
     freqs_50 = freqs[mask_50]
     sxx_db_50 = 10.0 * np.log10(sxx[mask_50] + 1e-12)
+    # The turbo colormap maps the highest displayed power to red/yellow,
+    # making power differences visually clearer without changing the PSD data.
     render_spectrogram(
         times,
         freqs_50,
