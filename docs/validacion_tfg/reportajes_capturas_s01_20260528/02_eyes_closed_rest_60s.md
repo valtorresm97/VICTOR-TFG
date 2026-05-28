@@ -40,19 +40,19 @@ Los bandpowers permiten observar la distribucion espectral durante ojos cerrados
 
 Los controles de sonificacion se mantienen dentro del contrato reportable. Esta grafica ayuda a justificar que la musica no se genero de forma arbitraria, sino a partir de variables derivadas del analisis espectral y de amplitud.
 
-## 6. Notas musicales generadas
+## 6. Calidad de señal y quality gate
+
+![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/calidad_senal_quality_gate.png)
+
+Esta figura permite comprobar el estado de calidad de las ventanas usadas por la sonificacion. En ojos cerrados, el ratio de 50 Hz elevado obliga a interpretar la respuesta espectral con cautela.
+
+## 7. Notas musicales generadas
 
 ![Notas musicales](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/notas_musicales.png)
 
 Se registraron 80 notas deduplicadas, la cifra mas alta de las condiciones principales. Esto demuestra que el sistema musical estuvo activo y genero salida durante toda la captura.
 
 No debe afirmarse que el aumento de notas se deba directamente a ojos cerrados; se puede decir que bajo esta condicion el sistema produjo una mayor densidad musical, de acuerdo con los controles calculados en esa sesion.
-
-## 7. Figura combinada
-
-![Figura combinada EEG musica](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145251_s01_20260528_ear_eeg_ch1_only_02_eyes_closed_rest_60s/figura_combinada_eeg_musica.png)
-
-La figura combinada es util para ver la relacion temporal entre la señal, las bandas, los controles y las notas. Es especialmente importante para no interpretar la grafica de notas de forma aislada.
 
 ## 8. Conclusión para el TFG
 
