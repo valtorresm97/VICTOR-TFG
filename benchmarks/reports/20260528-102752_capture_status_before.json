@@ -1,0 +1,15 @@
+{
+  "block_gaps_total": 0,
+  "capture_dir": "/app/captures/20260527-171841_final_atenuacion_artefactos_mixed_states",
+  "condition": "final_atenuacion_artefactos_mixed_states",
+  "csv_rows_written": 45336,
+  "duration_sec": 190.0,
+  "elapsed_sec": 190.0564765460001,
+  "invalid_status_total": 0,
+  "request_id": "00e092b0a85c452cb50b2024fdae1ab4",
+  "rx_blocks_total": 5667,
+  "rx_samples_total": 45336,
+  "sample_gaps_total": 0,
+  "state": "completed",
+  "updated_at_unix": 1779902511.20948
+}

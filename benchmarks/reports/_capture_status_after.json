@@ -1,0 +1,15 @@
+{
+  "block_gaps_total": 0,
+  "capture_dir": "/app/captures/20260528-104617_bench_real_rest_60s",
+  "condition": "bench_real_rest_60s",
+  "csv_rows_written": 14272,
+  "duration_sec": 60.0,
+  "elapsed_sec": 60.042310687999986,
+  "invalid_status_total": 0,
+  "request_id": "78cafc6518ca4174bb9e8b15f512becf",
+  "rx_blocks_total": 1784,
+  "rx_samples_total": 14272,
+  "sample_gaps_total": 0,
+  "state": "completed",
+  "updated_at_unix": 1779965237.3935132
+}
