@@ -1,12 +1,25 @@
 # LED matrix piano scroll
 
+Documento activo secundario de referencia para la visualizacion LED tipo piano scroll.
+
+Estado final-v4:
+
+```text
+Rama integrada actual: firmware-final-v4
+Estado por defecto firmware: LED_MATRIX_ENABLED=0
+Estado por defecto Python: EEG_LED_MATRIX_ENABLED=0
+Rol: visualizacion secundaria de music.recent_notes, no ruta principal EEG->MIDI
+```
+
+La version final-v4 valida el flujo EEG->MIDI fisico y la WebUI. La matriz LED queda documentada como subsistema opcional/desactivado por defecto. No debe incluirse como requisito del flujo principal ni como evidencia central del TFG.
+
 ## Objetivo
 
 La matriz LED representa fisicamente las mismas notas que alimentan el piano
 roll de la Web UI. La matriz no interpreta EEG: recibe una vista compacta de
 `music.recent_notes`, que ya contiene las notas generadas por la sonificacion.
 
-Flujo real:
+Flujo secundario:
 
 ```text
 EEG features
@@ -23,11 +36,24 @@ recent_notes / snapshot
    ↓
 Web UI piano roll
    ↓
-LED matrix piano scroll
+LED matrix piano scroll opcional
    ↓
 Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
    ↓
-Arduino_LED_Matrix
+Arduino_LED_Matrix si LED_MATRIX_ENABLED=1
+```
+
+Flujo principal final-v4, que no depende de la matriz:
+
+```text
+EEG features
+  -> sonification_features
+  -> MusicSegment / NoteEvent
+  -> MidiScheduler
+  -> MidiByteTransport
+  -> Bridge.call("midi_bytes")
+  -> Serial1/D1 con TX invertido
+  -> MIDI OUT fisico
 ```
 
 ## Auditoria LED matrix
@@ -43,7 +69,7 @@ Arduino_LED_Matrix
 - Pines: no aplica en esta version porque `Arduino_LED_Matrix` es la matriz
   integrada/gestionada por libreria. No se han tocado pines ADS1299 ni MIDI.
 - Control: Python calcula el frame; el MCU recibe filas empaquetadas y dibuja.
-- Restricciones: `LED_MATRIX_ENABLED` queda a `0` por defecto en firmware y
+- Restricciones final-v4: `LED_MATRIX_ENABLED` queda a `0` por defecto en firmware y
   `EEG_LED_MATRIX_ENABLED=0` por defecto en Python. La activacion fisica queda
   pendiente de probar en UNO Q.
 
@@ -59,6 +85,7 @@ Arduino_LED_Matrix
 - `assets/app.js::renderPianoRoll()` usa `music.recent_notes`, calcula una
   ventana temporal `now - recent_notes_window_sec`, dibuja el tiempo en X y
   el pitch en Y.
+- La matriz LED reutiliza esa misma fuente si se activa.
 
 ## Mapeo visual
 
@@ -153,6 +180,12 @@ payload dinamico en el MCU.
 El handler valida fila y chunks. Si `LED_MATRIX_ENABLED=0`,
 devuelve `false` y no dibuja; sirve como dry-run seguro.
 
+Este handler no sustituye ni modifica el contrato MIDI:
+
+```text
+Bridge.call("midi_bytes", n, b0, b1, b2)
+```
+
 ## Observabilidad
 
 El snapshot añade:
@@ -174,6 +207,8 @@ depurar.
   defecto evita saturar la matriz con barras largas.
 - Si hay muchas notas simultaneas, se limita por `EEG_LED_MATRIX_MAX_POINTS`.
 - Si una nota sale por arriba/abajo, por defecto se ignora sin romper.
+- No forma parte de la evidencia principal de benchmarks/capturas finales.
+- No debe activarse durante benchmarks temporales salvo que se quiera medir explicitamente la carga adicional de LED.
 
 ## Pruebas realizadas
 
@@ -193,3 +228,15 @@ Validaciones cubiertas por el test:
 - movimiento X de izquierda a derecha;
 - `velocity` afecta brillo;
 - `clip_mode=saturate` mantiene notas extremas visibles.
+
+## Relacion con la version esencial UML
+
+Para la version esencial EEG->MIDI, la matriz LED debe aparecer como modulo secundario u opcional, no como parte del flujo principal.
+
+En diagramas UML principales, puede omitirse o colocarse como consumidor lateral de:
+
+```text
+music.recent_notes
+```
+
+No debe condicionar los diagramas de adquisicion, DSP, sonificacion ni MIDI fisico.
