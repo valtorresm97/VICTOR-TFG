@@ -1,0 +1,6 @@
+[capture-request] request_id=5593df084a8c42a197fa2c1ff7f50c86
+[capture-request] condition=bench_real_rest_60s_mcu duration=60.0s
+[capture-request] waiting for the running App Lab app to record the capture...
+[capture-request] state=recording
+[capture-request] state=completed
+[capture-request] saved: /app/captures/20260528-111723_bench_real_rest_60s_mcu

@@ -1,0 +1,1488 @@
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.08  filt_max_us_win=15  notify_avg_us=3350.48  notify_eff_us/sample=418.81  notify_max_us_win=8236
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=423562  sent=421136  blk_enq=52642  blk_sent=52642  notify_calls=52642
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=424000 status=0xC00000 uV[0..1]=21, 0
+idx=424500 status=0xC00000 uV[0..1]=7, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=241.40  blk_enq/s=30.17  blk_sent/s=30.17
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3219.89  notify_eff_us/sample=402.49  notify_max_us_win=7499
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=9588
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=424766  sent=422344  blk_enq=52793  blk_sent=52793  notify_calls=52793
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=425000 status=0xC00000 uV[0..1]=-4, 0
+idx=425500 status=0xC00000 uV[0..1]=104, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3278.47  notify_eff_us/sample=409.81  notify_max_us_win=7479
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=425967  sent=423544  blk_enq=52943  blk_sent=52943  notify_calls=52943
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=426000 status=0xC00000 uV[0..1]=-14, 0
+idx=426500 status=0xC00000 uV[0..1]=13, 0
+idx=427000 status=0xC00000 uV[0..1]=-5, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.75  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.06  filt_max_us_win=16  notify_avg_us=3317.07  notify_eff_us/sample=414.63  notify_max_us_win=7473
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=33
+------------------------------------------------------------
+  total  | gen=427166  sent=424744  blk_enq=53093  blk_sent=53093  notify_calls=53093
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=427500 status=0xC00000 uV[0..1]=15, 0
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0x0
+idx=428000 status=0xC00000 uV[0..1]=-4, 3
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=234.40  sent/s=233.60  blk_enq/s=29.20  blk_sent/s=29.20
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3995.65  notify_eff_us/sample=499.46  notify_max_us_win=7631
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=26  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=428338  sent=425912  blk_enq=53239  blk_sent=53239  notify_calls=53239
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=428500 status=0xC00000 uV[0..1]=10, 0
+idx=429000 status=0xC00000 uV[0..1]=8, 0
+idx=429500 status=0xC00000 uV[0..1]=-1, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=14  notify_avg_us=3272.11  notify_eff_us/sample=409.01  notify_max_us_win=7525
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=429539  sent=427112  blk_enq=53389  blk_sent=53389  notify_calls=53389
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=430000 status=0xC00000 uV[0..1]=5, 0
+idx=430500 status=0xC00000 uV[0..1]=2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3227.29  notify_eff_us/sample=403.41  notify_max_us_win=7496
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=273  loop_max_us_win=9413
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=430743  sent=428320  blk_enq=53540  blk_sent=53540  notify_calls=53540
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=431000 status=0xC00000 uV[0..1]=-15, 0
+idx=431500 status=0xC00000 uV[0..1]=3, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=14  notify_avg_us=3305.51  notify_eff_us/sample=413.19  notify_max_us_win=7504
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=431945  sent=429520  blk_enq=53690  blk_sent=53690  notify_calls=53690
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=432000 status=0xC00000 uV[0..1]=3, 0
+idx=432500 status=0xC00000 uV[0..1]=-13, 0
+idx=433000 status=0xC00000 uV[0..1]=13, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3303.45  notify_eff_us/sample=412.93  notify_max_us_win=7524
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10819
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=433148  sent=430720  blk_enq=53840  blk_sent=53840  notify_calls=53840
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=433500 status=0xC00000 uV[0..1]=0, 0
+idx=434000 status=0xC00000 uV[0..1]=-2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.08  filt_max_us_win=15  notify_avg_us=3273.35  notify_eff_us/sample=409.17  notify_max_us_win=7498
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=434352  sent=431928  blk_enq=53991  blk_sent=53991  notify_calls=53991
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=434500 status=0xC00000 uV[0..1]=4, 0
+idx=435000 status=0xC00000 uV[0..1]=-7, 0
+idx=435500 status=0xC00000 uV[0..1]=35, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=3450.63  notify_eff_us/sample=431.33  notify_max_us_win=7501
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=283  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=435551  sent=433128  blk_enq=54141  blk_sent=54141  notify_calls=54141
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=436000 status=0xC00000 uV[0..1]=-1, 0
+idx=436500 status=0xC00000 uV[0..1]=-21, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.08  filt_max_us_win=16  notify_avg_us=3299.39  notify_eff_us/sample=412.42  notify_max_us_win=7527
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=436753  sent=434328  blk_enq=54291  blk_sent=54291  notify_calls=54291
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+Frame invalido / error sincron¡a. status=0x0
+idx=437000 status=0xC00000 uV[0..1]=-6, 0
+idx=437500 status=0xC00000 uV[0..1]=9, 0
+Frame invalido / error sincron¡a. status=0x2532
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3361.93  notify_eff_us/sample=420.24  notify_max_us_win=7497
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=273  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=437953  sent=435528  blk_enq=54441  blk_sent=54441  notify_calls=54441
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=438000 status=0xC00000 uV[0..1]=34, 0
+[MIDI TX TOTAL] calls=3584 bytes=10751
+idx=438500 status=0xC00000 uV[0..1]=-7, 0
+idx=439000 status=0xC00000 uV[0..1]=0, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=16  notify_avg_us=3230.77  notify_eff_us/sample=403.85  notify_max_us_win=7359
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=439156  sent=436728  blk_enq=54591  blk_sent=54591  notify_calls=54591
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=439500 status=0xC00000 uV[0..1]=-16, 0
+idx=440000 status=0xC00000 uV[0..1]=-4, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.35  sent/s=241.55  blk_enq/s=30.19  blk_sent/s=30.19
+  time   | filt_avg_us=5.01  filt_max_us_win=14  notify_avg_us=3253.01  notify_eff_us/sample=406.63  notify_max_us_win=7525
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=440358  sent=437936  blk_enq=54742  blk_sent=54742  notify_calls=54742
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=440500 status=0xC00000 uV[0..1]=19, 0
+idx=441000 status=0xC00000 uV[0..1]=-9, 0
+idx=441500 status=0xC00000 uV[0..1]=16, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.60  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3323.38  notify_eff_us/sample=415.42  notify_max_us_win=7307
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=441556  sent=439128  blk_enq=54891  blk_sent=54891  notify_calls=54891
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=442000 status=0xC00000 uV[0..1]=-7, 0
+idx=442500 status=0xC00000 uV[0..1]=10, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=236.0  sent/s=236.80  blk_enq/s=29.60  blk_sent/s=29.60
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3829.14  notify_eff_us/sample=478.64  notify_max_us_win=7807
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=23  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=442736  sent=440312  blk_enq=55039  blk_sent=55039  notify_calls=55039
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=443000 status=0xC00000 uV[0..1]=15, 0
+idx=443500 status=0xC00000 uV[0..1]=-16, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.03  filt_max_us_win=14  notify_avg_us=3299.63  notify_eff_us/sample=412.45  notify_max_us_win=7700
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=443940  sent=441512  blk_enq=55189  blk_sent=55189  notify_calls=55189
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=444000 status=0xC00000 uV[0..1]=9, 0
+idx=444500 status=0xC00000 uV[0..1]=-11, 0
+idx=445000 status=0xC00000 uV[0..1]=-26, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=15  notify_avg_us=3331.45  notify_eff_us/sample=416.43  notify_max_us_win=7522
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10838
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=445141  sent=442712  blk_enq=55339  blk_sent=55339  notify_calls=55339
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=445500 status=0xC00000 uV[0..1]=-23, 0
+idx=446000 status=0xC00000 uV[0..1]=-55, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3305.67  notify_eff_us/sample=413.21  notify_max_us_win=7694
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=446343  sent=443920  blk_enq=55490  blk_sent=55490  notify_calls=55490
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=446500 status=0xC00000 uV[0..1]=20, 0
+idx=447000 status=0xC00000 uV[0..1]=-2, 0
+idx=447500 status=0xC00000 uV[0..1]=15, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.09  filt_max_us_win=15  notify_avg_us=3366.55  notify_eff_us/sample=420.82  notify_max_us_win=8582
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10792
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=447543  sent=445120  blk_enq=55640  blk_sent=55640  notify_calls=55640
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=448000 status=0xC00000 uV[0..1]=-1, 0
+idx=448500 status=0xC00000 uV[0..1]=-13, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3315.44  notify_eff_us/sample=414.43  notify_max_us_win=7705
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=448745  sent=446320  blk_enq=55790  blk_sent=55790  notify_calls=55790
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=449000 status=0xC00000 uV[0..1]=18, 0
+Frame invalido / error sincron¡a. status=0xBA0000
+idx=449500 status=0xC00000 uV[0..1]=22, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.35  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.03  filt_max_us_win=15  notify_avg_us=3292.45  notify_eff_us/sample=411.56  notify_max_us_win=7310
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=9605
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=449947  sent=447520  blk_enq=55940  blk_sent=55940  notify_calls=55940
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=450000 status=0xC00000 uV[0..1]=-39, 0
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0x0
+idx=450500 status=0xC00000 uV[0..1]=-190, 188
+idx=451000 status=0xC00000 uV[0..1]=6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=225.40  sent/s=225.60  blk_enq/s=28.20  blk_sent/s=28.20
+  time   | filt_avg_us=5.06  filt_max_us_win=14  notify_avg_us=5581.84  notify_eff_us/sample=697.73  notify_max_us_win=9793
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=64  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=11188
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=451074  sent=448648  blk_enq=56081  blk_sent=56081  notify_calls=56081
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=451500 status=0xC00000 uV[0..1]=24, 0
+idx=452000 status=0xC00000 uV[0..1]=0, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.65  sent/s=241.45  blk_enq/s=30.18  blk_sent/s=30.18
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3261.06  notify_eff_us/sample=407.63  notify_max_us_win=7303
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=9595
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=452278  sent=449856  blk_enq=56232  blk_sent=56232  notify_calls=56232
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=452500 status=0xC00000 uV[0..1]=-10, 0
+idx=453000 status=0xC00000 uV[0..1]=19, 0
+[MIDI TX TOTAL] calls=3712 bytes=11135
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3341.88  notify_eff_us/sample=417.73  notify_max_us_win=7702
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=453479  sent=451056  blk_enq=56382  blk_sent=56382  notify_calls=56382
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=453500 status=0xC00000 uV[0..1]=153, 0
+idx=454000 status=0xC00000 uV[0..1]=21, 0
+idx=454500 status=0xC00000 uV[0..1]=11, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.03  filt_max_us_win=14  notify_avg_us=3324.59  notify_eff_us/sample=415.57  notify_max_us_win=8361
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=9596
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=454678  sent=452256  blk_enq=56532  blk_sent=56532  notify_calls=56532
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=455000 status=0xC00000 uV[0..1]=-33, 0
+Frame invalido / error sincron¡a. status=0x0
+idx=455500 status=0xC00000 uV[0..1]=-17, 4
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=238.30  sent/s=238.30  blk_enq/s=29.78  blk_sent/s=29.78
+  time   | filt_avg_us=5.11  filt_max_us_win=15  notify_avg_us=3596.91  notify_eff_us/sample=449.61  notify_max_us_win=7699
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=8  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=455870  sent=453448  blk_enq=56681  blk_sent=56681  notify_calls=56681
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=456000 status=0xC00000 uV[0..1]=-3, 0
+idx=456500 status=0xC00000 uV[0..1]=-77, 0
+idx=457000 status=0xC00000 uV[0..1]=-95, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3416.55  notify_eff_us/sample=427.07  notify_max_us_win=7882
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10843
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=457069  sent=454640  blk_enq=56830  blk_sent=56830  notify_calls=56830
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0x0
+idx=457500 status=0xC00000 uV[0..1]=141, 143
+idx=458000 status=0xC00000 uV[0..1]=87, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=230.41  sent/s=231.81  blk_enq/s=28.97  blk_sent/s=28.97
+  time   | filt_avg_us=5.18  filt_max_us_win=15  notify_avg_us=4764.50  notify_eff_us/sample=595.56  notify_max_us_win=9233
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=48  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=9762
+  DRDY   | pin=0  drdy_count_now=33
+------------------------------------------------------------
+  total  | gen=458222  sent=455800  blk_enq=56975  blk_sent=56975  notify_calls=56975
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=458500 status=0xC00000 uV[0..1]=-22, 0
+idx=459000 status=0xC00000 uV[0..1]=-31, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=235.10  sent/s=235.10  blk_enq/s=29.38  blk_sent/s=29.38
+  time   | filt_avg_us=5.14  filt_max_us_win=15  notify_avg_us=4043.43  notify_eff_us/sample=505.43  notify_max_us_win=8335
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=25  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=459398  sent=456976  blk_enq=57122  blk_sent=57122  notify_calls=57122
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=459500 status=0xC00000 uV[0..1]=-28, 4
+idx=460000 status=0xC00000 uV[0..1]=-4, 0
+idx=460500 status=0xC00000 uV[0..1]=-4, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.60  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.14  filt_max_us_win=15  notify_avg_us=3444.32  notify_eff_us/sample=430.54  notify_max_us_win=7702
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10834
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=460596  sent=458168  blk_enq=57271  blk_sent=57271  notify_calls=57271
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=461000 status=0xC00000 uV[0..1]=-34, 0
+idx=461500 status=0xC00000 uV[0..1]=-13, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.11  filt_max_us_win=15  notify_avg_us=3406.71  notify_eff_us/sample=425.84  notify_max_us_win=7878
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=461798  sent=459376  blk_enq=57422  blk_sent=57422  notify_calls=57422
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=462000 status=0xC00000 uV[0..1]=12, 0
+idx=462500 status=0xC00000 uV[0..1]=18, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=235.60  sent/s=235.20  blk_enq/s=29.40  blk_sent/s=29.40
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=4055.46  notify_eff_us/sample=506.93  notify_max_us_win=7303
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=26  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=9588
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=462976  sent=460552  blk_enq=57569  blk_sent=57569  notify_calls=57569
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=463000 status=0xC00000 uV[0..1]=-76, 4
+idx=463500 status=0xC00000 uV[0..1]=-35, 0
+idx=464000 status=0xC00000 uV[0..1]=-17, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.06  filt_max_us_win=14  notify_avg_us=3437.62  notify_eff_us/sample=429.70  notify_max_us_win=7702
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=464177  sent=461752  blk_enq=57719  blk_sent=57719  notify_calls=57719
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=464500 status=0xC00000 uV[0..1]=81, 0
+Frame invalido / error sincron¡a. status=0x2665
+idx=465000 status=0xC00000 uV[0..1]=-6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.13  filt_max_us_win=15  notify_avg_us=3926.19  notify_eff_us/sample=490.77  notify_max_us_win=7481
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=465378  sent=462952  blk_enq=57869  blk_sent=57869  notify_calls=57869
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=465500 status=0xC00000 uV[0..1]=37, 0
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0x0
+idx=466000 status=0xC00000 uV[0..1]=-20215, -64101
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=222.75  sent/s=222.35  blk_enq/s=27.79  blk_sent/s=27.79
+  time   | filt_avg_us=5.12  filt_max_us_win=17  notify_avg_us=5741.42  notify_eff_us/sample=717.68  notify_max_us_win=8700
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=83  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=12778
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=466492  sent=464064  blk_enq=58008  blk_sent=58008  notify_calls=58008
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=466500 status=0xC00000 uV[0..1]=397, 7
+idx=467000 status=0xC00000 uV[0..1]=-12, 0
+idx=467500 status=0xC00000 uV[0..1]=89, 0
+Frame invalido / error sincron¡a. status=0x371800
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.13  filt_max_us_win=15  notify_avg_us=3628.42  notify_eff_us/sample=453.55  notify_max_us_win=8546
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=7  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=467690  sent=465264  blk_enq=58158  blk_sent=58158  notify_calls=58158
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=468000 status=0xC00000 uV[0..1]=-4, 0
+idx=468500 status=0xC00000 uV[0..1]=-82, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=14  notify_avg_us=3544.49  notify_eff_us/sample=443.06  notify_max_us_win=8236
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=468893  sent=466464  blk_enq=58308  blk_sent=58308  notify_calls=58308
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=469000 status=0xC00000 uV[0..1]=21, 0
+idx=469500 status=0xC00000 uV[0..1]=23, 0
+Frame invalido / error sincron¡a. status=0x0
+idx=470000 status=0xC00000 uV[0..1]=6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.09  filt_max_us_win=15  notify_avg_us=3693.98  notify_eff_us/sample=461.75  notify_max_us_win=7682
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=9595
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=470093  sent=467664  blk_enq=58458  blk_sent=58458  notify_calls=58458
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=470500 status=0xC00000 uV[0..1]=-16, 0
+idx=471000 status=0xC00000 uV[0..1]=18, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.17  filt_max_us_win=16  notify_avg_us=3290.78  notify_eff_us/sample=411.35  notify_max_us_win=7524
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10826
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=471296  sent=468872  blk_enq=58609  blk_sent=58609  notify_calls=58609
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=471500 status=0xC00000 uV[0..1]=-26, 0
+idx=472000 status=0xC00000 uV[0..1]=31, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3291.96  notify_eff_us/sample=411.49  notify_max_us_win=7699
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=472499  sent=470072  blk_enq=58759  blk_sent=58759  notify_calls=58759
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=472500 status=0xC00000 uV[0..1]=-353, 0
+idx=473000 status=0xC00000 uV[0..1]=-12, 0
+idx=473500 status=0xC00000 uV[0..1]=24, 0
+Frame invalido / error sincron¡a. status=0xF90000
+[MIDI TX TOTAL] calls=3840 bytes=11519
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=235.40  sent/s=235.20  blk_enq/s=29.40  blk_sent/s=29.40
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=3880.11  notify_eff_us/sample=485.01  notify_max_us_win=8004
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=24  catchup_win=0  sample_iter_max_us_win=283  loop_max_us_win=12886
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=473676  sent=471248  blk_enq=58906  blk_sent=58906  notify_calls=58906
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+Frame invalido / error sincron¡a. status=0x0
+idx=474000 status=0xC00000 uV[0..1]=-123, 1951
+idx=474500 status=0xC00000 uV[0..1]=36, 2
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=229.10  sent/s=230.30  blk_enq/s=28.78  blk_sent/s=28.78
+  time   | filt_avg_us=5.09  filt_max_us_win=16  notify_avg_us=4970.47  notify_eff_us/sample=621.31  notify_max_us_win=8519
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=58  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=11186
+  DRDY   | pin=0  drdy_count_now=33
+------------------------------------------------------------
+  total  | gen=474822  sent=472400  blk_enq=59050  blk_sent=59050  notify_calls=59050
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=475000 status=0xC00000 uV[0..1]=-97, 0
+idx=475500 status=0xC00000 uV[0..1]=3, 0
+idx=476000 status=0xC00000 uV[0..1]=6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.90  sent/s=239.90  blk_enq/s=29.98  blk_sent/s=29.98
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=3507.97  notify_eff_us/sample=438.50  notify_max_us_win=7501
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=476022  sent=473600  blk_enq=59200  blk_sent=59200  notify_calls=59200
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=476500 status=0xC00000 uV[0..1]=10, 0
+idx=477000 status=0xC00000 uV[0..1]=-9, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=16  notify_avg_us=3274.35  notify_eff_us/sample=409.29  notify_max_us_win=7313
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=477224  sent=474800  blk_enq=59350  blk_sent=59350  notify_calls=59350
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=477500 status=0xC00000 uV[0..1]=-22, 0
+idx=478000 status=0xC00000 uV[0..1]=51, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.75  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.07  filt_max_us_win=14  notify_avg_us=3296.69  notify_eff_us/sample=412.09  notify_max_us_win=7523
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=283  loop_max_us_win=10825
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=478428  sent=476000  blk_enq=59500  blk_sent=59500  notify_calls=59500
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=478500 status=0xC00000 uV[0..1]=-8, 0
+idx=479000 status=0xC00000 uV[0..1]=7, 0
+idx=479500 status=0xC00000 uV[0..1]=-19, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=14  notify_avg_us=3324.83  notify_eff_us/sample=415.60  notify_max_us_win=7524
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=479628  sent=477200  blk_enq=59650  blk_sent=59650  notify_calls=59650
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=480000 status=0xC00000 uV[0..1]=3, 0
+idx=480500 status=0xC00000 uV[0..1]=-2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3280.78  notify_eff_us/sample=410.10  notify_max_us_win=7524
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=480832  sent=478408  blk_enq=59801  blk_sent=59801  notify_calls=59801
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=481000 status=0xC00000 uV[0..1]=16, 0
+idx=481500 status=0xC00000 uV[0..1]=-13, 0
+idx=482000 status=0xC00000 uV[0..1]=-2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3271.82  notify_eff_us/sample=408.98  notify_max_us_win=7526
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=482033  sent=479608  blk_enq=59951  blk_sent=59951  notify_calls=59951
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=482500 status=0xC00000 uV[0..1]=21, 0
+idx=483000 status=0xC00000 uV[0..1]=-27, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=235.55  sent/s=235.15  blk_enq/s=29.39  blk_sent/s=29.39
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3821.83  notify_eff_us/sample=477.73  notify_max_us_win=7631
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=27  catchup_win=0  sample_iter_max_us_win=289  loop_max_us_win=10834
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=483211  sent=480784  blk_enq=60098  blk_sent=60098  notify_calls=60098
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+Frame invalido / error sincron¡a. status=0x0
+idx=483500 status=0xC00000 uV[0..1]=25, 866
+Frame invalido / error sincron¡a. status=0x0
+idx=484000 status=0xC00000 uV[0..1]=-3, 11
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=227.0  sent/s=227.20  blk_enq/s=28.40  blk_sent/s=28.40
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=5115.80  notify_eff_us/sample=639.48  notify_max_us_win=11528
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=63  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=484346  sent=481920  blk_enq=60240  blk_sent=60240  notify_calls=60240
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=484500 status=0xC00000 uV[0..1]=-11, 0
+Frame invalido / error sincron¡a. status=0x25AF
+idx=485000 status=0xC00000 uV[0..1]=-3, 2
+idx=485500 status=0xC00000 uV[0..1]=-27, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=234.60  sent/s=235.20  blk_enq/s=29.40  blk_sent/s=29.40
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=3953.03  notify_eff_us/sample=494.13  notify_max_us_win=7879
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=22  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=485519  sent=483096  blk_enq=60387  blk_sent=60387  notify_calls=60387
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=486000 status=0xC00000 uV[0..1]=-35, 0
+idx=486500 status=0xC00000 uV[0..1]=-1, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3268.22  notify_eff_us/sample=408.53  notify_max_us_win=7356
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=289  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=486721  sent=484296  blk_enq=60537  blk_sent=60537  notify_calls=60537
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=487000 status=0xC00000 uV[0..1]=-8, 0
+idx=487500 status=0xC00000 uV[0..1]=9, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=231.75  sent/s=231.95  blk_enq/s=28.99  blk_sent/s=28.99
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=4383.94  notify_eff_us/sample=547.99  notify_max_us_win=8521
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=38  catchup_win=0  sample_iter_max_us_win=284  loop_max_us_win=10827
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=487880  sent=485456  blk_enq=60682  blk_sent=60682  notify_calls=60682
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=488000 status=0xC00000 uV[0..1]=-5, 42
+idx=488500 status=0xC00000 uV[0..1]=4, 0
+idx=489000 status=0xC00000 uV[0..1]=32, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.15  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.03  filt_max_us_win=14  notify_avg_us=3367.95  notify_eff_us/sample=420.99  notify_max_us_win=7504
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=274  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=489081  sent=486656  blk_enq=60832  blk_sent=60832  notify_calls=60832
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=489500 status=0xC00000 uV[0..1]=-2, 0
+idx=490000 status=0xC00000 uV[0..1]=60, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.08  filt_max_us_win=15  notify_avg_us=3260.12  notify_eff_us/sample=407.52  notify_max_us_win=7525
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=490285  sent=487856  blk_enq=60982  blk_sent=60982  notify_calls=60982
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=490500 status=0xC00000 uV[0..1]=4, 0
+idx=491000 status=0xC00000 uV[0..1]=-5, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=3303.99  notify_eff_us/sample=413.00  notify_max_us_win=7629
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=279  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=491486  sent=489064  blk_enq=61133  blk_sent=61133  notify_calls=61133
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=491500 status=0xC00000 uV[0..1]=168, 0
+idx=492000 status=0xC00000 uV[0..1]=-2, 0
+idx=492500 status=0xC00000 uV[0..1]=3, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3312.46  notify_eff_us/sample=414.06  notify_max_us_win=8358
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10828
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=492685  sent=490256  blk_enq=61282  blk_sent=61282  notify_calls=61282
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=493000 status=0xC00000 uV[0..1]=-37, 0
+[MIDI TX TOTAL] calls=3968 bytes=11903
+idx=493500 status=0xC00000 uV[0..1]=-45, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=3398.72  notify_eff_us/sample=424.84  notify_max_us_win=8236
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=493885  sent=491456  blk_enq=61432  blk_sent=61432  notify_calls=61432
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=494000 status=0xC00000 uV[0..1]=9, 0
+idx=494500 status=0xC00000 uV[0..1]=-89, 0
+idx=495000 status=0xC00000 uV[0..1]=-29, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.95  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=3647.14  notify_eff_us/sample=455.89  notify_max_us_win=8359
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10832
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=495085  sent=492656  blk_enq=61582  blk_sent=61582  notify_calls=61582
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=495500 status=0xC00000 uV[0..1]=1, 0
+idx=496000 status=0xC00000 uV[0..1]=3, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.55  sent/s=241.55  blk_enq/s=30.19  blk_sent/s=30.19
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=3396.13  notify_eff_us/sample=424.52  notify_max_us_win=7689
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=279  loop_max_us_win=9422
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=496288  sent=493864  blk_enq=61733  blk_sent=61733  notify_calls=61733
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=496500 status=0xC00000 uV[0..1]=1, 0
+idx=497000 status=0xC00000 uV[0..1]=-19, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.09  filt_max_us_win=15  notify_avg_us=3364.19  notify_eff_us/sample=420.52  notify_max_us_win=7495
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=497491  sent=495064  blk_enq=61883  blk_sent=61883  notify_calls=61883
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=497500 status=0xC00000 uV[0..1]=-265, 0
+idx=498000 status=0xC00000 uV[0..1]=-18, 0
+idx=498500 status=0xC00000 uV[0..1]=-104, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=14  notify_avg_us=3547.45  notify_eff_us/sample=443.43  notify_max_us_win=8567
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=11010
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=498691  sent=496264  blk_enq=62033  blk_sent=62033  notify_calls=62033
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=499000 status=0xC00000 uV[0..1]=66, 0
+idx=499500 status=0xC00000 uV[0..1]=-22, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.55  sent/s=241.55  blk_enq/s=30.19  blk_sent/s=30.19
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3314.30  notify_eff_us/sample=414.29  notify_max_us_win=7524
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=499894  sent=497472  blk_enq=62184  blk_sent=62184  notify_calls=62184
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=500000 status=0xC00000 uV[0..1]=26, 0
+idx=500500 status=0xC00000 uV[0..1]=-19, 0
+idx=501000 status=0xC00000 uV[0..1]=-28, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.95  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.03  filt_max_us_win=15  notify_avg_us=3394.53  notify_eff_us/sample=424.32  notify_max_us_win=7526
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=501094  sent=498672  blk_enq=62334  blk_sent=62334  notify_calls=62334
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=501500 status=0xC00000 uV[0..1]=-9, 0
+idx=502000 status=0xC00000 uV[0..1]=-45, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3345.74  notify_eff_us/sample=418.22  notify_max_us_win=7701
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10825
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=502295  sent=499872  blk_enq=62484  blk_sent=62484  notify_calls=62484
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=502500 status=0xC00000 uV[0..1]=7, 0
+idx=503000 status=0xC00000 uV[0..1]=11, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3289.80  notify_eff_us/sample=411.23  notify_max_us_win=7496
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=284  loop_max_us_win=9596
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=503497  sent=501072  blk_enq=62634  blk_sent=62634  notify_calls=62634
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=503500 status=0xC00000 uV[0..1]=-87, 0
+idx=504000 status=0xC00000 uV[0..1]=22, 0
+idx=504500 status=0xC00000 uV[0..1]=-174, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.15  sent/s=239.95  blk_enq/s=29.99  blk_sent/s=29.99
+  time   | filt_avg_us=5.06  filt_max_us_win=15  notify_avg_us=3469.66  notify_eff_us/sample=433.71  notify_max_us_win=8570
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=11014
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=504698  sent=502272  blk_enq=62784  blk_sent=62784  notify_calls=62784
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=505000 status=0xC00000 uV[0..1]=-4, 0
+idx=505500 status=0xC00000 uV[0..1]=30, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=234.20  sent/s=233.60  blk_enq/s=29.20  blk_sent/s=29.20
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=4263.16  notify_eff_us/sample=532.90  notify_max_us_win=8703
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=29  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=505869  sent=503440  blk_enq=62930  blk_sent=62930  notify_calls=62930
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=506000 status=0xC00000 uV[0..1]=-1, -3
+idx=506500 status=0xC00000 uV[0..1]=2, 0
+Frame invalido / error sincron¡a. status=0x579600
+idx=507000 status=0xC00000 uV[0..1]=4, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3339.96  notify_eff_us/sample=417.49  notify_max_us_win=7514
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=7  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=12074
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=507068  sent=504640  blk_enq=63080  blk_sent=63080  notify_calls=63080
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=507500 status=0xC00000 uV[0..1]=5, 0
+idx=508000 status=0xC00000 uV[0..1]=-6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.12  filt_max_us_win=15  notify_avg_us=3344.24  notify_eff_us/sample=418.03  notify_max_us_win=7498
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=508270  sent=505848  blk_enq=63231  blk_sent=63231  notify_calls=63231
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=508500 status=0xC00000 uV[0..1]=1, 0
+idx=509000 status=0xC00000 uV[0..1]=101, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3461.16  notify_eff_us/sample=432.64  notify_max_us_win=7503
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=9581
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=509472  sent=507048  blk_enq=63381  blk_sent=63381  notify_calls=63381
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=509500 status=0xC00000 uV[0..1]=162, 0
+idx=510000 status=0xC00000 uV[0..1]=14, 0
+[MIDI TX TOTAL] calls=4096 bytes=12287
+idx=510500 status=0xC00000 uV[0..1]=-10, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.60  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3378.70  notify_eff_us/sample=422.34  notify_max_us_win=8017
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=7  catchup_win=0  sample_iter_max_us_win=288  loop_max_us_win=10824
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=510670  sent=508248  blk_enq=63531  blk_sent=63531  notify_calls=63531
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=511000 status=0xC00000 uV[0..1]=-30, 0
+idx=511500 status=0xC00000 uV[0..1]=-200, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.11  filt_max_us_win=15  notify_avg_us=3661.51  notify_eff_us/sample=457.69  notify_max_us_win=8746
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=11015
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=511871  sent=509448  blk_enq=63681  blk_sent=63681  notify_calls=63681
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=512000 status=0xC00000 uV[0..1]=14, 0
+idx=512500 status=0xC00000 uV[0..1]=29, 0
+idx=513000 status=0xC00000 uV[0..1]=-50, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3584.28  notify_eff_us/sample=448.04  notify_max_us_win=7297
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10827
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=513072  sent=510648  blk_enq=63831  blk_sent=63831  notify_calls=63831
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=513500 status=0xC00000 uV[0..1]=7, 0
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0x0
+idx=514000 status=0xC00000 uV[0..1]=395, 669
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=225.80  sent/s=225.60  blk_enq/s=28.20  blk_sent/s=28.20
+  time   | filt_avg_us=5.20  filt_max_us_win=15  notify_avg_us=5301.41  notify_eff_us/sample=662.68  notify_max_us_win=8518
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=70  catchup_win=0  sample_iter_max_us_win=283  loop_max_us_win=9761
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=514201  sent=511776  blk_enq=63972  blk_sent=63972  notify_calls=63972
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=514500 status=0xC00000 uV[0..1]=33, 1
+Frame invalido / error sincron¡a. status=0x6B4400
+idx=515000 status=0xC00000 uV[0..1]=-32, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.09  filt_max_us_win=15  notify_avg_us=3500.31  notify_eff_us/sample=437.54  notify_max_us_win=7301
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=515403  sent=512976  blk_enq=64122  blk_sent=64122  notify_calls=64122
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=515500 status=0xC00000 uV[0..1]=-20, 0
+idx=516000 status=0xC00000 uV[0..1]=14, 0
+Frame invalido / error sincron¡a. status=0xFF0000
+idx=516500 status=0xC00000 uV[0..1]=-22, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.09  filt_max_us_win=16  notify_avg_us=3343.01  notify_eff_us/sample=417.88  notify_max_us_win=8414
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=7  catchup_win=0  sample_iter_max_us_win=277  loop_max_us_win=10835
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=516602  sent=514176  blk_enq=64272  blk_sent=64272  notify_calls=64272
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=517000 status=0xC00000 uV[0..1]=21, 0
+idx=517500 status=0xC00000 uV[0..1]=-18, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.65  sent/s=241.45  blk_enq/s=30.18  blk_sent/s=30.18
+  time   | filt_avg_us=5.11  filt_max_us_win=15  notify_avg_us=3327.19  notify_eff_us/sample=415.90  notify_max_us_win=7701
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=278  loop_max_us_win=10835
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=517806  sent=515384  blk_enq=64423  blk_sent=64423  notify_calls=64423
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=518000 status=0xC00000 uV[0..1]=-2, 0
+idx=518500 status=0xC00000 uV[0..1]=0, 0
+idx=519000 status=0xC00000 uV[0..1]=-13, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.02  filt_max_us_win=15  notify_avg_us=3292.56  notify_eff_us/sample=411.57  notify_max_us_win=7681
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=519005  sent=516576  blk_enq=64572  blk_sent=64572  notify_calls=64572
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+Frame invalido / error sincron¡a. status=0x26F2B5
+idx=519500 status=0xC00000 uV[0..1]=-10, 0
+idx=520000 status=0xC00000 uV[0..1]=2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.10  sent/s=241.50  blk_enq/s=30.18  blk_sent/s=30.18
+  time   | filt_avg_us=5.04  filt_max_us_win=15  notify_avg_us=3453.84  notify_eff_us/sample=431.73  notify_max_us_win=8038
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=276  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=32
+------------------------------------------------------------
+  total  | gen=520206  sent=517784  blk_enq=64723  blk_sent=64723  notify_calls=64723
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=520500 status=0xC00000 uV[0..1]=-28, 0
+idx=521000 status=0xC00000 uV[0..1]=-7, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.20  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3249.86  notify_eff_us/sample=406.23  notify_max_us_win=7525
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10831
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=521407  sent=518984  blk_enq=64873  blk_sent=64873  notify_calls=64873
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=521500 status=0xC00000 uV[0..1]=-7, 0
+idx=522000 status=0xC00000 uV[0..1]=-9, 0
+idx=522500 status=0xC00000 uV[0..1]=6, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.60  sent/s=238.40  blk_enq/s=29.80  blk_sent/s=29.80
+  time   | filt_avg_us=5.04  filt_max_us_win=16  notify_avg_us=3284.45  notify_eff_us/sample=410.56  notify_max_us_win=7495
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=6  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10830
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=522605  sent=520176  blk_enq=65022  blk_sent=65022  notify_calls=65022
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=523000 status=0xC00000 uV[0..1]=0, 0
+idx=523500 status=0xC00000 uV[0..1]=13, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.03  filt_max_us_win=14  notify_avg_us=3267.47  notify_eff_us/sample=408.43  notify_max_us_win=7509
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=273  loop_max_us_win=9587
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=523808  sent=521384  blk_enq=65173  blk_sent=65173  notify_calls=65173
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=524000 status=0xC00000 uV[0..1]=-8, 0
+idx=524500 status=0xC00000 uV[0..1]=17, 0
+Frame invalido / error sincron¡a. status=0x0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=236.80  sent/s=236.80  blk_enq/s=29.60  blk_sent/s=29.60
+  time   | filt_avg_us=5.11  filt_max_us_win=15  notify_avg_us=4032.69  notify_eff_us/sample=504.09  notify_max_us_win=7301
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=18  catchup_win=0  sample_iter_max_us_win=280  loop_max_us_win=10829
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=524992  sent=522568  blk_enq=65321  blk_sent=65321  notify_calls=65321
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=525000 status=0xC00000 uV[0..1]=-117, 2
+idx=525500 status=0xC00000 uV[0..1]=2, 0
+Frame invalido / error sincron¡a. status=0x910000
+idx=526000 status=0xC00000 uV[0..1]=12, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.40  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3276.91  notify_eff_us/sample=409.61  notify_max_us_win=7495
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=10954
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=526194  sent=523768  blk_enq=65471  blk_sent=65471  notify_calls=65471
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=526500 status=0xC00000 uV[0..1]=24, 0
+Frame invalido / error sincron¡a. status=0x273
+idx=527000 status=0xC00000 uV[0..1]=-8, 1
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=235.20  sent/s=235.20  blk_enq/s=29.40  blk_sent/s=29.40
+  time   | filt_avg_us=5.10  filt_max_us_win=15  notify_avg_us=4066.59  notify_eff_us/sample=508.32  notify_max_us_win=7810
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=28  catchup_win=0  sample_iter_max_us_win=284  loop_max_us_win=10826
+  DRDY   | pin=0  drdy_count_now=30
+------------------------------------------------------------
+  total  | gen=527370  sent=524944  blk_enq=65618  blk_sent=65618  notify_calls=65618
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=527500 status=0xC00000 uV[0..1]=13, 0
+[MIDI TX TOTAL] calls=4224 bytes=12671
+idx=528000 status=0xC00000 uV[0..1]=34, 0
+idx=528500 status=0xC00000 uV[0..1]=2, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=239.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3923.17  notify_eff_us/sample=490.40  notify_max_us_win=7679
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=7  catchup_win=0  sample_iter_max_us_win=275  loop_max_us_win=9596
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=528569  sent=526144  blk_enq=65768  blk_sent=65768  notify_calls=65768
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=529000 status=0xC00000 uV[0..1]=80, 0
+idx=529500 status=0xC00000 uV[0..1]=39, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3470.27  notify_eff_us/sample=433.78  notify_max_us_win=7655
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=274  loop_max_us_win=9588
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=529773  sent=527344  blk_enq=65918  blk_sent=65918  notify_calls=65918
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=530000 status=0xC00000 uV[0..1]=95, 0
+idx=530500 status=0xC00000 uV[0..1]=36, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.60  sent/s=241.60  blk_enq/s=30.20  blk_sent/s=30.20
+  time   | filt_avg_us=5.04  filt_max_us_win=14  notify_avg_us=3453.99  notify_eff_us/sample=431.75  notify_max_us_win=8755
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=279  loop_max_us_win=9599
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=530976  sent=528552  blk_enq=66069  blk_sent=66069  notify_calls=66069
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=531000 status=0xC00000 uV[0..1]=-25, 0
+idx=531500 status=0xC00000 uV[0..1]=-8, 0
+idx=532000 status=0xC00000 uV[0..1]=-16, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.0  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.05  filt_max_us_win=15  notify_avg_us=3422.75  notify_eff_us/sample=427.84  notify_max_us_win=7703
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=5  catchup_win=0  sample_iter_max_us_win=283  loop_max_us_win=10833
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=532176  sent=529752  blk_enq=66219  blk_sent=66219  notify_calls=66219
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=532500 status=0xC00000 uV[0..1]=2, 0
+idx=533000 status=0xC00000 uV[0..1]=8, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=240.80  sent/s=240.0  blk_enq/s=30.0  blk_sent/s=30.0
+  time   | filt_avg_us=5.02  filt_max_us_win=14  notify_avg_us=3450.61  notify_eff_us/sample=431.33  notify_max_us_win=7677
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=4  catchup_win=0  sample_iter_max_us_win=279  loop_max_us_win=9409
+  DRDY   | pin=0  drdy_count_now=31
+------------------------------------------------------------
+  total  | gen=533380  sent=530952  blk_enq=66369  blk_sent=66369  notify_calls=66369
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
+idx=533500 status=0xC00000 uV[0..1]=14, 0
+Frame invalido / error sincron¡a. status=0x0
+Frame invalido / error sincron¡a. status=0xDC0000
+idx=534000 status=0xC00000 uV[0..1]=358, 13
+idx=534500 status=0xC00000 uV[0..1]=-5, 0
+
+============================================================
+[BENCH] EEG_MIDI
+------------------------------------------------------------
+  rate   | gen/s=230.61  sent/s=231.81  blk_enq/s=28.97  blk_sent/s=28.97
+  time   | filt_avg_us=5.07  filt_max_us_win=15  notify_avg_us=4813.97  notify_eff_us/sample=601.75  notify_max_us_win=9069
+  queue  | q=0  qmax_win=1  drops_win=0  pub_burst_win=1
+  jitter | lag_win=43  catchup_win=0  sample_iter_max_us_win=284  loop_max_us_win=10827
+  DRDY   | pin=0  drdy_count_now=33
+------------------------------------------------------------
+  total  | gen=534534  sent=532112  blk_enq=66514  blk_sent=66514  notify_calls=66514
+  peak   | qmax_global=1  drops_total=0  pub_burst_global=1  notify_max_global_us=11587  loop_max_global_us=32494
+============================================================
