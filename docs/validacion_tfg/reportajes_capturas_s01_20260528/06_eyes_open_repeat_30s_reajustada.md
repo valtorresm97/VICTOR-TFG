@@ -39,7 +39,7 @@ Esta grafica muestra la evolucion de la calidad por ventana. Es importante porqu
 
 ![Espectrograma 0.5-50 Hz](../figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_espectrograma_ch1_0p5_50hz.png)
 
-El espectrograma permite observar la evolucion temporal del contenido espectral. Se usa una escala robusta de visualizacion para que el transitorio final no tape la estructura del resto de la captura.
+El espectrograma permite observar la evolucion temporal del contenido espectral. Se usa una escala robusta de visualizacion para que el transitorio final no tape la estructura del resto de la captura. La paleta de alto contraste hace que las zonas de mayor potencia alcancen rojo/amarillo y que las diferencias de potencia sean mas visibles.
 
 ## 7. Espectrograma en bandas EEG hasta 30 Hz
 

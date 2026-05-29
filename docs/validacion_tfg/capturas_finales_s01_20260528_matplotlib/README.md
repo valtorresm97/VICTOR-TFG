@@ -1,13 +1,13 @@
-﻿# Documentacion matplotlib de capturas finales s01 20260528
+# Documentacion matplotlib de capturas finales s01 20260528
 
 Figuras generadas con matplotlib a partir de la sesion real reportada en el TFG.
 
 Criterios de representacion aplicados:
 
 - EEG temporal estandar con escala fija `±400 uV` para evitar que transitorios grandes oculten la dinamica util.
-- Bandpowers, controles de sonificacion y calidad con tiempo centrado en la ventana y eje X alineado con la duracion total de la captura.
+- Bandpowers, controles de sonificacion y calidad usan tiempos de ventana alineados con la duracion total de la captura.
 - La figura combinada se conserva como PNG en la carpeta de figuras, pero no se inserta en los Markdown automaticos para evitar duplicacion visual.
-- Las graficas de controles de sonificacion usan leyenda interna en esquina superior derecha, igual que las graficas de bandpowers, para mantener el mismo tamano de imagen.
+- Las graficas usan un estilo visual comun para que encajen mejor en GitHub, PDF y memoria TFG.
 
 | Captura | Condicion | Documento |
 | --- | --- | --- |
@@ -18,4 +18,3 @@ Criterios de representacion aplicados:
 | `20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s` | `quiet_rest_60s` | [`20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s.md`](20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s.md) |
 | `20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s` | `blink_artifact_30s` | [`20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s.md`](20260528-145635_s01_20260528_ear_eeg_ch1_only_04_blink_artifact_30s.md) |
 | `20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s` | `eyes_open_repeat_30s` | [`20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s.md`](20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s.md) |
-
