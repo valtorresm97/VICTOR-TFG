@@ -1,4 +1,4 @@
-"""Regenera docs/validacion_tfg con estilo de figuras final-v4.
+"""Regenera figuras de docs/validacion_tfg con estilo final-v4.
 
 Este wrapper no cambia los calculos base de `build_validation_docs.py`. Aplica una
 capa de estilo Matplotlib mas segura para la memoria del TFG y mejora la
@@ -11,19 +11,31 @@ homogeneidad de las figuras por estado de la captura mixed_states:
 - senal temporal + PSD multitaper para todos los estados de la timeline;
 - periodograma vs multitaper para todos los estados de la timeline.
 
+IMPORTANTE: por defecto este wrapper fuerza `--only-figures` para no volver a
+pisar los Markdown `00` a `05`, que han sido revisados manualmente para final-v4.
+
 Uso recomendado desde la raiz del repo:
 
     python3 python/tools/build_validation_docs_final_v4_style.py \
       --captures captures \
       --output docs/validacion_tfg
 
-La salida pisa las mismas figuras/documentos generados por `build_validation_docs.py`,
-por lo que debe ejecutarse con `git status --short` limpio o con cambios controlados.
+Equivalente explicito:
+
+    python3 python/tools/build_validation_docs_final_v4_style.py \
+      --captures captures \
+      --output docs/validacion_tfg \
+      --only-figures
+
+Si algun dia se quieren regenerar tambien documentos, usar conscientemente
+`--only-docs` o el generador historico, y restaurar despues los Markdown
+manuales si fuera necesario.
 """
 
 from __future__ import annotations
 
 import re
+import sys
 import textwrap
 from pathlib import Path
 
@@ -187,8 +199,21 @@ def patch_base_generator() -> None:
     base.plot_periodogram_vs_multitaper = plot_all_periodogram_vs_multitaper
 
 
+def force_figures_only_by_default() -> None:
+    """Evita que el generador historico vuelva a sobrescribir Markdown revisados.
+
+    `build_validation_docs.py` soporta `--only-figures`; este wrapper lo fuerza
+    si el usuario no ha pedido explicitamente `--only-figures` o `--only-docs`.
+    """
+
+    args = set(sys.argv[1:])
+    if "--only-figures" not in args and "--only-docs" not in args:
+        sys.argv.append("--only-figures")
+
+
 def main() -> int:
     patch_base_generator()
+    force_figures_only_by_default()
     return int(base.main() or 0)
 
 
