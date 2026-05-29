@@ -93,22 +93,15 @@ historico/documentacion antigua/
 | Documento | Estado | Documento preferente actual |
 | --- | --- | --- |
 | `historico/documentacion antigua/configuracion_final_v3.md` | Historico | `configuracion_final_v4.md` |
+| `historico/documentacion antigua/auditoria_captura_datos.md` | Historico | `auditoria_codigo_detallada/`, `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
+| `historico/documentacion antigua/validacion_de_la_captura_de_datos.md` | Historico | `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
+| `historico/documentacion antigua/resultados_validacion_espectral_capturas.md` | Historico | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y reportajes por captura |
+| `historico/documentacion antigua/resultados_validacion_dsp_mixta.md` | Historico | `validacion_tfg/09_benchmarks_rendimiento_placa.md` y auditoria DSP |
+| `historico/documentacion antigua/validacion_bandas_eeg_sonificacion.md` | Historico | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `configuracion_final_v4.md` |
 
 Criterio: consultar estos documentos solo para entender decisiones anteriores, no como fuente principal del estado final-v4.
 
-## 7. Reports historicos o solapados pendientes de clasificar
-
-Estos documentos pueden seguir siendo utiles para trazabilidad, pero deben revisarse antes de usarlos como fuente principal. En caso de discrepancia, prevalecen `configuracion_final_v4.md` y `validacion_tfg/`.
-
-| Documento | Estado | Documento preferente |
-| --- | --- | --- |
-| `auditoria_captura_datos.md` | Historico/pendiente de clasificar | `auditoria_codigo_detallada/`, `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
-| `validacion_de_la_captura_de_datos.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
-| `resultados_validacion_espectral_capturas.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y reportajes por captura |
-| `resultados_validacion_dsp_mixta.md` | Historico/pendiente de clasificar | `validacion_tfg/09_benchmarks_rendimiento_placa.md` y auditoria DSP |
-| `validacion_bandas_eeg_sonificacion.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `configuracion_final_v4.md` |
-
-## 8. Regla de lectura
+## 7. Regla de lectura
 
 1. Para entender el estado actual, empezar por `configuracion_final_v4.md`.
 2. Para comprobar que se reviso en la migracion documental, leer `auditoria_final_v4_fase1_2.md`.
