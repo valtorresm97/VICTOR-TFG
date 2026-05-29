@@ -1,95 +1,201 @@
-# 00. Inventario del proyecto
+# 00. Inventario del proyecto - final-v4
 
-Rama de auditoria creada: `firmware-final-v1`.
+## 1. Objetivo
 
-Base real usada en este checkout: `matrixz-scroll`. La rama solicitada como `matrix-scroll` no existe local ni remota en este repositorio; la rama activa contenia los commits de scroll LED/matriz (`Add LED matrix piano scroll`, `Optimize LED matrix runtime cost`).
+Este documento resume el inventario global del proyecto EEG-MIDI desde una perspectiva narrativa. Su funcion es orientar la lectura de la arquitectura y de los bloques principales sin repetir la auditoria funcion por funcion.
 
-Inventario levantado con `rg --files` y clasificado por bloque funcional. Las capturas y figuras repetitivas se agrupan por familia para mantener el documento legible; los directorios de captura existentes se enumeran explicitamente.
+La auditoria detallada actual esta en:
 
-| Archivo | Bloque | Descripcion breve | Critico | Observaciones |
+```text
+docs/auditoria_codigo_detallada/
+```
+
+La configuracion principal actual esta en:
+
+```text
+docs/configuracion_final_v4.md
+```
+
+Estado actual de referencia:
+
+```text
+Rama integrada: firmware-final-v4
+Rama documental: refactor/essential-eeg-midi-plan
+```
+
+Nota historica: esta carpeta nacio durante auditorias sobre `firmware-final-v1` y ramas de LED/matrix scroll. El inventario queda ahora reajustado a final-v4.
+
+## 2. Bloques principales del sistema
+
+El sistema queda organizado en estos bloques:
+
+```text
+Firmware/MCU
+ADS1299/SPI
+Streaming Bridge
+Python backend
+DSP y quality gate
+Sonificacion y MIDI
+WebUI
+Capturas y validacion
+Benchmarks
+Tools offline
+Documentacion TFG
+LED matrix lateral
+```
+
+El flujo principal validado es:
+
+```text
+ADS1299 -> firmware -> eeg_block_uV -> Python backend -> DSP -> quality gate -> sonificacion -> midi_bytes -> Serial1/D1 TXINV -> MIDI OUT fisico
+```
+
+## 3. Inventario por familias
+
+| Familia | Archivos principales | Papel | Criticidad | Lectura final-v4 |
 | --- | --- | --- | --- | --- |
-| `AGENTS.md` | Documentacion | Reglas persistentes del proyecto, arquitectura, pines, contratos y validacion esperada. | Si | Fuente normativa principal para futuros prompts. |
-| `README.md` | Documentacion | Resumen raiz y enlaces principales. | No | Muy breve; apunta a LED matrix. |
-| `app.yaml` | Configuracion App Lab | Define app `EEG_MIDI`, brick web UI e icono. | Si | No contiene dependencias firmware; eso vive en `sketch/sketch.yaml`. |
-| `sketch/sketch.yaml` | Configuracion App Lab | Perfil `arduino:zephyr`, RouterBridge, LED Matrix, librerias ADS locales. | Si | Mantiene `dir: ADS1299Plus` y `dir: ADS1299_SafeSPI`. |
-| `sketch/sketch.ino` | Firmware / MCU | Firmware principal: ADS1299, DRDY, filtros, streaming, handlers MIDI/LED, bench. | Si | Archivo mas critico de tiempo real. |
-| `sketch/bench.h` | Firmware / benchmarks | Estructura de metricas de adquisicion, filtros, notify, cola y jitter. | Si | No cambia payload EEG. |
-| `sketch/filters.h` | Firmware / filtros | DC blocker, notch 50 Hz, low-pass 40 Hz y conversion V a microvoltios. | Si | Afecta directamente a senal y features. |
-| `sketch/streaming.h` | Firmware / Bridge | Define `EegBlockUV`, ring TX y `Bridge.notify("eeg_block_uV", ...)`. | Si | Contrato MCU-Python. No cambiar sin `receiver.py`. |
-| `sketch/synthetic.h` | Firmware / diagnostico | Generador EEG-like sintetico para validar filtros/Bridge/Python sin ADS real. | Medio | `USE_SYNTHETIC=0` por defecto. |
-| `sketch/ADS1299Plus/library.properties` | ADS1299 / libreria local | Manifest local del driver ADS1299Plus. | Medio | Debe seguir siendo libreria local. |
-| `sketch/ADS1299Plus/src/ADS1299Plus.h` | ADS1299 / driver | API alto nivel, constantes 4 canales, unpack 24-bit, status sync. | Si | `NUM_CHANNELS=4`, frame 15 bytes. |
-| `sketch/ADS1299Plus/src/ADS1299Plus.cpp` | ADS1299 / driver | Power-up, comandos SPI, registros, configuracion, RDATAC/RDATA. | Si | Valida ID ADS1299-4 y status sync. |
-| `sketch/ADS1299Plus/src/ADS1299_Registers.h` | ADS1299 / registros | Mapa de registros, comandos, mascaras, defaults CONFIG/CH/LOFF. | Si | Cambios aqui pueden romper adquisicion. |
-| `sketch/ADS1299_SafeSPI/library.properties` | SPI / libreria local | Manifest local del wrapper SPI. | Medio | Debe seguir local. |
-| `sketch/ADS1299_SafeSPI/src/ADS1299_SafeSPI.h` | SPI / wrapper | API de SPI seguro, CS, transfer y waitDecode. | Si | Contrato de bajo nivel ADS1299. |
-| `sketch/ADS1299_SafeSPI/src/ADS1299_SafeSPI.cpp` | SPI / wrapper | `SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE1))`. | Si | 2 MHz, MSB first, SPI_MODE1. |
-| `python/main.py` | Python backend | Punto de entrada App Lab: crea backend, WebUI y `App.run`. | Si | Loop con `sleep(0.02)`. |
-| `python/backend_service.py` | Python backend | Orquestador: receiver, DSP, quality, sonificacion, MIDI, LED, snapshot. | Si | Centro del pipeline Linux/Python. |
-| `python/receiver.py` | Python backend | Handler `eeg_block_uV`, validacion de bloques/status/indices y colas. | Si | Contrato directo con `streaming.h`. |
-| `python/eeg_signal_processor.py` | DSP y buffers | Ring buffer multicanal, ingestion uV->V, ventanas y features live. | Si | No aplica filtros EEG adicionales. |
-| `python/dsp_core.py` | DSP y features | PSD periodogram/Welch/multitaper, bandpowers, picos, spectrogram. | Si | Depende de NumPy/SciPy. |
-| `python/spectral_quality.py` | DSP / quality gate | Calcula `score`, estado y `gate_factor` de calidad espectral. | Si | Protege sonificacion frente a artefactos. |
-| `python/sonification_features.py` | Sonificacion | Convierte features DSP en controles musicales suavizados y con gate. | Si | No calcula DSP. |
-| `python/music_utils.py` | Sonificacion | Conversor de nombre de nota a MIDI. | Medio | Usado por escala/main note. |
-| `python/scale_registry.py` | Sonificacion | Registro de escalas y construccion de `ScaleConfig`. | Medio | Usado por configuracion musical WebUI root/main/scale. |
-| `python/music_segment.py` | Sonificacion | `LiveSegment`, `ScaleConfig`, `MusicSegment`, cadencia e histeresis. | Si | Entrada a bar generator. |
-| `python/music_bar.py` | Sonificacion | Genera compas, acorde y slots ritmicos desde controles EEG. | Si | Modula densidad/tension/estabilidad. |
-| `python/music_note.py` | Sonificacion / MIDI | Convierte compas en `NoteEvent` con pitch, velocity y duracion. | Si | Alimenta scheduler y piano roll. |
-| `python/midi_live.py` | MIDI live | `MidiLiveEvent`, scheduler, program/CC/note on/off, panic y bytes MIDI. | Si | Panic existe en Python. |
-| `python/midi_byte_transport.py` | MIDI transporte | Envia bytes por `Bridge.call("midi_bytes", n,b0,b1,b2)`. | Si | Desactivado por defecto por env. |
-| `python/led_matrix_visualizer.py` | LED matrix | Config por env y conversion `recent_notes` a frame 13x8 row-major. | Si | Misma fuente que piano roll web. |
-| `python/led_matrix_transport.py` | LED matrix transporte | Envia frame LED por filas empaquetadas con `Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)`. | Medio | Desactivado por defecto. |
-| `python/capture_manager.py` | Capturas | Gestiona solicitudes `state/capture_request.json` y guarda CSV/metadata. | Si | Vive dentro de App Lab. |
-| `python/app_state.py` | Estado / snapshot | Publica/lee `state/snapshot.json` con escritura atomica. | Medio | UI puede leer fallback desde disco. |
-| `python/web_server.py` | Web UI | WebUI brick, rutas `/status` y `/latest`, websocket `eeg_snapshot`. | Medio | Sustituye a `dashboard.py`; no hay Streamlit. |
-| `python/requirements.txt` | Python config | Dependencias: `numpy`, `scipy`. | Medio | App Lab aporta modulos `arduino.*`. |
-| `assets/index.html` | Web UI | Dashboard HTML: adquisicion, features, calidad, sonificacion, MIDI, piano roll. | Medio | Depende de claves snapshot. |
-| `assets/app.js` | Web UI | Render de snapshots, bandas, waveform, warnings, sonificacion y piano roll. | Medio | Fragil ante cambios de nombres de snapshot. |
-| `assets/styles.css` | Web UI | Estilos visuales del dashboard. | No | No afecta pipeline. |
-| `python/tools/capture_eeg_quality.py` | Tools CLI | Solicita captura real a la app mediante JSON de estado. | Medio | Requiere app corriendo. |
-| `python/tools/analyze_eeg_capture.py` | Tools CLI / offline | Analiza CSV de captura, PSD, metricas y reports. | Medio | Duplica parte de DSP para analisis offline. |
-| `python/tools/validate_spectral_features.py` | Tools CLI / offline | Valida features espectrales y sonificacion por ventanas. | Medio | Usa quality gate offline. |
-| `python/tools/compare_eeg_captures.py` | Tools CLI / offline | Compara capturas abiertas/cerradas u otras condiciones. | Bajo | Produce markdown comparativo. |
-| `python/tools/build_validation_docs.py` | Tools CLI / docs | Genera documentos, tablas y figuras de validacion TFG. | Medio | Script grande; toca muchos outputs. |
-| `python/tools/set_ads_diagnostic_mode.py` | Tools CLI / firmware | Cambia `ADS_DIAGNOSTIC_MODE` en `sketch.ino`. | Medio | Edita firmware; usar con cuidado. |
-| `python/tools/test_led_matrix_visualizer.py` | Tests / LED | Tests simples para frame LED, clipping y mapeo. | Medio | Se puede ejecutar sin hardware. |
-| `docs/auditoria_captura_datos.md` | Documentacion | Auditoria previa de captura, ADS1299, filtros y tools. | Medio | Base muy util para esta auditoria. |
-| `docs/ads1299_diagnostic_modes.md` | Documentacion | Modos ADS, protocolos y capturas recomendadas. | Medio | Define modo CH1-only/Bias. |
-| `docs/ads1299_register_audit_bias_drl.md` | Documentacion | Auditoria de registros ADS1299 y BIAS/DRL. | Medio | Complementa `ADS1299_Registers.h`. |
-| `docs/diseno_spectral_quality_score.md` | Documentacion | Diseno del quality gate y efectos en sonificacion. | Medio | Explica umbrales y gate. |
-| `docs/led_matrix_piano_scroll.md` | Documentacion | Diseno/auditoria del piano scroll LED 13x8. | Medio | Documento de la rama scroll. |
-| `docs/resultados_validacion_dsp_mixta.md` | Reports | Resultados DSP de captura mixta. | Bajo | Evidencia experimental. |
-| `docs/resultados_validacion_espectral_capturas.md` | Reports | Resumen de validacion espectral de capturas reales. | Medio | Soporta decisiones de features. |
-| `docs/validacion_bandas_eeg_sonificacion.md` | Reports | Validacion de bandas y usos para sonificacion. | Medio | Similar a docs TFG, posible redundancia. |
-| `docs/validacion_de_la_captura_de_datos.md` | Reports | Validacion de captura de datos. | Medio | Documento historico. |
-| `docs/validacion_tfg/*.md` | Documentacion TFG | Serie 00-08 de validacion formal: captura, montaje, calidad, DSP, features, protocolo e historial. | Medio | Documentacion mas definitiva. |
-| `docs/validacion_tfg/tables/*.csv|*.md` | Reports / tablas | Inventario de capturas, resumen, comparaciones y decisiones. | Bajo | Salidas generadas por tools. |
-| `docs/validacion_tfg/figures/*.png|*.pdf` | Assets / figuras | Figuras de validacion de captura, PSD, estados y quality gate. | Bajo | Artefactos para memoria TFG. |
-| `captures/<timestamp>/eeg_timeseries.csv` | Capturas | Series temporales reales con `block_idx`, `sample_idx`, status y CH1-CH4 uV. | Medio | Datos base; no modificar. |
-| `captures/<timestamp>/metadata.json` | Capturas | Metadatos de condicion, fs, ADS1299, git y resumen RX. | Medio | Trazabilidad clave. |
-| `captures/<timestamp>/quality_report.md|json` | Reports | Analisis de calidad por captura. | Medio | Evidencia experimental. |
-| `captures/<timestamp>/spectral_validation_report.md|json` | Reports | Validacion espectral por captura. | Medio | Contiene quality score y conclusiones. |
-| `captures/<timestamp>/spectral_summary.csv` | Reports | Resumen espectral por canal. | Bajo | Salida derivada. |
-| `captures/<timestamp>/psd_multitaper.csv` | Reports | PSD multitaper por captura. | Bajo | Salida derivada. |
-| `captures/<timestamp>/windowed_bandpowers.csv` | Reports | Bandpowers por ventanas. | Medio | Usado para validacion y docs. |
-| `captures/<timestamp>/windowed_sonification_features.csv` | Reports | Features de sonificacion por ventanas. | Medio | Compara offline/live. |
-| `captures/comparisons/*.csv|*.json|*.md` | Reports | Comparaciones agregadas de robustez y protocolo mixto. | Bajo | Evidencia resumida. |
+| Raiz/config | `AGENTS.md`, `README.md`, `app.yaml` | Reglas, entrada del repo y configuracion App Lab. | Media/Alta | Mantener coherentes con final-v4. |
+| Config firmware | `sketch/sketch.yaml` | Perfil App Lab, RouterBridge y librerias locales ADS/SPI. | Alta | No romper dependencias locales. |
+| Firmware principal | `sketch/sketch.ino` | ADS1299, DRDY, filtros, streaming, handlers MIDI/LED y bench. | Critica | Centro del tiempo real MCU. |
+| Firmware streaming | `sketch/streaming.h` | `EegBlockUV`, ring TX y `Bridge.notify("eeg_block_uV")`. | Critica contrato | No cambiar sin `eeg_contract.py`. |
+| Firmware filtros | `sketch/filters.h` | HP/DC blocker, notch 50 Hz, LP 40 Hz y conversion a uV. | Critica | Cambia el espectro que recibe Python. |
+| Firmware bench | `sketch/bench.h` | Metricas MCU por Monitor. | Media/Alta | Evidencia de rendimiento sin trafico Bridge extra. |
+| Firmware sintetico | `sketch/synthetic.h` | Generador diagnostico sin ADS real. | Media | No es evidencia final TFG. |
+| ADS1299 driver | `ADS1299Plus.*`, `ADS1299_Registers.h` | Power-up, registros, comandos, RDATAC, status y unpack 24-bit. | Critica hardware | Validado para ADS1299-4. |
+| Safe SPI | `ADS1299_SafeSPI.*` | SPI 2 MHz, MSB first, MODE1 y CS manual. | Critica hardware | No tocar sin placa. |
+| Python entrada | `python/main.py` | Crea backend, WebUI y loop App Lab. | Critica runtime | Entrada Linux/App Lab. |
+| Backend | `python/backend_service.py` | Orquestador RX, DSP, quality, sonificacion, MIDI, snapshot, capture y LED lateral. | Critica runtime | Demasiado ancho; simplificar con cuidado. |
+| Contrato EEG | `python/eeg_contract.py` | Constantes y parser `eeg_block_uV`. | Critica contrato | Fuente Python del contrato firmware/Python. |
+| Receiver | `python/receiver.py` | Handlers Bridge, validacion de bloques/status/indices y cola. | Critica runtime | Ruta principal `eeg_block_uV`; `eeg_frame_uV` legacy. |
+| DSP buffer | `python/eeg_signal_processor.py` | Ring buffer, uV->V, ventana y features live. | Critica runtime | Ruta principal `compute_live_features()`. |
+| DSP core | `python/dsp_core.py` | PSD multitaper/Welch/periodogram, bandpowers, picos y spectrogram. | Critica runtime | Multitaper es metodo live principal. |
+| Quality gate | `python/spectral_quality.py` | `score`, `state`, `gate_factor`, `valid_for_sonification`. | Critica seguridad | Conservar como `SignalQuality / QualityGate`. |
+| Sonificacion features | `python/sonification_features.py` | Features EEG -> controles final-v4 suavizados y con gate. | Critica runtime | Usa nombres `alpha_drive`, etc. |
+| Musica | `music_segment.py`, `music_bar.py`, `music_note.py`, `music_utils.py`, `scale_registry.py` | Segmento, compas, notas, escalas y validacion de notas. | Critica runtime | Ruta live: `build_live_segment`, `generate_live_bar`, `generate_notes_for_bar`. |
+| MIDI live | `python/midi_live.py` | Scheduler, eventos, bytes MIDI y panic. | Critica runtime/seguridad | Panic esencial. |
+| MIDI transport | `python/midi_byte_transport.py` | `Bridge.call("midi_bytes", n,b0,b1,b2)`. | Critica contrato/hardware | Activo por defecto en final-v4. |
+| WebUI server | `python/web_server.py` | WebUI brick, `/latest`, `/status`, socket, panic y music config. | Critica UI/TFG | Observador/control musical ligero. |
+| WebUI assets | `assets/index.html`, `assets/app.js`, `assets/styles.css` | Dashboard, render snapshot, controles musicales y piano roll. | Critica UI/TFG | Tratar con cuidado; muy acoplado al snapshot. |
+| Captura runtime | `python/capture_manager.py` | Solicitudes JSON y escritura CSV/metadata. | Lateral runtime | No calcula quality gate; guarda datos. |
+| Estado runtime | `python/app_state.py` | JSON atomico de snapshot/status. | Media/Alta | Fallback WebUI/tools. |
+| LED lateral | `led_matrix_visualizer.py`, `led_matrix_transport.py` | `music.recent_notes` -> frame 13x8 -> `led_matrix_row`. | Lateral runtime | Desactivado por defecto; no UML principal. |
+| Tools CLI | `python/tools/*.py` | Capturas, analisis, docs, figuras, ADS mode y benchmarks. | Offline/validacion | No runtime principal; si trazabilidad TFG. |
+| Benchmarks | `benchmarks/*.py`, `benchmarks/results`, `benchmarks/reports` | Medicion Python/Linux y parser de resultados. | Offline TFG | Evidencia temporal final-v4. |
+| Docs validacion | `docs/validacion_tfg/**` | Benchmarks, capturas finales, reportajes y figuras. | Evidencia TFG | Fuente principal de resultados. |
+| Capturas | `captures/**` | Datos EEG, metadata, features, calidad y musica. | Evidencia TFG | No modificar salvo regeneracion controlada. |
 
-Directorios de captura existentes:
+## 4. Configuracion final-v4 resumida
 
-| Directorio | Condicion / uso inferido |
+| Configuracion | Valor | Lectura |
+| --- | --- | --- |
+| `USE_SYNTHETIC` | `0` | ADS1299 real, no sintetico. |
+| `ADS_DIAGNOSTIC_MODE` | `5` | Modo final CH1-only `bias_ch1_only_loff_off`. |
+| Montaje | `ear_eeg_ch1_only` | CH1 canal EEG principal. |
+| CH2-CH4 | Conservados por contrato | No interpretarlos como EEG activo en capturas finales. |
+| `EEG_STREAMING_NOTIFY_ENABLED` | `1` | Activa `eeg_block_uV`. |
+| `BLOCK_SAMPLES` | `8` | 31.25 bloques/s. |
+| `FEATURE_WINDOW_SEC` | `4.0` | Ventana DSP/quality. |
+| `FEATURE_HOP_SAMPLES` | `64` | Presupuesto Python 256 ms. |
+| `MIDI_UART_ENABLED` | `1` | MIDI fisico activo en firmware. |
+| `EEG_MIDI_LIVE_ENABLED` | `True` | MIDI live activo en Python. |
+| UART MIDI | `Serial1`/D1 | TX invertido obligatorio. |
+| `LED_MATRIX_ENABLED` | `0` | LED desactivada firmware. |
+| `EEG_LED_MATRIX_ENABLED` | `False` | LED desactivada Python. |
+| WebUI | Activa | Monitorizacion, panic, root/main/scale y piano roll. |
+
+## 5. Capturas y evidencia actual
+
+La evidencia final actual se organiza alrededor de:
+
+```text
+benchmarks reales final-v4
+sesion final s01_20260528
+reportajes finales
+figuras estandar y enhanced
+```
+
+Rutas principales:
+
+```text
+docs/validacion_tfg/09_benchmarks_rendimiento_placa.md
+docs/validacion_tfg/10_resultados_captura_final_laboratorio.md
+docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md
+docs/validacion_tfg/reportajes_capturas_s01_20260528/
+docs/validacion_tfg/figures/capturas_finales_s01_20260528_matplotlib/
+docs/validacion_tfg/figures/capturas_finales_s01_20260528_enhanced/
+```
+
+Las capturas antiguas de mayo 2026 y capturas mixtas siguen siendo utiles como antecedentes de desarrollo, diagnostico y ajuste del quality gate, pero no deben presentarse como evidencia final principal si contradicen la sesion `s01_20260528`.
+
+## 6. Tools y outputs importantes
+
+| Tool/output | Uso final-v4 |
 | --- | --- |
-| `20260523-175959_post_configfix_shorted_inputs` | Diagnostico entradas internas en corto. |
-| `20260523-195752_ear_eeg_ch1_only_still_30s` | Ear EEG CH1-only quieto 30 s. |
-| `20260523-200925_ear_eeg_ch1_only_eyes_open_60s` | Ear EEG ojos abiertos 60 s. |
-| `20260523-201055_ear_eeg_ch1_only_eyes_closed_60s` | Ear EEG ojos cerrados 60 s. |
-| `20260523-201321_ear_eeg_ch1_only_jaw_movement_30s` | Artefacto mandibula. |
-| `20260523-202120_fp1_fp2_ch1_only_quiet_30s` | Fp1-Fp2 quieto. |
-| `20260523-202208_fp1_fp2_ch1_only_eyes_open_60s` | Fp1-Fp2 ojos abiertos. |
-| `20260523-202323_fp1_fp2_ch1_only_eyes_closed_60s` | Fp1-Fp2 ojos cerrados. |
-| `20260523-202451_fp1_fp2_ch1_only_forehead_blink_artifact_30s` | Artefacto frente/parpadeo. |
-| `20260524-104015_live_dsp_validation_mixed_states_ear_eeg` | Validacion DSP live con estados mixtos. |
-| `20260524-115948_diag_atenuacion_mixed_states_ear_eeg` | Diagnostico atenuacion artefactos. |
-| `20260524-122200_final_atenuacion_artefactos_mixed_states` | Captura final de referencia para quality gate. |
-| `comparisons` | Comparativas agregadas entre capturas. |
+| `capture_eeg_quality.py` | Solicita capturas al backend vivo mediante `capture_request.json`. |
+| `final_capture_session.py` | Gestiona sesion final y conserva musica (`music_snapshots.jsonl`, `music_notes.csv`). |
+| `validate_spectral_features.py` | Recalcula bandpowers, quality y controles de sonificacion offline. |
+| `parse_mcu_bench_monitor.py` | Parseo de Monitor `[BENCH] EEG_MIDI` sin contaminar Bridge. |
+| `benchmark_real_capture.py` | Mide funciones Python sobre captura real. |
+| `build_final_capture_docs_matplotlib.py` | Genera figuras/reportajes automaticos estandar. |
+| `build_capture06_enhanced_figures.py` | Genera figuras enhanced de captura 06. |
+| `set_ads_diagnostic_mode.py` | Cambia macro ADS; herramienta peligrosa que requiere recompilar/subir. |
+
+## 7. Contratos y rutas criticas
+
+No tocar sin pruebas:
+
+```text
+eeg_block_uV
+FS_HZ=250
+NUM_CHANNELS=4
+BLOCK_SAMPLES=8
+LSB_V
+status prefix 0xC00000
+compute_live_features
+compute_quality_diagnostics
+compute_spectral_quality
+SonificationFeatureAdapter
+MidiScheduler
+MidiByteTransport
+midi_bytes
+Serial1/D1 TXINV
+snapshot keys WebUI
+```
+
+Rutas legacy/compatibilidad a ocultar del UML principal:
+
+```text
+eeg_frame_uV
+compute_online_features
+generate_bars
+generate_notes_for_segment
+legacy aliases de sonificacion
+MIDI test loop
+LED matrix
+```
+
+## 8. Relacion con el resto de documentos
+
+Este inventario debe leerse como entrada rapida. Para mas detalle:
+
+```text
+docs/configuracion_final_v4.md
+docs/auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md
+docs/auditoria_codigo_detallada/10_mapa_funciones_criticas.md
+docs/auditoria_codigo_detallada/11_hallazgos_para_simplificacion_futura.md
+docs/auditoria_firmware_final_v1/01_arquitectura_global.md
+```
+
+## 9. Conclusion
+
+El proyecto final-v4 ya no debe entenderse como un conjunto de scripts sueltos, sino como una arquitectura integrada:
+
+```text
+firmware de adquisicion y transporte
+backend Python de DSP/quality/sonificacion/MIDI
+WebUI de observacion y control musical
+herramientas laterales de captura, validacion y benchmark
+corpus documental para TFG
+```
+
+Este documento conserva una vision global. La precision tecnica y las decisiones de refactor deben tomarse desde la auditoria detallada final-v4.
