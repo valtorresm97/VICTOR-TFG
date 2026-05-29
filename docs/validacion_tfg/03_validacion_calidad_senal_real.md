@@ -28,9 +28,15 @@ compute_quality_diagnostics()
   -> gate_factor / valid_for_sonification
 ```
 
-## 3. Captura intermedia usada para validar estados/artefactos
+## 3. Captura mixed_states
 
 La captura `20260524-122200_final_atenuacion_artefactos_mixed_states` se conserva como validacion intermedia de quality gate y estados/artefactos. No es la captura final principal de resultados; la sesion final actual es `s01_20260528`.
+
+Esta captura es importante porque el sujeto paso por varios estados durante una misma adquisicion. Eso permite evaluar si las metricas de calidad y las features cambian con el contexto:
+
+```text
+ojos abiertos -> ojos cerrados -> mandibula -> recuperacion -> parpadeo/frente -> recuperacion -> ojos cerrados
+```
 
 En esa captura intermedia se observo `valida_preliminar_con_artefactos`:
 
@@ -61,46 +67,67 @@ Tabla CSV:
 tables/table_03_mixed_state_stats.csv
 ```
 
-## 5. Figuras asociadas
+## 5. Orden correcto de figuras
 
-| Figura | Uso recomendado |
-| --- | --- |
-| `fig_03_final_capture_timeseries.png` | Vista temporal de la captura intermedia. |
-| `fig_09_jaw_movement_timeseries.png` | Ejemplo temporal de movimiento mandibular. |
-| `fig_10_jaw_emg_psd.png` | PSD durante movimiento mandibular/EMG. |
-| `fig_11_quality_state_distribution.png` | Distribucion de estados del quality score. |
-| `fig_00_final_capture_rms_timeline.png` | RMS por ventanas con timeline asumida. |
-| `fig_00_final_capture_quality_timeline.png` | Quality score por ventana. |
-| `fig_03_state_*` | Comparaciones por estados seleccionados. |
+Las figuras deben leerse en tres niveles. Las figuras antiguas especificas de mandibula (`fig_09_jaw_movement_timeseries` y `fig_10_jaw_emg_psd`) se conservan como artefactos generados, pero no deben ser el centro del relato porque rompen la comparacion homogenea entre estados.
+
+### 5.1 Vista global de la captura
+
+Primero se muestra la captura completa y la evolucion de calidad:
 
 ![final_timeseries](figures/fig_03_final_capture_timeseries.png)
-
-![jaw_timeseries](figures/fig_09_jaw_movement_timeseries.png)
-
-![jaw_psd](figures/fig_10_jaw_emg_psd.png)
-
-![quality_states](figures/fig_11_quality_state_distribution.png)
 
 ![final_rms_timeline](figures/fig_00_final_capture_rms_timeline.png)
 
 ![final_quality_timeline](figures/fig_00_final_capture_quality_timeline.png)
 
-![state_rest_timeseries](figures/fig_03_state_rest_timeseries.png)
+![quality_states](figures/fig_11_quality_state_distribution.png)
 
-![state_rest_psd](figures/fig_03_state_rest_psd.png)
+### 5.2 Estudio homogeneo por estado
 
-![state_jaw_timeseries](figures/fig_03_state_jaw_timeseries.png)
+Despues se debe estudiar cada estado con el mismo par de figuras:
 
-![state_jaw_psd](figures/fig_03_state_jaw_psd.png)
+```text
+senal temporal del estado
+PSD multitaper del estado
+```
 
-![state_blink_timeseries](figures/fig_03_state_blink_timeseries.png)
+El wrapper final-v4 genera este patron para todos los estados de la timeline con nombres:
 
-![state_blink_psd](figures/fig_03_state_blink_psd.png)
+```text
+fig_03_state_<estado>_timeseries.png
+fig_03_state_<estado>_psd.png
+```
 
-Para regenerar con mejor estilo de titulos/margenes:
+Figuras esperadas tras regenerar:
+
+```text
+fig_03_state_ojos_abiertos_reposo_timeseries.png
+fig_03_state_ojos_abiertos_reposo_psd.png
+fig_03_state_ojos_cerrados_reposo_1_timeseries.png
+fig_03_state_ojos_cerrados_reposo_1_psd.png
+fig_03_state_mandibula_timeseries.png
+fig_03_state_mandibula_psd.png
+fig_03_state_recuperacion_1_timeseries.png
+fig_03_state_recuperacion_1_psd.png
+fig_03_state_parpadeo_frente_timeseries.png
+fig_03_state_parpadeo_frente_psd.png
+fig_03_state_recuperacion_2_timeseries.png
+fig_03_state_recuperacion_2_psd.png
+fig_03_state_ojos_cerrados_reposo_2_timeseries.png
+fig_03_state_ojos_cerrados_reposo_2_psd.png
+```
+
+Cuando esas figuras esten generadas, el texto final puede insertar solo las mas representativas y dejar el resto como anexo/figuras disponibles.
+
+### 5.3 Comparacion DSP por estado
+
+La comparacion periodograma vs multitaper se trata en el documento `04`, pero se genera para los mismos estados para mantener simetria metodologica.
+
+Para regenerar todo el conjunto con nombres homogeneos:
 
 ```bash
-python3 python/tools/build_validation_docs_final_v4_style.py --captures-dir captures --docs-dir docs/validacion_tfg
+python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
 
 ## 6. Relacion con la sesion final
@@ -114,4 +141,4 @@ validez fisiologica como EEG limpio = parcial
 
 ## 7. Conclusion
 
-El sistema dispone de metricas suficientes para no tratar todas las ventanas por igual. La calidad de senal debe evaluarse por ventanas y el quality gate debe conservarse como parte esencial del pipeline final-v4.
+El sistema dispone de metricas suficientes para no tratar todas las ventanas por igual. La calidad de senal debe evaluarse por ventanas y por estado, y el quality gate debe conservarse como parte esencial del pipeline final-v4.
