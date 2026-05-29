@@ -1,10 +1,14 @@
 # Diseno y justificacion de `spectral_quality_score`
 
 Fecha: 2026-05-24
-Actualizado para final-v3: 2026-05-27
 
-Rama de diseño original: `captura-datos`
-Ramas relevantes actuales: `firmware-final-v3`, `codex/direct-band-sonification`
+Actualizado para final-v4: 2026-05-29
+
+Rama de diseno original: `captura-datos`.
+
+Rama integrada actual: `firmware-final-v4`.
+
+Este documento sigue activo como referencia del subsistema `spectral_quality`. Algunas evidencias empiricas proceden de capturas anteriores a la sesion final; para resultados finales de laboratorio y benchmarks debe priorizarse `docs/configuracion_final_v4.md` y `docs/validacion_tfg/`.
 
 ## 1. Objetivo
 
@@ -37,7 +41,9 @@ Las pruebas reales demostraron tres hechos:
    - ventanas malas ~60 %.
 
 3. La sonificacion actual responde a esas features:
-   - mandibula aumenta `activity`, `tension` y `note_probability`.
+   - mandibula aumenta los controles sensibles a actividad, bandas rapidas y probabilidad de nota.
+   - En final-v4 los nombres publicos/reportables son `rms_beta_activity`, `beta_gamma_drive`, `band_driven_density`, `rms_band_velocity` y `band_note_probability`.
+   - Los nombres antiguos `activity`, `tension`, `rhythmic_density`, `velocity_factor` y `note_probability` solo quedan como alias internos de compatibilidad.
 
 Por tanto, sin quality gate, una mandibula o un movimiento de frente podria
 interpretarse musicalmente como "mas actividad cerebral".
@@ -70,7 +76,7 @@ recupera.
 
 ## 4. Justificacion empirica de umbrales
 
-Los umbrales salen de las capturas reales de esta conversacion:
+Los umbrales salen de capturas reales previas y se conservan como base empirica:
 
 | Condicion | RMS mediano aprox | Interpretacion |
 | --- | ---: | --- |
@@ -81,6 +87,8 @@ Los umbrales salen de las capturas reales de esta conversacion:
 | captura mixta reposo | ~45-55 uV | plausible, mas variabilidad |
 | artefacto frente/parpadeo | ~174 uV | artefacto moderado |
 | mandibula | >200 uV y hasta mV | artefacto fuerte |
+
+En la sesion final `s01_20260528`, la interpretacion se hace con cautela: la adquisicion fue estable y reportable, pero hubo ventanas con ruido de red y transitorios. Por tanto, el score debe entenderse como una barrera conservadora, no como certificacion clinica de EEG limpio.
 
 Por eso:
 
@@ -116,14 +124,16 @@ El gate no modifica los bandpowers ni el DSP. Solo se aplica despues, en
 
 Si la calidad baja:
 
-- reduce `activity`,
-- reduce `rhythmic_density`,
-- reduce `velocity_factor`,
-- reduce `note_probability`,
-- lleva `tension` y `harmonic_stability` hacia valores neutros,
+- reduce `rms_beta_activity`,
+- reduce `band_driven_density`,
+- reduce `rms_band_velocity`,
+- reduce `band_note_probability`,
+- lleva `beta_gamma_drive` y `alpha_stability` hacia valores neutros,
 - evita actualizar el baseline de RMS con ventanas malas,
 - si score < 0.50, marca la feature como no valida para que no se genere musica
   nueva desde esa ventana.
+
+Por compatibilidad interna, esos controles pueden aparecer en algunas funciones como alias legacy: `activity`, `rhythmic_density`, `velocity_factor`, `note_probability`, `tension` y `harmonic_stability`. En documentacion final-v4 y TFG deben preferirse los nombres reportables nuevos.
 
 Por el suavizado EMA, los valores visibles no saltan de golpe a cero: tienden
 hacia niveles minimos/neutros. La marca `valid=False` es la que debe impedir que
@@ -131,11 +141,11 @@ esa ventana cree nuevos eventos musicales.
 
 Esto evita que el artefacto produzca mas notas o mas intensidad musical.
 
-En final-v3, este gate alimenta una cadena musical ya operativa:
+En final-v4, este gate alimenta una cadena musical ya operativa:
 
-- `activity`, `rhythmic_density`, `velocity_factor` y `note_probability` determinan densidad/velocity.
-- `harmonic_stability` y `tension` influyen en el acorde, pero los cambios se limitan con periodo minimo e histeresis para evitar pulsos repetitivos.
-- `register` y `tension` desplazan la melodia dentro de la escala elegida por WebUI.
+- `rms_beta_activity`, `band_driven_density`, `rms_band_velocity` y `band_note_probability` determinan densidad/velocity.
+- `alpha_stability` y `beta_gamma_drive` influyen en el acorde, pero los cambios se limitan con periodo minimo e histeresis para evitar pulsos repetitivos.
+- `spectral_register` y `beta_gamma_drive` desplazan la melodia dentro de la escala elegida por WebUI.
 - `valid=False` bloquea nuevos compases musicales; los eventos ya programados pueden sonar brevemente hasta que el scheduler/panic los limpie.
 
 ## 7. Por que no basta con filtrar mas
@@ -178,11 +188,12 @@ Sin cambiar la logica principal de obtencion de features, se podrian estudiar:
 Estas propuestas requieren pruebas A/B con CSV reales antes de entrar en
 produccion.
 
-## 9. Archivos modificados
+## 9. Archivos implicados
 
 - `python/spectral_quality.py`
 - `python/backend_service.py`
 - `python/sonification_features.py`
+- `python/tools/validate_spectral_features.py`
 
 ## 10. Validacion esperada en placa
 
@@ -204,11 +215,11 @@ sonification.quality_score
 sonification.quality_gate
 ```
 
-Repetir protocolo mixto:
+Repetir protocolo mixto si se hacen pruebas nuevas:
 
 - En reposo: `score` cercano a 1.
 - En mandibula: `score` debe caer.
-- Durante artefacto: `note_probability`, `velocity_factor` y `rhythmic_density`
+- Durante artefacto: `band_note_probability`, `rms_band_velocity` y `band_driven_density`
   deben atenuarse.
 - En recuperacion: `score` debe volver a subir.
 
