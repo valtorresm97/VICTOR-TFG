@@ -93,3 +93,5 @@ El montaje final no elimina los artefactos biologicos, pero ofrece una base sufi
 5. respuesta clara ante artefactos controlados;
 6. compatibilidad con quality gate y sonificacion final-v4.
 
+
+

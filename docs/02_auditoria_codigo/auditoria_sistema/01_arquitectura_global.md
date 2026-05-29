@@ -561,3 +561,5 @@ LED opcional
 
 Para redactar el TFG, este documento debe usarse como base narrativa. Para refactorizar o simplificar codigo, deben usarse los documentos de `docs/02_auditoria_codigo/funcion_por_funcion/`, especialmente los mapas de contratos, funciones criticas y hallazgos de simplificacion.
 
+
+

@@ -60,3 +60,5 @@ Esta captura debe reportarse como condicion real de ojos cerrados con adquisicio
 
 > En ojos cerrados, el sistema mantuvo adquisicion estable y genero una salida musical persistente. Sin embargo, el ratio de 50 Hz fue elevado, por lo que la condicion se usa como evidencia de funcionamiento del pipeline y no como demostracion fisiologica concluyente de cambios espectrales.
 
+
+

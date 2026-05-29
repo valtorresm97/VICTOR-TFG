@@ -36,8 +36,8 @@ Si ambas carpetas dicen cosas distintas, prevalece este orden:
 ```text
 1. Codigo real de firmware-final-v4
 2. docs/configuracion_final_v4.md
-3. docs/02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md
-4. docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+3. docs/01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md
+4. docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 5. docs/02_auditoria_codigo/auditoria_sistema/ una vez reajustada
 6. documentos historicos antiguos
 ```
@@ -153,4 +153,6 @@ usar auditoria_firmware_final_v1 como fuente narrativa reajustada a final-v4
 ```
 
 Esto permitira preparar una version esencial/UML mas clara y, al mismo tiempo, tener material redactable para el TFG sin perder la trazabilidad tecnica.
+
+
 

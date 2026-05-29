@@ -1,6 +1,6 @@
 ﻿# Plantilla de sesion de captura EEG-MIDI por sujeto
 
-> Copiar este archivo como `docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/<YYYYMMDD>_<subject>_sesion.md` antes o despues de cada sesion. No incluir nombres reales.
+> Copiar este archivo como `docs/04_protocolos_captura/sesiones_captura/<YYYYMMDD>_<subject>_sesion.md` antes o despues de cada sesion. No incluir nombres reales.
 
 ## 1. Identificacion anonima
 
@@ -175,4 +175,6 @@ Comentario final:
 ```text
 
 ```
+
+
 

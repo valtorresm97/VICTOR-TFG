@@ -15,3 +15,5 @@
 | 20260528-104617_bench_real_rest_60s | bench_real_rest_60s | 60.02 | valida_preliminar_con_artefactos | 97.95 | 16.1% | contexto |
 | 20260528-111723_bench_real_rest_60s_mcu | bench_real_rest_60s_mcu | 60.04 | pendiente | pendiente | pendiente | contexto |
 
+
+

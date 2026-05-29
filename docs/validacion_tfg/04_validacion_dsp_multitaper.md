@@ -133,3 +133,5 @@ El DSP queda validado para extraccion de caracteristicas bajo ventanas limpias o
 multitaper + bandpowers relativos + suavizado + quality gate
 ```
 
+
+

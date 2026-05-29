@@ -233,3 +233,5 @@ No incluir en el UML principal:
 
 Pero si deben quedar documentados como capacidades diagnosticas y riesgos de modificacion.
 
+
+

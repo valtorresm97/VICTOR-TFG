@@ -185,3 +185,5 @@ freeze/attenuate sonification when quality is low
    durante mandibula/frente.
 5. Despues pasar al estudio de parametros de sonificacion.
 
+
+

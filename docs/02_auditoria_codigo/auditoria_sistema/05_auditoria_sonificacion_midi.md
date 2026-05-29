@@ -322,3 +322,5 @@ EEG features + quality gate -> controles musicales -> notas MIDI -> salida fisic
 
 La salida musical debe interpretarse como sonificacion experimental de rasgos EEG, no como diagnostico clinico.
 
+
+

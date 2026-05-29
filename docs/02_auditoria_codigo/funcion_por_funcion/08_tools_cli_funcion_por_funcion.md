@@ -302,3 +302,5 @@ Usar tools solo para reproducir capturas, benchmarks y figuras.
 
 La version esencial debe explicar el sistema funcionando. Las tools explican como se valido y documento ese sistema.
 
+
+

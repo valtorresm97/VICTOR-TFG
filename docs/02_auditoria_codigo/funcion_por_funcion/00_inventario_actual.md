@@ -99,9 +99,9 @@ Criterio de lectura:
 | `docs/README.md` | Documentacion | Indice activo final-v4 | Si | Doc | Punto de entrada documental. |
 | `docs/configuracion_final_v4.md` | Documentacion | Resumen tecnico principal final-v4 | Si | Doc | Fuente preferente de estado actual. |
 | `docs/auditoria_final_v4_fase1_2.md` | Documentacion | Auditoria de fases 1 y 2 | Medio | Doc | Deja trazabilidad de decisiones de limpieza documental. |
-| `docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Capturas | Protocolo experimental repetible | Medio | Doc | Activo para nuevas sesiones. |
-| `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Capturas | Plantilla de sesion | Medio | Doc | Activo. |
-| `docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/` | Capturas | Sesiones documentadas | Medio | Doc | Incluye prueba de casa y sesion final. |
+| `docs/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Capturas | Protocolo experimental repetible | Medio | Doc | Activo para nuevas sesiones. |
+| `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Capturas | Plantilla de sesion | Medio | Doc | Activo. |
+| `docs/04_protocolos_captura/sesiones_captura/` | Capturas | Sesiones documentadas | Medio | Doc | Incluye prueba de casa y sesion final. |
 | `docs/ads1299_diagnostic_modes.md` | Subsistema ADS1299 | Modos diagnosticos | Medio | Doc | Activo final-v4; modo final de capturas = 5. |
 | `docs/ads1299_register_audit_bias_drl.md` | Subsistema ADS1299 | Registros, BIAS/DRL y CH1-only | Medio | Doc | Activo final-v4. |
 | `docs/diseno_spectral_quality_score.md` | Subsistema DSP/calidad | Diseno quality gate | Medio | Doc | Activo final-v4 con nombres reportables nuevos. |
@@ -190,4 +190,6 @@ Objetivo al revisarla:
 - confirmar `BENCH_REPORT_ENABLED=1` y uso de Monitor;
 - marcar LED matrix como secundaria/desactivada por defecto;
 - no modificar firmware.
+
+
 

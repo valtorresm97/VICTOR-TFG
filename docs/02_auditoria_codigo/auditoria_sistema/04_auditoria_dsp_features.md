@@ -303,3 +303,5 @@ el quality gate protege frente a artefactos y ventanas malas;
 la validacion offline documenta lo ocurrido en capturas reales.
 ```
 
+
+

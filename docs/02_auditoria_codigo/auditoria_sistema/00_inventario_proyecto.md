@@ -180,10 +180,10 @@ Este inventario debe leerse como entrada rapida. Para mas detalle:
 
 ```text
 docs/configuracion_final_v4.md
-docs/02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md
-docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+docs/01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md
+docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md
-docs/02_auditoria_codigo/auditoria_sistema/01_arquitectura_global.md
+docs/01_arquitectura_sistema/01_arquitectura_global.md
 ```
 
 ## 9. Conclusion
@@ -199,4 +199,6 @@ corpus documental para TFG
 ```
 
 Este documento conserva una vision global. La precision tecnica y las decisiones de refactor deben tomarse desde la auditoria detallada final-v4.
+
+
 

@@ -264,3 +264,5 @@ Python -> Bridge.call("midi_bytes") -> Serial1/D1 TXINV -> MIDI OUT
 
 No debe presentar LED ni modo sintetico como parte necesaria del flujo EEG->MIDI validado.
 
+
+

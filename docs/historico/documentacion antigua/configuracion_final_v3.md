@@ -197,3 +197,5 @@ No hay controles WebUI para habilitar/deshabilitar MIDI/LED, iniciar capturas, c
 5. Confirmar MIDI: panic funciona y una nota/secuencia diagnostica suena por D1/TX invertido.
 6. Confirmar sonificacion: con calidad baja no se generan cambios musicales fuertes; al recuperarse la calidad vuelve la generacion.
 
+
+

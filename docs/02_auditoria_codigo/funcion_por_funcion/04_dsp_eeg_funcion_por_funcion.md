@@ -298,3 +298,5 @@ compute_online_features()
 
 No mover codigo todavia. Primero crear tests de contrato y diagramas logicos. El primer refactor seguro seria separar en documentacion las responsabilidades de buffer, extractor de features y quality gate, sin cambiar imports ni clases reales.
 
+
+

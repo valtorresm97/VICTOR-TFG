@@ -16,7 +16,7 @@ lo que no debe tocarse sin pruebas
 La auditoria funcion por funcion mas exhaustiva esta en:
 
 ```text
-docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md
 ```
 
@@ -182,4 +182,6 @@ mantener herramientas y evidencias TFG como laterales
 ```
 
 La prioridad no debe ser reducir lineas de codigo, sino dejar una version esencial que conserve el funcionamiento validado y sea explicable en la memoria.
+
+
 

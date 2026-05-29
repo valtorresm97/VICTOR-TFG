@@ -176,3 +176,5 @@ WebUI musical activa, LED desactivado y benchmarks/capturas como laterales de va
 
 Esta configuracion es la que debe considerarse punto de partida para redactar el TFG y para preparar la futura version esencial/UML.
 
+
+

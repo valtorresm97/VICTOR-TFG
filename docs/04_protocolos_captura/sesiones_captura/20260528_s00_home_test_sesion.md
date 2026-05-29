@@ -43,3 +43,5 @@
 | Sesion valida | `parcial` |
 | Comentario final | `Primera prueba en casa para validar montaje, musica y guardado de capturas` |
 
+
+

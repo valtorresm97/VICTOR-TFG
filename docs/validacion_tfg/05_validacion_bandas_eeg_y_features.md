@@ -135,3 +135,5 @@ nombres reportables vinculados a EEG/features
 
 La decision defendible para el TFG es usar las bandas como moduladores musicales relativos, no como marcadores clinicos aislados.
 
+
+

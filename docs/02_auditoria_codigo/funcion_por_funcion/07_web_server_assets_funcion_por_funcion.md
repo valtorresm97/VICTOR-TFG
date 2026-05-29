@@ -298,3 +298,5 @@ Hacer que el codigo sea explicable para el TFG.
 Preferir una ruta atomica /music/config para root/main/scale.
 ```
 
+
+

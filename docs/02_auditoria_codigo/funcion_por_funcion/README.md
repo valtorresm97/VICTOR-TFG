@@ -102,3 +102,5 @@ ADS1299-4PAG
 6. Refactor offline tools grandes.
 7. Tocar firmware solo con placa y benchmark antes/despues.
 
+
+

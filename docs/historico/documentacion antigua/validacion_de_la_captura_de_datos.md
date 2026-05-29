@@ -526,3 +526,5 @@ Por tanto, la adquisicion real puede considerarse preliminarmente plausible. El
 foco de la siguiente fase debe ser repetir estabilidad, clasificar artefactos y
 evitar modificar filtros o registros hasta tener comparativas suficientes.
 
+
+

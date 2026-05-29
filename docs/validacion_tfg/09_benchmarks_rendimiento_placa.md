@@ -461,3 +461,5 @@ En Python/Linux, el calculo live de features espectrales requiere una mediana de
 
 Por tanto, en la configuracion evaluada, el cuello de botella principal del sistema no se encuentra en el calculo DSP/sonificacion de Python ni en el filtrado del MCU. Los aspectos mas criticos para fases posteriores son la calidad de senal, la presencia de artefactos, la estabilidad del montaje bioelectrico y la validacion de latencia fisica end-to-end EEG -> MIDI OUT.
 
+
+

@@ -220,3 +220,5 @@ Para el TFG, el piano roll WebUI es la representacion principal de las notas gen
 EEG -> DSP -> quality gate -> sonificacion -> MIDI fisico
 ```
 
+
+

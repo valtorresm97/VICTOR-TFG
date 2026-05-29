@@ -79,3 +79,5 @@ Esta captura se debe usar como evidencia de funcionamiento real y como ejemplo d
 
 > En ojos abiertos, el sistema mantuvo adquisicion continua y registro musical, pero la seÃ±al contenia un artefacto transitorio de gran amplitud. Por ello, la condicion se conserva como evidencia tecnica de integracion y como ejemplo de la necesidad de identificar ventanas contaminadas antes de realizar interpretaciones fisiologicas.
 
+
+

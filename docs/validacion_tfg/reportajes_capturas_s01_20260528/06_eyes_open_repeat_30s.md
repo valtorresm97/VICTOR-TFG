@@ -100,3 +100,5 @@ La figura combinada se conserva como PNG y la version reajustada se documenta en
 
 Esta captura debe ser la referencia principal de la sesion final. Su valor no esta en demostrar una fisiologia perfecta, sino en mostrar que el sistema EEG-MIDI funciona de extremo a extremo con datos reales y deja una trazabilidad completa para analisis posterior.
 
+
+

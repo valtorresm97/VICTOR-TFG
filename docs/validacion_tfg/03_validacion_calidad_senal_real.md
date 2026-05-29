@@ -159,3 +159,5 @@ validez fisiologica como EEG limpio = parcial
 
 El sistema dispone de metricas suficientes para no tratar todas las ventanas por igual. La calidad de senal debe evaluarse por ventanas y por estado, y el quality gate debe conservarse como parte esencial del pipeline final-v4.
 
+
+

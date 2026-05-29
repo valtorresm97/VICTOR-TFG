@@ -247,3 +247,5 @@ Antes de modificar el modo analogico en futuras ramas, confirmar:
 
 No cambiar registros ADS1299 en la futura version esencial UML. La version esencial debe documentar el modo final, no experimentar con la configuracion analogica.
 
+
+

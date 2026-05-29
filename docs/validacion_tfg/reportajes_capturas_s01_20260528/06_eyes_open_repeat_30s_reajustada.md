@@ -61,3 +61,5 @@ Esta es la figura combinada recomendada para la memoria si se quiere mostrar la 
 
 La captura 06 debe reportarse con ambas vistas: completa y reajustada. La completa demuestra transparencia experimental; la reajustada permite interpretar la parte util y defender la integracion EEG-MIDI.
 
+
+

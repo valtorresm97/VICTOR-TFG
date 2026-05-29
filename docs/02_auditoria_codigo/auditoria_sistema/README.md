@@ -21,8 +21,8 @@ Por tanto, esta carpeta debe tratarse como una segunda capa de auditoria transve
 
 ```text
 docs/configuracion_final_v4.md
-docs/02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md
-docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+docs/01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md
+docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md
 ```
 
@@ -140,4 +140,6 @@ docs/configuracion_final_v4.md
 docs/02_auditoria_codigo/funcion_por_funcion/
 docs/validacion_tfg/
 ```
+
+
 

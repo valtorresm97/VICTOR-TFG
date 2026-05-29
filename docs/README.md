@@ -68,8 +68,8 @@ La familia `02_auditoria_codigo/funcion_por_funcion/` sigue siendo muy valiosa p
 | `02_auditoria_codigo/funcion_por_funcion/06_led_matrix_funcion_por_funcion.md` | Activo secundario | LED matrix y piano scroll. |
 | `02_auditoria_codigo/funcion_por_funcion/07_web_server_assets_funcion_por_funcion.md` | Activo | Web server, endpoints y assets HTML/JS/CSS. |
 | `02_auditoria_codigo/funcion_por_funcion/08_tools_cli_funcion_por_funcion.md` | Activo | Tools offline, capturas, validacion y documentacion. |
-| `02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md` | Activo critico | Contratos productor/consumidor que no deben romperse. |
-| `02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md` | Activo critico | Criticidad y pruebas minimas. |
+| `01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md` | Activo critico | Contratos productor/consumidor que no deben romperse. |
+| `01_arquitectura_sistema/10_mapa_funciones_criticas.md` | Activo critico | Criticidad y pruebas minimas. |
 | `02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md` | Activo para fase UML | Base para futura `propuesta_version_esencial_uml.md`. |
 
 ## 5. Documentacion activa de subsistemas
@@ -109,7 +109,10 @@ Criterio: consultar estos documentos solo para entender decisiones anteriores, n
 2. Para comprobar que se reviso en la migracion documental, leer `auditoria_final_v4_fase1_2.md`.
 3. Para justificar rendimiento temporal del TFG, usar `validacion_tfg/09_benchmarks_rendimiento_placa.md`.
 4. Para justificar capturas reales y resultados experimentales, usar `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `reportaje_sesion_final_s01_20260528.md`.
-5. Para tocar codigo o preparar UML, consultar `02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md`, `10_mapa_funciones_criticas.md` y `11_hallazgos_para_simplificacion_futura.md`.
+5. Para tocar codigo o preparar UML, consultar `01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md`, `01_arquitectura_sistema/10_mapa_funciones_criticas.md` y `06_simplificacion_uml/11_hallazgos_para_simplificacion_futura.md`.
 6. Para entender una decision antigua, consultar `historico/documentacion antigua/` o reports historicos.
 7. No borrar benchmarks, capturas, reportajes ni figuras durante esta fase de organizacion documental.
+
+
+
 

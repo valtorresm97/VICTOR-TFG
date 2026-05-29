@@ -218,3 +218,5 @@ No tocar midi_bytes ni EEG por simplificar LED.
 No activar LED durante pruebas de rendimiento salvo benchmark especifico.
 ```
 
+
+

@@ -291,3 +291,5 @@ No borrar ni mover todavia. Primera fase de simplificacion recomendada:
 4. Extraer diagramas logicos sin mover imports.
 5. Solo despues plantear separacion de modulos.
 
+
+

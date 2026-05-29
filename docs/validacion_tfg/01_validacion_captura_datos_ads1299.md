@@ -96,3 +96,5 @@ python3 python/tools/build_validation_docs_final_v4_style.py --captures captures
 
 Bajo las capturas versionadas, la ruta ADC/SPI/Bridge/Python queda razonablemente validada. Los problemas observados en capturas reales posteriores no se explican por gaps, status invalido persistente ni fallo de streaming, sino por montaje bioelectrico, ruido comun, artefactos y calidad de contacto.
 
+
+

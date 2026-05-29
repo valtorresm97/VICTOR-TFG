@@ -9,8 +9,8 @@ No todos los controles faltantes deben implementarse. Algunos se dejan fuera de 
 La auditoria funcion por funcion mas exhaustiva esta en:
 
 ```text
-docs/02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md
-docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+docs/01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md
+docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md
 ```
 
@@ -217,4 +217,6 @@ mantener controles seguros
 no exponer firmware/ADS desde UI
 separar flujo principal y herramientas laterales
 ```
+
+
 

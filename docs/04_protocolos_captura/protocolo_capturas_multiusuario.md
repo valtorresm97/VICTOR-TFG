@@ -66,7 +66,7 @@ Aunque el modelo final use CH1 como canal principal, se conservan las cuatro col
 - Bloque `git` con rama, commit y dirty state.
 - `notes`.
 
-La metadata adicional de sujeto/sesion debe escribirse en `--notes` y en la plantilla `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md`.
+La metadata adicional de sujeto/sesion debe escribirse en `--notes` y en la plantilla `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md`.
 
 ## 4. Preparacion antes de todos los sujetos
 
@@ -97,7 +97,7 @@ Las capturas se crean automaticamente en `captures/`. Para logs manuales de sesi
 
 ```bash
 cd /home/arduino/ArduinoApps/eeg_midi
-mkdir -p docs/sesiones_captura logs/capturas
+mkdir -p docs/04_protocolos_captura/sesiones_captura logs/capturas
 ```
 
 No guardar plots en esta fase.
@@ -494,9 +494,12 @@ captures/<timestamp>_<condition>/quality_report.md
 captures/<timestamp>_<condition>/quality_report.json
 captures/<timestamp>_<condition>/spectral_validation_report.md
 captures/<timestamp>_<condition>/spectral_validation_report.json
-docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/<session>_<subject>_sesion.md
+docs/04_protocolos_captura/sesiones_captura/<session>_<subject>_sesion.md
 logs/capturas/<session>_<subject>_context.txt
 ```
 
 No borrar capturas descartadas. Marcar en la plantilla que no se usaran como evidencia principal.
+
+
+
 

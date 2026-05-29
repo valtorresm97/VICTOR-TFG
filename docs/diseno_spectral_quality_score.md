@@ -234,3 +234,5 @@ reescritura del DSP ni como cambio de bandas. Esto permite justificar en el TFG
 que la sonificacion se basa en features EEG plausibles y que los artefactos no
 se transforman directamente en eventos musicales.
 
+
+

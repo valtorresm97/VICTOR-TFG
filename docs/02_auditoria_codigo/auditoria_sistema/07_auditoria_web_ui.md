@@ -283,3 +283,5 @@ La WebUI final-v4 es una interfaz de monitorizacion y control musical. Permite o
 
 Para el TFG debe describirse como una capa de supervision y control, no como parte del calculo DSP ni del firmware. Su simplificacion futura debe hacerla mas comprensible sin perder fluidez ni funcionalidad.
 
+
+

@@ -390,3 +390,5 @@ Python -> midi_bytes -> Serial1/D1 TXINV -> MIDI OUT fisico
 
 Su responsabilidad es capturar y transportar datos de forma estable, no interpretar EEG ni generar musica. La interpretacion espectral, quality gate y sonificacion viven en Python. Para el TFG, este documento sirve como descripcion narrativa del bloque firmware; para cambios de codigo, usar la auditoria detallada funcion por funcion.
 
+
+

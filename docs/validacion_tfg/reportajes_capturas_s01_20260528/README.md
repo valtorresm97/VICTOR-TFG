@@ -63,3 +63,5 @@ Los artefactos deben documentarse, no ocultarse.
 
 Por tanto, los reportajes no deben leerse como prueba clinica, sino como evidencia experimental y tecnica de integracion EEG-MIDI.
 
+
+

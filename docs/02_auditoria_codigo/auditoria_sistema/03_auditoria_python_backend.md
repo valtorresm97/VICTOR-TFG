@@ -414,3 +414,5 @@ El backend Python final-v4 es la capa que convierte los bloques EEG procedentes 
 
 Tambien sostiene la WebUI y las capturas, pero estas deben entenderse como observacion, control y validacion alrededor del nucleo EEG->MIDI, no como sustitutos del flujo principal.
 
+
+

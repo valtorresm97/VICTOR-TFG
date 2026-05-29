@@ -112,3 +112,5 @@ Primero se evalua calidad, despues se extraen rasgos espectrales y finalmente es
 
 Esta estrategia permite una sonificacion expresiva, trazable y prudente frente a artefactos.
 
+
+

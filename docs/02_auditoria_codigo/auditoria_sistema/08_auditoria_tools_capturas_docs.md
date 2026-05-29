@@ -235,10 +235,10 @@ FEATURE_HOP_SAMPLES / FS_HZ = 64 / 250 = 256 ms
 
 | Documento | Estado final-v4 | Observacion |
 | --- | --- | --- |
-| `docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Vigente | Protocolo repetible multiusuario. |
-| `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Vigente | Plantilla de sesion simplificada. |
-| `docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/20260528_s01_sesion.md` | Vigente | Sesion final real. |
-| `docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/20260528_s00_home_test_sesion.md` | Vigente como prueba previa | Validacion en casa, no evidencia principal. |
+| `docs/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Vigente | Protocolo repetible multiusuario. |
+| `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Vigente | Plantilla de sesion simplificada. |
+| `docs/04_protocolos_captura/sesiones_captura/20260528_s01_sesion.md` | Vigente | Sesion final real. |
+| `docs/04_protocolos_captura/sesiones_captura/20260528_s00_home_test_sesion.md` | Vigente como prueba previa | Validacion en casa, no evidencia principal. |
 | `docs/diseno_spectral_quality_score.md` | Vigente con cautela | Base conceptual del quality gate. |
 | `docs/midi_out_inverted_tx_validation.md` | Vigente | Validacion MIDI fisico TX invertido. |
 | `docs/ads1299_diagnostic_modes.md` | Vigente tecnico | Define modos ADS 0..5. |
@@ -342,4 +342,6 @@ figuras y reportajes
 ```
 
 Para el TFG, esta capa es fundamental como metodologia y resultados. Para la futura version esencial/UML, debe mantenerse como soporte lateral y no mezclarse con el flujo principal EEG->MIDI.
+
+
 

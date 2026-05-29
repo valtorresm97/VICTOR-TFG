@@ -581,8 +581,8 @@ Documentos recomendados como entrada:
 | `docs/validacion_tfg/10_resultados_captura_final_laboratorio.md` | Resumen de sesion final de laboratorio. |
 | `docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md` | Relato tecnico global de la sesion. |
 | `docs/validacion_tfg/reportajes_capturas_s01_20260528/` | Lectura individual por captura. |
-| `docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Protocolo experimental. |
-| `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Plantilla de sesion. |
+| `docs/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Protocolo experimental. |
+| `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Plantilla de sesion. |
 | `docs/02_auditoria_codigo/funcion_por_funcion/` | Auditoria funcion por funcion. |
 
 ## Que no se debe tocar sin placa
@@ -649,4 +649,6 @@ Conclusion:
 final-v4 es la version integrada y trazable del sistema EEG-MIDI.
 La futura version esencial debe simplificar la explicacion y los diagramas, no perder la evidencia de validacion ni modificar contratos criticos sin pruebas.
 ```
+
+
 

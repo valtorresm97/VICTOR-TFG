@@ -60,3 +60,5 @@ Frase sugerida:
 
 > La captura de parpadeo se incluye como artefacto fisiologico controlado. Aunque el sistema mantuvo adquisicion y sonificacion, esta condicion no se usa para validar EEG limpia, sino para documentar la respuesta del pipeline ante contaminacion fisiologica esperada.
 
+
+

@@ -274,3 +274,5 @@ No tocar contrato midi_bytes ni panic.
 No presentar test endpoints como parte del flujo EEG->MIDI.
 ```
 
+
+

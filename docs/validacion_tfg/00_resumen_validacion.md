@@ -80,3 +80,5 @@ ADS1299 -> firmware -> Bridge -> Python -> DSP -> quality gate -> sonificacion -
 
 Las limitaciones restantes estan relacionadas principalmente con calidad de senal, artefactos, estabilidad del montaje, explicabilidad de la WebUI y futura medicion de latencia fisica end-to-end.
 
+
+

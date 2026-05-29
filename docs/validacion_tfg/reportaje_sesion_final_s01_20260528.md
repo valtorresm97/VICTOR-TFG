@@ -234,3 +234,5 @@ captura real -> CSV EEG -> quality reports -> features -> controles de sonificac
 
 La limitacion principal tambien queda documentada: la adquisicion real presenta artefactos. Esto no invalida el sistema; delimita honestamente el alcance experimental de la prueba.
 
+
+

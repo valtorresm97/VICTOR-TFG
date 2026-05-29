@@ -94,8 +94,8 @@ Para una sesion final organizada, usar el flujo documentado por:
 
 ```text
 python/tools/final_capture_session.py
-docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md
-docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md
+docs/04_protocolos_captura/protocolo_capturas_multiusuario.md
+docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md
 ```
 
 ## 7. Artefactos que debe contener cada captura
@@ -185,4 +185,6 @@ No debe presentarse como la sesion final principal. Su papel actual es justifica
 ## 11. Conclusion
 
 El protocolo final-v4 queda centrado en capturas reales trazables, con metadata, EEG, calidad, espectro, controles de sonificacion y notas persistidas. La captura `mixed_states` queda como antecedente tecnico importante, mientras que `s01_20260528` es la sesion final reportable para resultados del TFG.
+
+
 

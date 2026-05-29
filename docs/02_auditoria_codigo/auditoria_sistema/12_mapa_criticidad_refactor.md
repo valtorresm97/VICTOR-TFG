@@ -7,7 +7,7 @@ Este documento clasifica los archivos y funciones del proyecto segun el riesgo d
 La auditoria funcion por funcion mas exhaustiva esta en:
 
 ```text
-docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md
+docs/01_arquitectura_sistema/10_mapa_funciones_criticas.md
 docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md
 ```
 
@@ -277,4 +277,6 @@ Despues simplificar diagramas.
 Despues refactorizar con commits pequenos.
 Solo al final eliminar legacy.
 ```
+
+
 

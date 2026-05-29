@@ -61,3 +61,5 @@ Frase sugerida:
 
 > Durante el reposo quieto, el sistema mantuvo adquisicion continua sin gaps ni estados invalidos y registro una salida musical sostenida. La condicion se considera valida como evidencia de integracion tecnica, aunque la interpretacion fisiologica queda limitada por ruido de red y variabilidad de amplitud.
 
+
+
