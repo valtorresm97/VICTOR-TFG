@@ -31,12 +31,8 @@ La conversación comenzó con un sistema que ya comunicaba con el ADS1299, pero 
 - `captura-datos-dsp`: base común con adquisición y DSP validados preliminarmente, y `bias_ch1_only_loff_off` por defecto.
 - `diagnosis/sonificacion-con-artefactos`: rama de control, sin atenuación de artefactos.
 - `diagnosis/sonificacion-atenuacion-artefactos`: rama experimental, con `spectral_quality_score` y quality gate.
-- `firmware-final-v3`: rama congelada de referencia para entrega final. Mantiene adquisición/streaming final, MIDI UART físico validado y TX invertido obligatorio.
-- `codex/direct-band-sonification`: rama experimental posterior con mapeo musical directo por bandas, controles WebUI root/main/scale, escalas ampliadas, acordes menos frecuentes y mayor variedad melódica.
 
 La comparación entre las dos ramas de diagnóstico permite separar dos preguntas: si la señal/DSP funciona, y si la capa musical debe protegerse frente a artefactos. La respuesta obtenida fue que la señal y el DSP son suficientemente útiles para continuar, pero la sonificación necesita memoria musical, histéresis y control de repetición armónica.
-
-Actualización final-v3: esa memoria musical e histéresis ya están implementadas de forma inicial mediante periodo mínimo de acorde, umbral de cambio y variedad melódica controlada. Sigue pendiente medir formalmente latencia, robustez de endpoints WebUI y comportamiento musical con usuarios.
 
 ## Cambios que no se hicieron en esta fase
 

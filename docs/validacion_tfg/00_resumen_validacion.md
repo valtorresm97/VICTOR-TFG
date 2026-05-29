@@ -1,81 +1,55 @@
-# 00. Resumen general de validacion - final-v4
+# 00. Resumen general de validación
 
-## 1. Papel de este documento
+Generado automáticamente por `python/tools/build_validation_docs.py`.
 
-Este documento resume el bloque de validacion del sistema EEG-MIDI. Los documentos `00` a `05` nacieron como salida automatica de `python/tools/build_validation_docs.py` y siguen siendo utiles para justificar decisiones de diseno: adquisicion ADS1299, montaje de electrodos, BIAS/RLD, calidad de senal, DSP multitaper, bandas EEG y quality gate.
+La validación se realizó antes de diseñar la sonificación final para separar tres problemas: la adquisición física de la señal, la extracción espectral de características y la respuesta musical. Esta separación evita atribuir a la música errores que podrían venir del ADC, del firmware o del montaje de electrodos.
 
-En final-v4 no deben leerse como sustituto de la sesion final de laboratorio. La evidencia final principal queda en:
+En la rama documentada se dispone de 14 capturas versionadas con informes asociados. Las pruebas internas y reales indican que la cadena ADS1299 -> SPI -> firmware -> Bridge -> Python funciona sin pérdidas temporales apreciables en las capturas principales. Las limitaciones restantes se asocian sobre todo a artefactos biológicos o mecánicos: mandíbula, frente, contacto de electrodos, movimiento de cables y ruido común.
 
-| Evidencia | Documento |
-| --- | --- |
-| Rendimiento temporal en placa | `09_benchmarks_rendimiento_placa.md` |
-| Captura final de laboratorio | `10_resultados_captura_final_laboratorio.md` |
-| Reportaje global de sesion | `reportaje_sesion_final_s01_20260528.md` |
-| Reportajes por condicion | `reportajes_capturas_s01_20260528/` |
-| Figuras finales | `figures/capturas_finales_s01_20260528_matplotlib/` y `figures/capturas_finales_s01_20260528_enhanced/` |
+La captura final `20260524-122200_final_atenuacion_artefactos_mixed_states` resume el estado alcanzado: fs=250.0 Hz, gaps=0, invalid_status=0, RMS mediano por ventanas=83.30 µV y quality score mediano=0.912.
 
-## 2. Configuracion final-v4 de referencia
+| Bloque validado | Pruebas realizadas | Resultado | Estado final |
+| --- | --- | --- | --- |
+| ADS1299/SPI/RDATAC | ID 0x3C, status 0xC00000, shorted_inputs | sin gaps/invalid status en capturas versionadas | razonablemente validado |
+| Bridge MCU-Python | capturas CSV con 250 Hz y bloques de 8 | streaming estable | validado en condiciones probadas |
+| Montaje electrodos | Fp1-Fp2, ear-EEG, BIAS/RLD | ear-EEG y CH1-only más estables | montaje final definido |
+| DSP multitaper | windowed PSD, bandpowers, quality score | features reproducibles offline | validado para diagnóstico |
+| Sonificación | quality gate y controles espectrales | atenuación funciona; diseño musical pendiente | siguiente fase |
 
-| Campo | Valor |
-| --- | --- |
-| Modo ADS | `ADS_DIAGNOSTIC_MODE=5 / bias_ch1_only_loff_off` |
-| Montaje final | `ear_eeg_ch1_only` |
-| Canal principal | CH1 |
-| CH2-CH4 | Conservados por contrato, no EEG activo en capturas finales |
-| Ventana DSP | 4.0 s |
-| Hop features | 64 muestras, 256 ms a 250 Hz |
-| MIDI fisico | `Serial1`/D1 con TX invertido |
-| LED matrix | Desactivada por defecto |
+Queda fuera del alcance de estos documentos el diseño sonoro definitivo. La evidencia aquí recogida sirve como base para esa fase posterior.
 
-## 3. Bloques validados
+## Captura final válida y evolución temporal
 
-| Bloque validado | Evidencia | Resultado final-v4 |
+La captura `20260524-122200_final_atenuacion_artefactos_mixed_states` se usa como evidencia final de la fase de adquisición/DSP con atenuación de artefactos. La línea temporal mostrada en las figuras procede del protocolo de captura usado en la placa: ojos abiertos, ojos cerrados, mandíbula, recuperación, parpadeo/frente, recuperación y ojos cerrados. Como los estados no están embebidos muestra a muestra en `metadata.json`, se documentan como timeline asumida desde el protocolo ejecutado.
+
+| Métrica | Valor | Interpretación |
 | --- | --- | --- |
-| ADS1299/SPI/RDATAC | ID/status, shorted inputs y capturas reales | Cadena digital razonablemente validada. |
-| Bridge MCU-Python | CSV con 250 Hz y bloques de 8 muestras | Streaming estable en condiciones probadas. |
-| Montaje electrodos | Fp1-Fp2 frente a ear-EEG/CH1-only | Se adopta ear-EEG/CH1-only por estabilidad. |
-| DSP multitaper | PSD, bandpowers, ventanas de 4 s | Valido para extraer features de sonificacion. |
-| Quality gate | Diagnostico + `spectral_quality_score` | Esencial para atenuar/bloquear ventanas malas. |
-| Sonificacion | Controles final-v4 y notas guardadas | Integrada con capturas finales. |
-| MIDI fisico | `midi_bytes` hacia UART fisica | Validado en placa. |
-| WebUI musical | root/main/scale, panic y piano roll | Integrada como observador y control ligero. |
+| Duración | 191.7 s | captura larga suficiente para observar estados y transitorios |
+| Frecuencia efectiva | 250.0 Hz | coincide con el objetivo de adquisición |
+| Muestras | 45872 | stream completo de la sesión |
+| Sample gaps | 0 | sin discontinuidades temporales detectadas |
+| Invalid status | 0 | sin errores de estado ADS1299 |
+| RMS global | 848.7 µV | afectado por transitorios de artefacto |
+| RMS mediano por ventana | 83.30 µV | representa mejor los tramos estables |
+| RMS p95 | 264.2 µV | cuantifica ventanas altas |
+| Best window RMS | 44.90 µV | referencia de tramo limpio |
+| PTP global | 98868 µV | detecta artefactos extremos |
+| PTP mediano | 1200 µV | amplitud típica por ventana |
+| PTP p95 | 1763 µV | transitorios altos |
+| Ratio 50 Hz | 0.003 | ruido de red no dominante globalmente |
+| Artifact windows | 6.0% | ventanas artefactadas según quality_report |
+| Spectral quality mediana | 0.912 | score offline/live comparable |
+| Low-quality spectral | pendiente | ventanas atenuadas o bloqueadas |
+| Diagnóstico | valida_preliminar_con_artefactos | resultado automático del análisis |
 
-## 4. Capturas antiguas y sesion final
+![final_rms_timeline](figures/fig_00_final_capture_rms_timeline.png)
 
-La captura antigua `20260524-122200_final_atenuacion_artefactos_mixed_states` sigue siendo util como validacion intermedia de quality gate y estados/artefactos. No debe presentarse como captura final principal.
+![final_bands_timeline](figures/fig_00_final_capture_bands_timeline.png)
 
-La sesion final reportable es:
+![final_quality_timeline](figures/fig_00_final_capture_quality_timeline.png)
 
-```text
-s01_20260528
-```
 
-con resultados en `10_resultados_captura_final_laboratorio.md` y reportajes asociados.
+Tabla de inventario: [`tables/table_01_capture_summary.csv`](tables/table_01_capture_summary.csv).
+Inventario all-branches: [`tables/table_00_capture_inventory_all_branches.csv`](tables/table_00_capture_inventory_all_branches.csv).
 
-## 5. Figuras de este bloque
-
-Las figuras enlazadas en `00` a `05` son utiles para explicar decisiones de diseno, pero algunas fueron generadas con titulos y margenes poco adecuados para memoria. Para regenerarlas con estilo final-v4 se ha anadido:
-
-```text
-python/tools/build_validation_docs_final_v4_style.py
-```
-
-Este wrapper no modifica calculos. Solo mejora estilo Matplotlib: titulos mas pequenos, wrapping, margenes robustos, leyendas moderadas y guardado con `bbox_inches="tight"`.
-
-Comando recomendado:
-
-```bash
-python3 python/tools/build_validation_docs_final_v4_style.py --captures-dir captures --docs-dir docs/validacion_tfg
-```
-
-Debe ejecutarse con `git status --short` limpio porque regenera documentos y figuras.
-
-## 6. Conclusion
-
-La validacion final-v4 demuestra integracion tecnica completa:
-
-```text
-ADS1299 -> firmware -> Bridge -> Python -> DSP -> quality gate -> sonificacion -> MIDI fisico / notas registradas
-```
-
-Las limitaciones restantes estan relacionadas principalmente con calidad de senal, artefactos, estabilidad del montaje, explicabilidad de la WebUI y futura medicion de latencia fisica end-to-end.
+La evolución de ramas, commits y decisiones de esta conversación se documenta en [`08_historial_ramas_y_cambios.md`](08_historial_ramas_y_cambios.md).
