@@ -42,36 +42,58 @@ La captura `20260524-122200_final_atenuacion_artefactos_mixed_states` se conserv
 
 En esa captura, el informe espectral produjo una calidad mediana de 0.912. El valor de ventanas de baja calidad/artefacto queda documentado en los CSV/reportes asociados.
 
-## 4. Lectura de las figuras
+## 4. Lectura correcta de las figuras
+
+La validacion DSP debe leerse en dos niveles:
+
+1. Comparacion global de todos los estados en una misma figura.
+2. Comparacion directa periodograma vs multitaper para cada estado individual.
+
+La version anterior solo generaba comparaciones directas para reposo y artefacto. El wrapper final-v4 ahora genera comparaciones homogéneas para todos los estados de la timeline.
+
+### 4.1 Vista global
 
 | Figura | Uso recomendado |
 | --- | --- |
 | `fig_08_windowed_bandpowers.png` | Evolucion de bandpowers relativos por ventana. |
-| `fig_11_quality_state_distribution.png` | Distribucion de estados del quality gate. |
-| `fig_04_periodogram_by_state.png` | Periodograma por estados de protocolo. |
-| `fig_04_multitaper_psd_by_state.png` | PSD multitaper por estados de protocolo. |
-| `fig_04_periodogram_vs_multitaper_rest.png` | Comparacion directa en reposo. |
-| `fig_04_periodogram_vs_multitaper_artifact.png` | Comparacion directa en artefacto. |
-| `fig_04_spectrogram_with_state_bar.png` | Evolucion temporal del espectro con estados. |
+| `fig_04_periodogram_by_state.png` | Periodograma superpuesto por estados. |
+| `fig_04_multitaper_psd_by_state.png` | PSD multitaper superpuesta por estados. |
+| `fig_04_spectrogram_with_state_bar.png` | Evolucion tiempo-frecuencia con estados. |
 
 ![windowed_bandpowers](figures/fig_08_windowed_bandpowers.png)
-
-![quality_states](figures/fig_11_quality_state_distribution.png)
 
 ![periodogram_by_state](figures/fig_04_periodogram_by_state.png)
 
 ![multitaper_by_state](figures/fig_04_multitaper_psd_by_state.png)
 
-![periodogram_vs_multitaper_rest](figures/fig_04_periodogram_vs_multitaper_rest.png)
-
-![periodogram_vs_multitaper_artifact](figures/fig_04_periodogram_vs_multitaper_artifact.png)
-
 ![spectrogram_state_bar](figures/fig_04_spectrogram_with_state_bar.png)
 
-Para regenerar estas figuras con mejor estilo:
+### 4.2 Periodograma vs multitaper por estado
+
+Tras regenerar con el wrapper final-v4, se esperan figuras homogéneas con este patron:
+
+```text
+fig_04_periodogram_vs_multitaper_<estado>.png
+```
+
+Concretamente:
+
+```text
+fig_04_periodogram_vs_multitaper_ojos_abiertos_reposo.png
+fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_1.png
+fig_04_periodogram_vs_multitaper_mandibula.png
+fig_04_periodogram_vs_multitaper_recuperacion_1.png
+fig_04_periodogram_vs_multitaper_parpadeo_frente.png
+fig_04_periodogram_vs_multitaper_recuperacion_2.png
+fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_2.png
+```
+
+Estas figuras permiten hacer la misma comparacion metodologica para cada estado: el periodograma muestra mas variabilidad, mientras que multitaper suaviza la estimacion y aporta bandpowers mas estables para sonificacion.
+
+Para regenerar todo el conjunto:
 
 ```bash
-python3 python/tools/build_validation_docs_final_v4_style.py --captures-dir captures --docs-dir docs/validacion_tfg
+python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
 
 ## 5. Interpretacion
