@@ -9,6 +9,7 @@ homogeneidad de las figuras por estado de la captura mixed_states:
 - leyendas con tamano moderado;
 - salida con mas dpi y padding estable;
 - senal temporal + PSD multitaper para todos los estados de la timeline;
+- escala vertical fija de +-750 uV en senales temporales por estado;
 - periodograma vs multitaper para todos los estados de la timeline.
 
 IMPORTANTE: por defecto este wrapper fuerza `--only-figures` para no volver a
@@ -63,6 +64,7 @@ FINAL_V4_RCPARAMS = {
 FIGSIZE_TIMESERIES = (10.5, 3.8)
 FIGSIZE_PSD = (10.5, 3.8)
 FIGSIZE_COMPARE = (10.5, 3.8)
+STATE_TIMESERIES_UV_LIMIT = 750.0
 
 
 def _wrap_title(title: str | None, width: int = 74) -> str:
@@ -134,6 +136,7 @@ def plot_all_state_timeseries_and_psd(capture, figures_dir: Path) -> dict[str, s
 
         fig, ax = plt.subplots(figsize=FIGSIZE_TIMESERIES)
         ax.plot(t, x_v * 1e6, linewidth=0.85)
+        ax.set_ylim(-STATE_TIMESERIES_UV_LIMIT, STATE_TIMESERIES_UV_LIMIT)
         apply_final_v4_plot_style(
             ax,
             xlabel="Tiempo dentro del estado (s)",
