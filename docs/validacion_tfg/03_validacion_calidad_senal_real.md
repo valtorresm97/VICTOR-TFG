@@ -69,13 +69,13 @@ tables/table_03_mixed_state_stats.csv
 
 ## 5. Orden correcto de figuras
 
-Las figuras deben leerse en tres niveles. Las figuras antiguas especificas de mandibula (`fig_09_jaw_movement_timeseries` y `fig_10_jaw_emg_psd`) se conservan como artefactos generados, pero no deben ser el centro del relato porque rompen la comparacion homogenea entre estados.
+Las figuras deben leerse en tres niveles. La senal completa `fig_03_final_capture_timeseries.png` se conserva como artefacto generado, pero no se inserta aqui porque comprime demasiado los estados y dificulta la lectura. Para este documento son mas utiles la evolucion por ventanas y las figuras homogeneas por estado.
 
-### 5.1 Vista global de la captura
+Las figuras antiguas especificas de mandibula (`fig_09_jaw_movement_timeseries` y `fig_10_jaw_emg_psd`) tambien se conservan como artefactos generados, pero no deben ser el centro del relato porque rompen la comparacion homogenea entre estados.
 
-Primero se muestra la captura completa y la evolucion de calidad:
+### 5.1 Vista global por ventanas
 
-![final_timeseries](figures/fig_03_final_capture_timeseries.png)
+Primero se muestra la evolucion de amplitud/calidad por ventanas:
 
 ![final_rms_timeline](figures/fig_00_final_capture_rms_timeline.png)
 
@@ -85,10 +85,10 @@ Primero se muestra la captura completa y la evolucion de calidad:
 
 ### 5.2 Estudio homogeneo por estado
 
-Despues se estudia cada estado con el mismo par de figuras:
+Despues se estudia cada estado con el mismo par de figuras. Todas las senales temporales por estado deben usar escala vertical fija de `-750` a `+750 uV` para facilitar comparacion visual entre estados.
 
 ```text
-senal temporal del estado
+senal temporal del estado, escala fija +-750 uV
 PSD multitaper del estado
 ```
 
