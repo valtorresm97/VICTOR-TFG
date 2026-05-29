@@ -1,4 +1,4 @@
-# 02. Validacion del montaje de electrodos, BIAS y RLD - final-v4
+﻿# 02. Validacion del montaje de electrodos, BIAS y RLD - final-v4
 
 ## 1. Objetivo
 
@@ -92,3 +92,4 @@ El montaje final no elimina los artefactos biologicos, pero ofrece una base sufi
 4. menor influencia de canales no usados;
 5. respuesta clara ante artefactos controlados;
 6. compatibilidad con quality gate y sonificacion final-v4.
+

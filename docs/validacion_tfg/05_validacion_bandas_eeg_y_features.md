@@ -1,4 +1,4 @@
-# 05. Validacion de bandas EEG y features espectrales - final-v4
+﻿# 05. Validacion de bandas EEG y features espectrales - final-v4
 
 ## 1. Objetivo
 
@@ -134,3 +134,4 @@ nombres reportables vinculados a EEG/features
 ```
 
 La decision defendible para el TFG es usar las bandas como moduladores musicales relativos, no como marcadores clinicos aislados.
+

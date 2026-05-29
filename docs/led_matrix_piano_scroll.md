@@ -1,4 +1,4 @@
-# LED matrix piano scroll
+﻿# LED matrix piano scroll
 
 Documento activo secundario de referencia para la visualizacion LED tipo piano scroll.
 
@@ -23,23 +23,23 @@ Flujo secundario:
 
 ```text
 EEG features
-   ↓
+   â†“
 MusicSegment
-   ↓
+   â†“
 Bar
-   ↓
+   â†“
 NoteEvent[]
-   ↓
+   â†“
 MidiScheduler
-   ↓
+   â†“
 recent_notes / snapshot
-   ↓
+   â†“
 Web UI piano roll
-   ↓
+   â†“
 LED matrix piano scroll opcional
-   ↓
+   â†“
 Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
-   ↓
+   â†“
 Arduino_LED_Matrix si LED_MATRIX_ENABLED=1
 ```
 
@@ -167,7 +167,7 @@ Python con `EEG_LED_MATRIX_ENABLED=1`. No activar hasta confirmar que
 
 ## Bridge
 
-Handler añadido:
+Handler aÃ±adido:
 
 ```text
 Bridge.call("led_matrix_row", row_idx, chunk0, chunk1, chunk2)
@@ -188,7 +188,7 @@ Bridge.call("midi_bytes", n, b0, b1, b2)
 
 ## Observabilidad
 
-El snapshot añade:
+El snapshot aÃ±ade:
 
 - `led_matrix.config`
 - `led_matrix.transport.enabled`
@@ -240,3 +240,4 @@ music.recent_notes
 ```
 
 No debe condicionar los diagramas de adquisicion, DSP, sonificacion ni MIDI fisico.
+

@@ -1,4 +1,4 @@
-# 10. Resultados de captura final EEG-MIDI en laboratorio - final-v4
+﻿# 10. Resultados de captura final EEG-MIDI en laboratorio - final-v4
 
 ## 1. Objetivo
 
@@ -205,3 +205,4 @@ ADS1299 -> firmware -> Bridge -> Python -> DSP -> quality gate -> sonificacion -
 ```
 
 Por tanto, en la memoria debe usarse para defender la integracion hardware/software, la trazabilidad de datos y la persistencia de EEG + musica. La interpretacion neurofisiologica debe formularse con cautela y apoyarse siempre en las metricas de calidad y en la documentacion de artefactos.
+

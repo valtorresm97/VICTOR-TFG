@@ -1,4 +1,4 @@
-# Configuracion final v3
+﻿# Configuracion final v3
 
 Documento resumen para el estado final-v3 del sistema EEG-MIDI. Consolida la arquitectura real observada en codigo y las auditorias vigentes. No cambia firmware ni runtime.
 
@@ -196,3 +196,4 @@ No hay controles WebUI para habilitar/deshabilitar MIDI/LED, iniciar capturas, c
 4. Confirmar WebUI: `ADS_DIAGNOSTIC_MODE=5`, CH1 activo y CH2-CH4 apagados.
 5. Confirmar MIDI: panic funciona y una nota/secuencia diagnostica suena por D1/TX invertido.
 6. Confirmar sonificacion: con calidad baja no se generan cambios musicales fuertes; al recuperarse la calidad vuelve la generacion.
+

@@ -1,4 +1,4 @@
-# Auditoria final-v4 - fases 1 y 2
+﻿# Auditoria final-v4 - fases 1 y 2
 
 Rama base auditada: `firmware-final-v4`.
 
@@ -49,18 +49,18 @@ Accion para fase 3:
 
 Revisada la familia documental:
 
-- `docs/auditoria_codigo_detallada/00_inventario_actual.md`
-- `docs/auditoria_codigo_detallada/01_firmware_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/02_ads1299_spi_driver.md`
-- `docs/auditoria_codigo_detallada/03_python_backend_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/04_dsp_eeg_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/05_sonificacion_midi_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/06_led_matrix_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/07_web_server_assets_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/08_tools_cli_funcion_por_funcion.md`
-- `docs/auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md`
-- `docs/auditoria_codigo_detallada/10_mapa_funciones_criticas.md`
-- `docs/auditoria_codigo_detallada/11_hallazgos_para_simplificacion_futura.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/00_inventario_actual.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/01_firmware_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/02_ads1299_spi_driver.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/03_python_backend_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/04_dsp_eeg_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/05_sonificacion_midi_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/06_led_matrix_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/07_web_server_assets_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/08_tools_cli_funcion_por_funcion.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md`
+- `docs/02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md`
 
 Hallazgo principal:
 
@@ -90,8 +90,8 @@ Hallazgos principales:
 
 Revisado:
 
-- `docs/protocolo_capturas_multiusuario.md`
-- `docs/templates/plantilla_sesion_sujeto.md`
+- `docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md`
+- `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md`
 - `docs/validacion_tfg/10_resultados_captura_final_laboratorio.md`
 - `docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md`
 - `docs/validacion_tfg/reportajes_capturas_s01_20260528/`
@@ -252,7 +252,7 @@ Interpretacion:
 Accion sugerida:
 
 - No borrar la procedencia.
-- Añadir una nota de integracion final-v4.
+- AÃ±adir una nota de integracion final-v4.
 
 ### 4.3 Nombres de sonificacion legacy vs nombres reportables
 
@@ -397,3 +397,4 @@ No realizado:
 - No se ha tocado runtime Python.
 - No se ha tocado WebUI.
 - No se han tocado capturas, benchmarks, reports ni figuras.
+

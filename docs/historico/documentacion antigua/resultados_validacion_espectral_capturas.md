@@ -1,4 +1,4 @@
-# Resultados de validacion espectral con capturas reales
+﻿# Resultados de validacion espectral con capturas reales
 
 Fecha: 2026-05-24
 
@@ -227,23 +227,24 @@ No se modificaron:
 ## Checklist
 
 ```text
-[x] Se auditó `dsp_core.py`.
-[x] Se auditó `eeg_signal_processor.py`.
-[x] Se auditó `sonification_features.py`.
-[x] Se verificó método multitaper.
-[x] Se verificó resolución de frecuencia.
-[x] Se verificó ventana/hop.
-[x] Se verificaron bandas EEG definidas en código.
+[x] Se auditÃ³ `dsp_core.py`.
+[x] Se auditÃ³ `eeg_signal_processor.py`.
+[x] Se auditÃ³ `sonification_features.py`.
+[x] Se verificÃ³ mÃ©todo multitaper.
+[x] Se verificÃ³ resoluciÃ³n de frecuencia.
+[x] Se verificÃ³ ventana/hop.
+[x] Se verificaron bandas EEG definidas en cÃ³digo.
 [x] Se analizaron CSV reales de captures/.
-[x] Se comparó ojos abiertos vs ojos cerrados si había datos.
-[x] Se evaluó alpha_rel y alpha_abs.
-[x] Se evaluó beta/gamma frente a EMG.
-[x] Se evaluó delta/theta frente a parpadeos/drift.
-[x] Se evaluó ruido 50 Hz.
-[x] Se evaluó estabilidad temporal por ventanas.
-[x] Se clasificó cada banda como usable/dudosa/no usable.
+[x] Se comparÃ³ ojos abiertos vs ojos cerrados si habÃ­a datos.
+[x] Se evaluÃ³ alpha_rel y alpha_abs.
+[x] Se evaluÃ³ beta/gamma frente a EMG.
+[x] Se evaluÃ³ delta/theta frente a parpadeos/drift.
+[x] Se evaluÃ³ ruido 50 Hz.
+[x] Se evaluÃ³ estabilidad temporal por ventanas.
+[x] Se clasificÃ³ cada banda como usable/dudosa/no usable.
 [x] Se validaron controles de `sonification_features.py`.
-[x] Se propuso matriz final EEG feature → sonificación.
-[x] No se modificó el pipeline principal sin justificación.
+[x] Se propuso matriz final EEG feature â†’ sonificaciÃ³n.
+[x] No se modificÃ³ el pipeline principal sin justificaciÃ³n.
 [x] Se dejaron claras las capturas adicionales necesarias.
 ```
+

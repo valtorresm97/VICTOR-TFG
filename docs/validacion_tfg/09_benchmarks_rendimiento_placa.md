@@ -1,4 +1,4 @@
-# 09. Validacion temporal del procesamiento en placa - final-v4
+﻿# 09. Validacion temporal del procesamiento en placa - final-v4
 
 ## Objetivo
 
@@ -306,13 +306,13 @@ La primera ejecucion ya mostraba margen amplio, con un maximo de 23.1306 ms, equ
 El replay completo con hop real de la segunda captura proceso 209 llamadas de features en 2624.4660 ms de mediana:
 
 ```text
-2624.4660 ms / 209 ≈ 12.56 ms/ciclo
+2624.4660 ms / 209 â‰ˆ 12.56 ms/ciclo
 ```
 
 Frente a los 256 ms disponibles por hop:
 
 ```text
-12.56 / 256 ≈ 4.9 %
+12.56 / 256 â‰ˆ 4.9 %
 ```
 
 Este ciclo incluye entrada de bloques, calculo de features, diagnostico de calidad y adaptacion de sonificacion. El resultado confirma que el pipeline Python mantiene amplio margen temporal incluso al reproducir la logica de hop real sobre una captura completa.
@@ -334,8 +334,8 @@ El informe MCU parseo:
 | `qmax_global` | 1 |
 | `drops_total` | 0 |
 | `pub_burst_global` | 1 |
-| `notify_max_global_us` | 11587 µs |
-| `loop_max_global_us` | 32494 µs |
+| `notify_max_global_us` | 11587 Âµs |
+| `loop_max_global_us` | 32494 Âµs |
 
 ### Resumen por ventanas del MCU
 
@@ -358,18 +358,18 @@ El informe MCU parseo:
 
 ### Interpretacion MCU
 
-El filtrado del MCU tiene un coste despreciable frente al periodo de muestreo: `filt_avg_us` se mantiene alrededor de 5 µs y el maximo por ventana de filtrado no supera 17 µs. El coste dominante del lado MCU no es el filtrado, sino la publicacion de bloques mediante Bridge, con `notify_avg_us` mediano de 3367.250 µs y maximo de ventana de 11528 µs.
+El filtrado del MCU tiene un coste despreciable frente al periodo de muestreo: `filt_avg_us` se mantiene alrededor de 5 Âµs y el maximo por ventana de filtrado no supera 17 Âµs. El coste dominante del lado MCU no es el filtrado, sino la publicacion de bloques mediante Bridge, con `notify_avg_us` mediano de 3367.250 Âµs y maximo de ventana de 11528 Âµs.
 
 Incluso ese maximo de `notify_max_us_win` queda por debajo del periodo asociado a un bloque de 8 muestras:
 
 ```text
-11528 µs = 11.528 ms < 32 ms
+11528 Âµs = 11.528 ms < 32 ms
 ```
 
-El maximo de loop por ventana fue 12886 µs, tambien inferior a 32 ms:
+El maximo de loop por ventana fue 12886 Âµs, tambien inferior a 32 ms:
 
 ```text
-12886 µs = 12.886 ms < 32 ms
+12886 Âµs = 12.886 ms < 32 ms
 ```
 
 La cola TX se mantuvo controlada:
@@ -388,10 +388,10 @@ Los picos de `lag_win` muestran que existen ventanas con interrupciones DRDY pen
 
 | Parte del sistema | Metrica critica | Resultado | Presupuesto/Referencia | Conclusion |
 | --- | --- | ---: | ---: | --- |
-| MCU | `filt_avg_us` mediano | 5.050 µs | 4000 µs por muestra a 250 Hz | Coste de filtrado despreciable. |
-| MCU | `notify_avg_us` mediano | 3367.250 µs | 32 ms por bloque de 8 muestras | Publicacion Bridge asumible. |
-| MCU | `notify_max_us_win` maximo | 11528 µs | 32 ms por bloque de 8 muestras | Pico inferior al periodo de bloque. |
-| MCU | `loop_max_us_win` maximo | 12886 µs | 32 ms por bloque de 8 muestras | Loop maximo de ventana con margen. |
+| MCU | `filt_avg_us` mediano | 5.050 Âµs | 4000 Âµs por muestra a 250 Hz | Coste de filtrado despreciable. |
+| MCU | `notify_avg_us` mediano | 3367.250 Âµs | 32 ms por bloque de 8 muestras | Publicacion Bridge asumible. |
+| MCU | `notify_max_us_win` maximo | 11528 Âµs | 32 ms por bloque de 8 muestras | Pico inferior al periodo de bloque. |
+| MCU | `loop_max_us_win` maximo | 12886 Âµs | 32 ms por bloque de 8 muestras | Loop maximo de ventana con margen. |
 | MCU | `drops_total` | 0 | 0 esperado | Sin perdidas por cola TX. |
 | MCU | `qmax_global` | 1 | Cola estable | Sin acumulacion significativa. |
 | Python/Linux | `compute_live_features` mediano | 5.2158 ms | 256 ms por hop | Coste muy bajo. |
@@ -445,7 +445,7 @@ Este cambio de nombres no altera los resultados temporales del benchmark. Solo h
 1. La validacion temporal se ha realizado sobre capturas reales concretas, no sobre una bateria estadistica extensa de sujetos y condiciones.
 2. Las capturas contienen artefactos transitorios, por lo que no deben usarse por si solas para extraer conclusiones fisiologicas fuertes.
 3. Los benchmarks MCU se obtuvieron copiando el Monitor/App Lab para no anadir trafico extra por Bridge. El copiado manual se mitigo usando un parser automatico que genera CSV/JSON/Markdown.
-4. El log MCU incluye lineas de diagnostico como `Frame invalido / error sincronía`. Estas incidencias aparecen en el Monitor, pero las metricas de cola TX no muestran drops y el benchmark Python se ejecuto sobre la captura real generada.
+4. El log MCU incluye lineas de diagnostico como `Frame invalido / error sincronÃ­a`. Estas incidencias aparecen en el Monitor, pero las metricas de cola TX no muestran drops y el benchmark Python se ejecuto sobre la captura real generada.
 5. No se midio latencia fisica end-to-end EEG -> nota -> MIDI OUT.
 6. No se midio el coste del navegador WebUI ni la latencia fisica del UART MIDI.
 7. Los resultados temporales son representativos de la configuracion evaluada, pero pueden variar si se modifican frecuencia de muestreo, numero de canales, tamano de bloque, carga de UI, transporte MIDI/LED o estrategia de publicacion.
@@ -455,8 +455,9 @@ Este cambio de nombres no altera los resultados temporales del benchmark. Solo h
 
 Los benchmarks realizados sobre capturas reales muestran que el sistema dispone de margen temporal amplio tanto en firmware/MCU como en Python/Linux.
 
-En el MCU, el filtrado digital tiene una mediana de aproximadamente 5 µs, mientras que el coste dominante es la publicacion por Bridge, con `notify_avg_us` mediano de 3367 µs y maximo de ventana de 11528 µs. Estos valores quedan por debajo del periodo de bloque de 32 ms. Ademas, la cola TX no acumulo mas de un bloque y no se registraron drops.
+En el MCU, el filtrado digital tiene una mediana de aproximadamente 5 Âµs, mientras que el coste dominante es la publicacion por Bridge, con `notify_avg_us` mediano de 3367 Âµs y maximo de ventana de 11528 Âµs. Estos valores quedan por debajo del periodo de bloque de 32 ms. Ademas, la cola TX no acumulo mas de un bloque y no se registraron drops.
 
 En Python/Linux, el calculo live de features espectrales requiere una mediana de 5.2158 ms frente a un presupuesto de 256 ms por hop. El replay completo con hop real requiere aproximadamente 12.56 ms por ciclo de procesamiento, tambien muy por debajo de los 256 ms disponibles.
 
 Por tanto, en la configuracion evaluada, el cuello de botella principal del sistema no se encuentra en el calculo DSP/sonificacion de Python ni en el filtrado del MCU. Los aspectos mas criticos para fases posteriores son la calidad de senal, la presencia de artefactos, la estabilidad del montaje bioelectrico y la validacion de latencia fisica end-to-end EEG -> MIDI OUT.
+

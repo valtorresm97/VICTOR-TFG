@@ -1,4 +1,4 @@
-# 03. Validacion de calidad de senal real - final-v4
+﻿# 03. Validacion de calidad de senal real - final-v4
 
 ## 1. Objetivo
 
@@ -158,3 +158,4 @@ validez fisiologica como EEG limpio = parcial
 ## 7. Conclusion
 
 El sistema dispone de metricas suficientes para no tratar todas las ventanas por igual. La calidad de senal debe evaluarse por ventanas y por estado, y el quality gate debe conservarse como parte esencial del pipeline final-v4.
+

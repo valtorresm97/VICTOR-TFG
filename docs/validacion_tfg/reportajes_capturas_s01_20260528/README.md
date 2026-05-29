@@ -1,4 +1,4 @@
-# Reportajes por captura - sesion final `s01_20260528`
+﻿# Reportajes por captura - sesion final `s01_20260528`
 
 Esta carpeta queda como **documentacion principal por captura** para el TFG. Es la version narrativa, revisada y defendible de la sesion final `s01_20260528`.
 
@@ -62,3 +62,4 @@ Los artefactos deben documentarse, no ocultarse.
 ```
 
 Por tanto, los reportajes no deben leerse como prueba clinica, sino como evidencia experimental y tecnica de integracion EEG-MIDI.
+

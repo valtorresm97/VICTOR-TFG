@@ -1,4 +1,4 @@
-# Indice de documentacion
+﻿# Indice de documentacion
 
 Este indice define que documentos deben leerse como fuente principal del estado integrado `firmware-final-v4` y cuales quedan como historicos. No se borra documentacion tecnica: se clasifica para evitar confundir versiones antiguas con el estado actual.
 
@@ -49,28 +49,28 @@ La carpeta `validacion_tfg/` contiene la evidencia principal para la memoria: be
 
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `protocolo_capturas_multiusuario.md` | Activo | Procedimiento repetible para capturas EEG-MIDI multiusuario. |
-| `templates/plantilla_sesion_sujeto.md` | Activo | Plantilla para documentar sesiones por sujeto. |
-| `sesiones_captura/` | Activo | Sesiones documentadas, incluyendo prueba de casa y sesion final de laboratorio. |
+| `04_protocolos_captura/protocolo_capturas_multiusuario.md` | Activo | Procedimiento repetible para capturas EEG-MIDI multiusuario. |
+| `04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Activo | Plantilla para documentar sesiones por sujeto. |
+| `04_protocolos_captura/sesiones_captura/` | Activo | Sesiones documentadas, incluyendo prueba de casa y sesion final de laboratorio. |
 
 ## 4. Auditorias tecnicas activas
 
-La familia `auditoria_codigo_detallada/` sigue siendo muy valiosa para entender el sistema funcion por funcion. Puede contener referencias a final-v3 o ramas antiguas, pero su contenido tecnico debe conservarse mientras se revisa la organizacion documental.
+La familia `02_auditoria_codigo/funcion_por_funcion/` sigue siendo muy valiosa para entender el sistema funcion por funcion. Puede contener referencias a final-v3 o ramas antiguas, pero su contenido tecnico debe conservarse mientras se revisa la organizacion documental.
 
 | Carpeta/documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `auditoria_codigo_detallada/00_inventario_actual.md` | Activo con posible terminologia historica | Inventario del repo y bloques funcionales. |
-| `auditoria_codigo_detallada/01_firmware_funcion_por_funcion.md` | Activo | Firmware, streaming, filtros, bench, MIDI y LED. |
-| `auditoria_codigo_detallada/02_ads1299_spi_driver.md` | Activo | ADS1299, SPI, registros y contratos criticos. |
-| `auditoria_codigo_detallada/03_python_backend_funcion_por_funcion.md` | Activo | Backend, receiver, contratos, capturas y WebUI. |
-| `auditoria_codigo_detallada/04_dsp_eeg_funcion_por_funcion.md` | Activo | DSP, features y quality score. |
-| `auditoria_codigo_detallada/05_sonificacion_midi_funcion_por_funcion.md` | Activo | Sonificacion, musica, MIDI scheduler y transporte. |
-| `auditoria_codigo_detallada/06_led_matrix_funcion_por_funcion.md` | Activo secundario | LED matrix y piano scroll. |
-| `auditoria_codigo_detallada/07_web_server_assets_funcion_por_funcion.md` | Activo | Web server, endpoints y assets HTML/JS/CSS. |
-| `auditoria_codigo_detallada/08_tools_cli_funcion_por_funcion.md` | Activo | Tools offline, capturas, validacion y documentacion. |
-| `auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md` | Activo critico | Contratos productor/consumidor que no deben romperse. |
-| `auditoria_codigo_detallada/10_mapa_funciones_criticas.md` | Activo critico | Criticidad y pruebas minimas. |
-| `auditoria_codigo_detallada/11_hallazgos_para_simplificacion_futura.md` | Activo para fase UML | Base para futura `propuesta_version_esencial_uml.md`. |
+| `02_auditoria_codigo/funcion_por_funcion/00_inventario_actual.md` | Activo con posible terminologia historica | Inventario del repo y bloques funcionales. |
+| `02_auditoria_codigo/funcion_por_funcion/01_firmware_funcion_por_funcion.md` | Activo | Firmware, streaming, filtros, bench, MIDI y LED. |
+| `02_auditoria_codigo/funcion_por_funcion/02_ads1299_spi_driver.md` | Activo | ADS1299, SPI, registros y contratos criticos. |
+| `02_auditoria_codigo/funcion_por_funcion/03_python_backend_funcion_por_funcion.md` | Activo | Backend, receiver, contratos, capturas y WebUI. |
+| `02_auditoria_codigo/funcion_por_funcion/04_dsp_eeg_funcion_por_funcion.md` | Activo | DSP, features y quality score. |
+| `02_auditoria_codigo/funcion_por_funcion/05_sonificacion_midi_funcion_por_funcion.md` | Activo | Sonificacion, musica, MIDI scheduler y transporte. |
+| `02_auditoria_codigo/funcion_por_funcion/06_led_matrix_funcion_por_funcion.md` | Activo secundario | LED matrix y piano scroll. |
+| `02_auditoria_codigo/funcion_por_funcion/07_web_server_assets_funcion_por_funcion.md` | Activo | Web server, endpoints y assets HTML/JS/CSS. |
+| `02_auditoria_codigo/funcion_por_funcion/08_tools_cli_funcion_por_funcion.md` | Activo | Tools offline, capturas, validacion y documentacion. |
+| `02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md` | Activo critico | Contratos productor/consumidor que no deben romperse. |
+| `02_auditoria_codigo/funcion_por_funcion/10_mapa_funciones_criticas.md` | Activo critico | Criticidad y pruebas minimas. |
+| `02_auditoria_codigo/funcion_por_funcion/11_hallazgos_para_simplificacion_futura.md` | Activo para fase UML | Base para futura `propuesta_version_esencial_uml.md`. |
 
 ## 5. Documentacion activa de subsistemas
 
@@ -95,7 +95,7 @@ historico/documentacion antigua/
 | Documento | Estado | Documento preferente actual |
 | --- | --- | --- |
 | `historico/documentacion antigua/configuracion_final_v3.md` | Historico | `configuracion_final_v4.md` |
-| `historico/documentacion antigua/auditoria_captura_datos.md` | Historico | `auditoria_codigo_detallada/`, `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
+| `historico/documentacion antigua/auditoria_captura_datos.md` | Historico | `02_auditoria_codigo/funcion_por_funcion/`, `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
 | `historico/documentacion antigua/validacion_de_la_captura_de_datos.md` | Historico | `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
 | `historico/documentacion antigua/resultados_validacion_espectral_capturas.md` | Historico | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y reportajes por captura |
 | `historico/documentacion antigua/resultados_validacion_dsp_mixta.md` | Historico | `validacion_tfg/09_benchmarks_rendimiento_placa.md` y auditoria DSP |
@@ -109,6 +109,7 @@ Criterio: consultar estos documentos solo para entender decisiones anteriores, n
 2. Para comprobar que se reviso en la migracion documental, leer `auditoria_final_v4_fase1_2.md`.
 3. Para justificar rendimiento temporal del TFG, usar `validacion_tfg/09_benchmarks_rendimiento_placa.md`.
 4. Para justificar capturas reales y resultados experimentales, usar `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `reportaje_sesion_final_s01_20260528.md`.
-5. Para tocar codigo o preparar UML, consultar `auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md`, `10_mapa_funciones_criticas.md` y `11_hallazgos_para_simplificacion_futura.md`.
+5. Para tocar codigo o preparar UML, consultar `02_auditoria_codigo/funcion_por_funcion/09_mapa_contratos_entre_modulos.md`, `10_mapa_funciones_criticas.md` y `11_hallazgos_para_simplificacion_futura.md`.
 6. Para entender una decision antigua, consultar `historico/documentacion antigua/` o reports historicos.
 7. No borrar benchmarks, capturas, reportajes ni figuras durante esta fase de organizacion documental.
+

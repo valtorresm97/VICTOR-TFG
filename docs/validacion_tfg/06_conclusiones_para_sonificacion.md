@@ -1,4 +1,4 @@
-# 06. Conclusiones para sonificacion - final-v4
+﻿# 06. Conclusiones para sonificacion - final-v4
 
 ## 1. Objetivo
 
@@ -111,3 +111,4 @@ Primero se evalua calidad, despues se extraen rasgos espectrales y finalmente es
 ```
 
 Esta estrategia permite una sonificacion expresiva, trazable y prudente frente a artefactos.
+

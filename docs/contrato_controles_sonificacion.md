@@ -1,4 +1,4 @@
-# Contrato de controles de sonificacion EEG
+﻿# Contrato de controles de sonificacion EEG
 
 ## Objetivo
 
@@ -13,15 +13,15 @@ La regla de esta migracion es: **renombrar el contrato publico sin cambiar el co
 | `alpha_drive` | Predominio relativo alfa frente a beta | `bandpower_rel.alpha`, `bandpower_rel.beta` | Alias interno antiguo: `calmness` |
 | `beta_gamma_drive` | Activacion rapida beta/gamma | `bandpower_rel.beta`, `bandpower_rel.gamma` | Alias interno antiguo: `tension` |
 | `rms_beta_activity` | Actividad global por RMS y beta | `rms`, `bandpower_rel.beta`, `bandpower_rel.gamma` | Alias interno antiguo: `activity` |
-| `band_driven_density` | Densidad rítmica por bandas rapidas/RMS | `beta`, `gamma`, `rms_norm`, `alpha_drive` | Antes reportado como `rhythmic_density` |
+| `band_driven_density` | Densidad rÃ­tmica por bandas rapidas/RMS | `beta`, `gamma`, `rms_norm`, `alpha_drive` | Antes reportado como `rhythmic_density` |
 | `spectral_register` | Registro musical guiado por espectro | `peak_alpha`/`peak_freq`, beta, gamma | Alias interno antiguo: `register` |
 | `alpha_stability` | Estabilidad asociada a alfa y baja actividad RMS | `alpha_drive`, `theta`, `rms_norm` | Alias interno antiguo: `harmonic_stability` |
-| `rms_band_velocity` | Dinámica/velocity por RMS y bandas rapidas | `rms_norm`, beta, gamma | Alias interno antiguo: `velocity_factor` |
+| `rms_band_velocity` | DinÃ¡mica/velocity por RMS y bandas rapidas | `rms_norm`, beta, gamma | Alias interno antiguo: `velocity_factor` |
 | `band_note_probability` | Probabilidad de nota por densidad espectral | `band_driven_density` | Alias interno antiguo: `note_probability` |
 
 ## Campos legacy
 
-Los nombres antiguos no deben usarse en documentación ni UI nueva:
+Los nombres antiguos no deben usarse en documentaciÃ³n ni UI nueva:
 
 - `calmness`
 - `tension`
@@ -93,3 +93,4 @@ DIR=$(ls -td "captures/capturas finales"/* | head -1)
 head -1 "$DIR/music_snapshots.jsonl" | python3 -m json.tool | grep -E "alpha_drive|beta_gamma_drive|rms_beta_activity|band_driven_density|spectral_register|alpha_stability|rms_band_velocity|band_note_probability"
 head "$DIR/music_notes.csv"
 ```
+

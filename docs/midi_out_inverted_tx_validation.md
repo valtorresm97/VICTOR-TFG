@@ -1,4 +1,4 @@
-# MIDI OUT inverted TX validation
+﻿# MIDI OUT inverted TX validation
 
 Documento activo de referencia para la salida MIDI fisica del sistema EEG-MIDI.
 
@@ -84,3 +84,4 @@ MidiScheduler
 ```
 
 No separar ni sustituir este contrato sin una prueba real de sonido y una prueba de panic MIDI.
+

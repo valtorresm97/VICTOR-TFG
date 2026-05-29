@@ -1,4 +1,4 @@
-# Configuracion final v4
+﻿# Configuracion final v4
 
 Documento resumen del estado integrado `firmware-final-v4` del sistema EEG-MIDI. Consolida el estado real del codigo, los benchmarks reales en placa, las capturas finales de laboratorio y la documentacion generada para el TFG.
 
@@ -158,7 +158,7 @@ El lado Python centraliza estas constantes en:
 python/eeg_contract.py
 ```
 
-Cualquier cambio de `streaming.h` debe ir acompañado de cambios coordinados en `eeg_contract.py`, `receiver.py`, capturas y herramientas offline.
+Cualquier cambio de `streaming.h` debe ir acompaÃ±ado de cambios coordinados en `eeg_contract.py`, `receiver.py`, capturas y herramientas offline.
 
 ## Python backend
 
@@ -581,9 +581,9 @@ Documentos recomendados como entrada:
 | `docs/validacion_tfg/10_resultados_captura_final_laboratorio.md` | Resumen de sesion final de laboratorio. |
 | `docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md` | Relato tecnico global de la sesion. |
 | `docs/validacion_tfg/reportajes_capturas_s01_20260528/` | Lectura individual por captura. |
-| `docs/protocolo_capturas_multiusuario.md` | Protocolo experimental. |
-| `docs/templates/plantilla_sesion_sujeto.md` | Plantilla de sesion. |
-| `docs/auditoria_codigo_detallada/` | Auditoria funcion por funcion. |
+| `docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Protocolo experimental. |
+| `docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Plantilla de sesion. |
+| `docs/02_auditoria_codigo/funcion_por_funcion/` | Auditoria funcion por funcion. |
 
 ## Que no se debe tocar sin placa
 
@@ -649,3 +649,4 @@ Conclusion:
 final-v4 es la version integrada y trazable del sistema EEG-MIDI.
 La futura version esencial debe simplificar la explicacion y los diagramas, no perder la evidencia de validacion ni modificar contratos criticos sin pruebas.
 ```
+

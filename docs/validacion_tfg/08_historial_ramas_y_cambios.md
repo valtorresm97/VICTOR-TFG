@@ -1,4 +1,4 @@
-# 08. Historial de ramas y cambios realizados durante la validacion - final-v4
+﻿# 08. Historial de ramas y cambios realizados durante la validacion - final-v4
 
 ## 1. Objetivo del documento
 
@@ -120,9 +120,9 @@ La rama de capturas finales documento el protocolo experimental y la sesion `s01
 Elementos principales:
 
 ```text
-docs/protocolo_capturas_multiusuario.md
-docs/templates/plantilla_sesion_sujeto.md
-docs/sesiones_captura/
+docs/04_protocolos_captura/04_protocolos_captura/protocolo_capturas_multiusuario.md
+docs/04_protocolos_captura/04_protocolos_captura/templates/plantilla_sesion_sujeto.md
+docs/04_protocolos_captura/04_protocolos_captura/sesiones_captura/
 docs/validacion_tfg/10_resultados_captura_final_laboratorio.md
 docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md
 docs/validacion_tfg/reportajes_capturas_s01_20260528/
@@ -215,3 +215,4 @@ Pendiente para fases posteriores, fuera de esta revision documental:
 El historial de ramas muestra una evolucion ordenada: primero se valido la adquisicion y el DSP, despues se introdujo el quality gate, posteriormente se midieron benchmarks reales y finalmente se tomaron capturas finales con musica persistida.
 
 La rama `firmware-final-v4` representa el estado integrado defendible para el TFG. La rama `refactor/essential-eeg-midi-plan` debe entenderse como una fase posterior de preparacion para simplificar y explicar el sistema, no como sustituto de la evidencia final-v4.
+

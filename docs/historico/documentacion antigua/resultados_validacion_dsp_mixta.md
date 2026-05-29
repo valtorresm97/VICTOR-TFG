@@ -1,4 +1,4 @@
-# Resultados de validacion DSP en captura mixta
+﻿# Resultados de validacion DSP en captura mixta
 
 Fecha: 2026-05-24
 
@@ -184,3 +184,4 @@ freeze/attenuate sonification when quality is low
 4. Repetir captura mixta y comprobar que los controles musicales no se disparan
    durante mandibula/frente.
 5. Despues pasar al estudio de parametros de sonificacion.
+

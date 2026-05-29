@@ -1,4 +1,4 @@
-# Validacion de la captura de datos EEG
+﻿# Validacion de la captura de datos EEG
 
 Fecha de cierre de fase: 2026-05-23
 
@@ -525,3 +525,4 @@ bruscos o mandibula/frente, la senal cambia claramente.
 Por tanto, la adquisicion real puede considerarse preliminarmente plausible. El
 foco de la siguiente fase debe ser repetir estabilidad, clasificar artefactos y
 evitar modificar filtros o registros hasta tener comparativas suficientes.
+

@@ -1,4 +1,4 @@
-# Diseno y justificacion de `spectral_quality_score`
+﻿# Diseno y justificacion de `spectral_quality_score`
 
 Fecha: 2026-05-24
 
@@ -164,11 +164,11 @@ Por eso el enfoque correcto es:
 
 ```text
 adquisicion estable
-→ filtros razonables
-→ PSD multitaper
-→ bandpowers
-→ spectral_quality_score
-→ gate de sonificacion
+â†’ filtros razonables
+â†’ PSD multitaper
+â†’ bandpowers
+â†’ spectral_quality_score
+â†’ gate de sonificacion
 ```
 
 No se descarta mejorar filtros en el futuro, pero no deben usarse para ocultar
@@ -233,3 +233,4 @@ Se implementa primero como una capa conservadora de seguridad, no como una
 reescritura del DSP ni como cambio de bandas. Esto permite justificar en el TFG
 que la sonificacion se basa en features EEG plausibles y que los artefactos no
 se transforman directamente en eventos musicales.
+

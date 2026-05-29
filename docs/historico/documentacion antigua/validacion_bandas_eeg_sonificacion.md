@@ -1,4 +1,4 @@
-# Validacion de bandas EEG para sonificacion
+﻿# Validacion de bandas EEG para sonificacion
 
 Fecha: 2026-05-24
 
@@ -61,30 +61,30 @@ Diagrama real:
 
 ```text
 eeg_block_uV
-   ↓
+   â†“
 receiver/backend
-   ↓
+   â†“
 EEGSignalProcessor.add_block_uV()
-   ↓
-uV → V
-   ↓
+   â†“
+uV â†’ V
+   â†“
 ring buffer multicanal
-   ↓
+   â†“
 ventana temporal reciente, normalmente 4 s
-   ↓
+   â†“
 DSPCore.compute_features()
-   ↓
+   â†“
 preprocess: detrend + deteccion/interpolacion de outliers
-   ↓
+   â†“
 PSD multitaper
-   ↓
+   â†“
 bandpower_abs / bandpower_rel / peaks
-   ↓
+   â†“
 SonificationFeatureAdapter
-   ↓
+   â†“
 activity / calmness / tension / rhythmic_density / register /
 harmonic_stability / velocity_factor / note_probability
-   ↓
+   â†“
 sonificacion
 ```
 
@@ -135,7 +135,7 @@ Tabla de ventanas:
 | 6 s | 0.17 Hz | mas lenta | mejora delta/theta | validacion offline o controles lentos |
 | 8 s | 0.125 Hz | lenta | mejor estabilidad baja frecuencia | analisis offline, no respuesta musical rapida |
 
-Conclusión: 4 s es un buen compromiso para sonificacion. Para validar alfa y
+ConclusiÃ³n: 4 s es un buen compromiso para sonificacion. Para validar alfa y
 bandas lentas conviene comparar tambien 6-8 s offline.
 
 ## 6. Definicion de bandas EEG en codigo
@@ -388,23 +388,24 @@ cat captures/comparisons/spectral_feature_robustness.md
 ## 19. Checklist final
 
 ```text
-[x] Se auditó `dsp_core.py`.
-[x] Se auditó `eeg_signal_processor.py`.
-[x] Se auditó `sonification_features.py`.
-[x] Se verificó método multitaper.
-[x] Se verificó resolución de frecuencia.
-[x] Se verificó ventana/hop.
-[x] Se verificaron bandas EEG definidas en código.
+[x] Se auditÃ³ `dsp_core.py`.
+[x] Se auditÃ³ `eeg_signal_processor.py`.
+[x] Se auditÃ³ `sonification_features.py`.
+[x] Se verificÃ³ mÃ©todo multitaper.
+[x] Se verificÃ³ resoluciÃ³n de frecuencia.
+[x] Se verificÃ³ ventana/hop.
+[x] Se verificaron bandas EEG definidas en cÃ³digo.
 [ ] Se analizaron CSV reales de captures/.
-[ ] Se comparó ojos abiertos vs ojos cerrados si había datos.
-[ ] Se evaluó alpha_rel y alpha_abs.
-[ ] Se evaluó beta/gamma frente a EMG.
-[ ] Se evaluó delta/theta frente a parpadeos/drift.
-[ ] Se evaluó ruido 50 Hz.
-[ ] Se evaluó estabilidad temporal por ventanas.
-[x] Se clasificó cada banda como usable/dudosa/no usable preliminarmente.
-[x] Se validaron controles de `sonification_features.py` por auditoría.
-[x] Se propuso matriz final EEG feature → sonificación preliminar.
-[x] No se modificó el pipeline principal sin justificación.
+[ ] Se comparÃ³ ojos abiertos vs ojos cerrados si habÃ­a datos.
+[ ] Se evaluÃ³ alpha_rel y alpha_abs.
+[ ] Se evaluÃ³ beta/gamma frente a EMG.
+[ ] Se evaluÃ³ delta/theta frente a parpadeos/drift.
+[ ] Se evaluÃ³ ruido 50 Hz.
+[ ] Se evaluÃ³ estabilidad temporal por ventanas.
+[x] Se clasificÃ³ cada banda como usable/dudosa/no usable preliminarmente.
+[x] Se validaron controles de `sonification_features.py` por auditorÃ­a.
+[x] Se propuso matriz final EEG feature â†’ sonificaciÃ³n preliminar.
+[x] No se modificÃ³ el pipeline principal sin justificaciÃ³n.
 [x] Se dejaron claras las capturas adicionales necesarias.
 ```
+

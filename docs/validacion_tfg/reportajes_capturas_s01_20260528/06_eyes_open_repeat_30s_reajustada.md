@@ -1,4 +1,4 @@
-# Seccion final reajustada - captura `06_eyes_open_repeat_30s`
+﻿# Seccion final reajustada - captura `06_eyes_open_repeat_30s`
 
 ## 1. Motivo de esta seccion
 
@@ -23,7 +23,7 @@ Esta figura conserva toda la amplitud. Es la prueba de que existe un transitorio
 
 La escala robusta permite ver la mayor parte de la senal sin que el transitorio domine toda la grafica. Esta vista es util para discusion visual, pero debe explicarse que el artefacto existe y se muestra en la figura completa.
 
-## 4. EEG con zoom fisiologico ±300 uV
+## 4. EEG con zoom fisiologico Â±300 uV
 
 ![EEG zoom 300 uV](../figures/capturas_finales_s01_20260528_enhanced/06_eyes_open_repeat_30s/06_eeg_ch1_zoom_300uv.png)
 
@@ -60,3 +60,4 @@ Esta es la figura combinada recomendada para la memoria si se quiere mostrar la 
 ## 10. Conclusion
 
 La captura 06 debe reportarse con ambas vistas: completa y reajustada. La completa demuestra transparencia experimental; la reajustada permite interpretar la parte util y defender la integracion EEG-MIDI.
+

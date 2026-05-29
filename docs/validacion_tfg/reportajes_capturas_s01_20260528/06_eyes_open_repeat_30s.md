@@ -1,4 +1,4 @@
-# Captura `06_eyes_open_repeat_30s` - repeticion de ojos abiertos
+﻿# Captura `06_eyes_open_repeat_30s` - repeticion de ojos abiertos
 
 ## 1. Motivo de seleccion
 
@@ -35,15 +35,15 @@ La frecuencia efectiva, la ausencia de gaps y la ausencia de status invalidos va
 
 ![EEG temporal](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/eeg_ch1_temporal.png)
 
-Esta figura debe ser la primera del bloque de resultados porque muestra la señal real antes de cualquier interpretacion musical. Permite explicar que la adquisicion fue continua, pero que la señal real puede incluir transitorios.
+Esta figura debe ser la primera del bloque de resultados porque muestra la seÃ±al real antes de cualquier interpretacion musical. Permite explicar que la adquisicion fue continua, pero que la seÃ±al real puede incluir transitorios.
 
-El TFG debe dejar claro que la señal EEG registrada no es limpia en toda la captura. Aun asi, la estabilidad de muestreo permite usarla como evidencia de pipeline.
+El TFG debe dejar claro que la seÃ±al EEG registrada no es limpia en toda la captura. Aun asi, la estabilidad de muestreo permite usarla como evidencia de pipeline.
 
 ## 4. Bandpowers relativos
 
 ![Bandpowers relativos](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/bandpowers_relativos.png)
 
-Los bandpowers relativos permiten mostrar como se alimenta la parte EEG-reportable de la sonificacion. Esta figura ayuda a conectar la señal temporal con la extraccion de rasgos espectrales.
+Los bandpowers relativos permiten mostrar como se alimenta la parte EEG-reportable de la sonificacion. Esta figura ayuda a conectar la seÃ±al temporal con la extraccion de rasgos espectrales.
 
 No se debe afirmar que una banda concreta representa de forma concluyente un estado cognitivo. La lectura correcta es que el sistema calcula descriptores espectrales en tiempo real/offline y los usa como entrada musical.
 
@@ -64,9 +64,9 @@ Esta figura es central para el TFG porque muestra los nombres reportables defini
 
 Estos controles permiten explicar la sonificacion desde EEG y no desde etiquetas musicales abstractas.
 
-## 6. Calidad de señal y quality gate
+## 6. Calidad de seÃ±al y quality gate
 
-![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/calidad_senal_quality_gate.png)
+![Calidad de seÃ±al y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145809_s01_20260528_ear_eeg_ch1_only_06_eyes_open_repeat_30s/calidad_senal_quality_gate.png)
 
 Esta grafica es clave para defender la captura 06: muestra que no se esta interpretando la musica de forma aislada, sino junto con un indicador de calidad de las ventanas. Permite justificar por que la captura se considera la mejor candidata de la sesion aunque conserve transitorios.
 
@@ -83,7 +83,7 @@ Esta figura no demuestra por si sola una relacion fisiologica, pero si demuestra
 Para esta captura, el orden mas claro en el TFG seria:
 
 1. presentar la figura temporal EEG;
-2. explicar que la señal es real y no perfecta;
+2. explicar que la seÃ±al es real y no perfecta;
 3. mostrar bandpowers para justificar el analisis espectral;
 4. mostrar controles de sonificacion para justificar el mapeo EEG-musica;
 5. mostrar quality score / quality gate para separar respuesta musical y calidad de senal;
@@ -94,8 +94,9 @@ La figura combinada se conserva como PNG y la version reajustada se documenta en
 
 ## 9. Texto sugerido para el TFG
 
-> La repeticion de ojos abiertos fue la captura con mejor diagnostico automatico de la sesion. Durante esta prueba, el sistema mantuvo adquisicion a 250 Hz, sin perdidas de muestras ni estados invalidos, y genero una salida musical persistente. La señal conserva transitorios de amplitud, por lo que no se interpreta como EEG clinicamente limpio; sin embargo, constituye la mejor evidencia visual de integracion completa entre adquisicion EEG, analisis espectral, controles de sonificacion, control de calidad y generacion de notas MIDI.
+> La repeticion de ojos abiertos fue la captura con mejor diagnostico automatico de la sesion. Durante esta prueba, el sistema mantuvo adquisicion a 250 Hz, sin perdidas de muestras ni estados invalidos, y genero una salida musical persistente. La seÃ±al conserva transitorios de amplitud, por lo que no se interpreta como EEG clinicamente limpio; sin embargo, constituye la mejor evidencia visual de integracion completa entre adquisicion EEG, analisis espectral, controles de sonificacion, control de calidad y generacion de notas MIDI.
 
 ## 10. Conclusion
 
 Esta captura debe ser la referencia principal de la sesion final. Su valor no esta en demostrar una fisiologia perfecta, sino en mostrar que el sistema EEG-MIDI funciona de extremo a extremo con datos reales y deja una trazabilidad completa para analisis posterior.
+

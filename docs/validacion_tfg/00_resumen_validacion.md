@@ -1,4 +1,4 @@
-# 00. Resumen general de validacion - final-v4
+﻿# 00. Resumen general de validacion - final-v4
 
 ## 1. Papel de este documento
 
@@ -79,3 +79,4 @@ ADS1299 -> firmware -> Bridge -> Python -> DSP -> quality gate -> sonificacion -
 ```
 
 Las limitaciones restantes estan relacionadas principalmente con calidad de senal, artefactos, estabilidad del montaje, explicabilidad de la WebUI y futura medicion de latencia fisica end-to-end.
+

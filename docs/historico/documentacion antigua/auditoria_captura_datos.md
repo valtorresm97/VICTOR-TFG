@@ -1,4 +1,4 @@
-# Auditoria captura-datos
+﻿# Auditoria captura-datos
 
 Rama auditada: `captura-datos`, creada desde la rama local real `sonification-pianoscrollui`.
 
@@ -265,3 +265,4 @@ No aplicar hasta tener capturas reales:
 
 Ver `docs/ads1299_diagnostic_modes.md` para ejecutar `shorted_inputs` y
 `test_signal_internal` sin alterar el modo EEG real por defecto.
+

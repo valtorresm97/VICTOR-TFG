@@ -1,4 +1,4 @@
-# Captura `03_quiet_rest_60s` - reposo quieto
+﻿# Captura `03_quiet_rest_60s` - reposo quieto
 
 ## 1. Objetivo de la condicion
 
@@ -21,7 +21,7 @@ Esta captura no debe interpretarse como control fisiologico perfecto. Su valor p
 | Fraccion de ventanas con artefacto | `0.0178571` |
 | Notas deduplicadas | `72` |
 
-El transporte fue estable. La señal presenta ruido/artefacto moderado, pero no muestra los picos extremos de la condicion `01_eyes_open_rest_60s`.
+El transporte fue estable. La seÃ±al presenta ruido/artefacto moderado, pero no muestra los picos extremos de la condicion `01_eyes_open_rest_60s`.
 
 ## 3. EEG temporal CH1
 
@@ -41,9 +41,9 @@ Esta figura muestra la evolucion de delta, theta, alpha, beta y gamma en ventana
 
 Los controles de sonificacion permiten explicar que la musica surge de variables normalizadas y suavizadas. La condicion de reposo es una de las mas utiles para observar si estos controles se mantienen en rangos razonables durante una captura sostenida.
 
-## 6. Calidad de señal y quality gate
+## 6. Calidad de seÃ±al y quality gate
 
-![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/calidad_senal_quality_gate.png)
+![Calidad de seÃ±al y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145448_s01_20260528_ear_eeg_ch1_only_03_quiet_rest_60s/calidad_senal_quality_gate.png)
 
 Esta figura permite comprobar si las ventanas usadas para sonificacion se mantienen en una zona aceptable o si deben interpretarse con cautela. En esta captura, el diagnostico sigue siendo dudoso por ruido de red, aunque la continuidad temporal del sistema es correcta.
 
@@ -53,10 +53,11 @@ Esta figura permite comprobar si las ventanas usadas para sonificacion se mantie
 
 Se registraron 72 notas deduplicadas. Esto confirma que la salida musical se produjo durante la condicion de reposo, con persistencia suficiente para analisis posterior.
 
-## 8. Conclusión para el TFG
+## 8. ConclusiÃ³n para el TFG
 
 Esta condicion es adecuada como evidencia de pipeline sostenido durante reposo. Debe redactarse con cautela, reconociendo que la calidad EEG fue dudosa por ruido y artefactos moderados, pero que el sistema tecnico se comporto correctamente.
 
 Frase sugerida:
 
 > Durante el reposo quieto, el sistema mantuvo adquisicion continua sin gaps ni estados invalidos y registro una salida musical sostenida. La condicion se considera valida como evidencia de integracion tecnica, aunque la interpretacion fisiologica queda limitada por ruido de red y variabilidad de amplitud.
+

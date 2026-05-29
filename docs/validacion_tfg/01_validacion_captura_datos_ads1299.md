@@ -1,4 +1,4 @@
-# 01. Validacion de captura de datos ADS1299 - final-v4
+﻿# 01. Validacion de captura de datos ADS1299 - final-v4
 
 ## 1. Objetivo
 
@@ -21,15 +21,15 @@ El documento original fue generado por `python/tools/build_validation_docs.py`. 
 
 ```text
 Electrodos / modo diagnostico
-   ↓
+   â†“
 ADS1299-4PAG
-   ↓ SPI / DRDY / RDATAC
+   â†“ SPI / DRDY / RDATAC
 Arduino UNO Q MCU
-   ↓ filtros MCU + bloques de 8 muestras
+   â†“ filtros MCU + bloques de 8 muestras
 Bridge.notify("eeg_block_uV")
-   ↓
+   â†“
 Python backend
-   ↓
+   â†“
 CSV / DSP / WebUI / tools offline
 ```
 
@@ -95,3 +95,4 @@ python3 python/tools/build_validation_docs_final_v4_style.py --captures captures
 ## 7. Conclusion
 
 Bajo las capturas versionadas, la ruta ADC/SPI/Bridge/Python queda razonablemente validada. Los problemas observados en capturas reales posteriores no se explican por gaps, status invalido persistente ni fallo de streaming, sino por montaje bioelectrico, ruido comun, artefactos y calidad de contacto.
+

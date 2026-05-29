@@ -1,4 +1,4 @@
-# 04. Validacion DSP y multitaper - final-v4
+﻿# 04. Validacion DSP y multitaper - final-v4
 
 ## 1. Objetivo
 
@@ -8,17 +8,17 @@ Pipeline analizado:
 
 ```text
 eeg_timeseries.csv / stream live
-   ↓
+   â†“
 ventana temporal CH1
-   ↓
+   â†“
 preprocesado ligero
-   ↓
+   â†“
 PSD multitaper
-   ↓
+   â†“
 bandpowers absolutos y relativos
-   ↓
+   â†“
 features espectrales
-   ↓
+   â†“
 quality gate / sonificacion
 ```
 
@@ -132,3 +132,4 @@ El DSP queda validado para extraccion de caracteristicas bajo ventanas limpias o
 ```text
 multitaper + bandpowers relativos + suavizado + quality gate
 ```
+

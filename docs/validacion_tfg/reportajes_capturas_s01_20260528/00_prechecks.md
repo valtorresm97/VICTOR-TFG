@@ -1,4 +1,4 @@
-# Prechecks de la sesion final `s01_20260528`
+﻿# Prechecks de la sesion final `s01_20260528`
 
 ## 1. Funcion de los prechecks
 
@@ -39,3 +39,4 @@ Ambas capturas presentaron continuidad tecnica correcta, pero tambien ruido de r
 Los prechecks confirman que antes de iniciar las pruebas largas el sistema ya era capaz de adquirir y guardar datos. El ruido de 50 Hz observado no invalida su funcion, pero impide tratarlos como condiciones fisiologicas limpias.
 
 En la memoria se pueden mencionar de forma breve como parte del protocolo experimental, sin dedicarles analisis extenso.
+

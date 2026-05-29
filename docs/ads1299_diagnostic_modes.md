@@ -1,4 +1,4 @@
-# ADS1299 diagnostic modes
+﻿# ADS1299 diagnostic modes
 
 Documento activo de referencia para los modos de diagnostico ADS1299 usados durante la validacion del proyecto.
 
@@ -71,7 +71,7 @@ Lectura esperada:
 ## Prueba 2: test signal interno
 
 Objetivo: validar reconstruccion 24-bit, escala, ganancia, CONFIG2, MUX y streaming
-con una señal generada dentro del ADS1299.
+con una seÃ±al generada dentro del ADS1299.
 
 Cambiar temporalmente el modo:
 
@@ -91,7 +91,7 @@ cat "$CAPTURE_DIR/quality_report.md"
 
 Lectura esperada:
 
-- Debe aparecer una señal periodica lenta coherente entre canales.
+- Debe aparecer una seÃ±al periodica lenta coherente entre canales.
 - Si la frecuencia/escala no tienen sentido, revisar CONFIG2, LSB, ganancia y Vref.
 
 ## Volver despues de pruebas diagnosticas
@@ -173,7 +173,7 @@ Y compilar/subir de nuevo.
 ## Prueba CH1 solo, CH2-CH4 apagados
 
 Objetivo: comprobar si canales no usados/flotantes contribuyen al artefacto de
-~25 Hz o a las métricas.
+~25 Hz o a las mÃ©tricas.
 
 ```bash
 python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
@@ -294,3 +294,4 @@ ADS_DIAGNOSTIC_MODE=5
 montage=ear_eeg_ch1_only
 ADS_MODE=bias_ch1_only_loff_off
 ```
+

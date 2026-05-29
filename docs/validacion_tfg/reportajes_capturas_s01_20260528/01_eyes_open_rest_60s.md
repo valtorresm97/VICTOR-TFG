@@ -1,4 +1,4 @@
-# Captura `01_eyes_open_rest_60s` - ojos abiertos en reposo
+﻿# Captura `01_eyes_open_rest_60s` - ojos abiertos en reposo
 
 ## 1. Objetivo de la condicion
 
@@ -59,11 +59,11 @@ Los controles reportables son:
 
 En esta condicion, su valor principal es demostrar que la sonificacion permanece trazable incluso cuando la senal presenta segmentos dudosos. No se deben extraer conclusiones neurofisiologicas fuertes de esta captura aislada.
 
-## 6. Calidad de señal y quality gate
+## 6. Calidad de seÃ±al y quality gate
 
-![Calidad de señal y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/calidad_senal_quality_gate.png)
+![Calidad de seÃ±al y gate](../figures/capturas_finales_s01_20260528_matplotlib/20260528-145041_s01_20260528_ear_eeg_ch1_only_01_eyes_open_rest_60s/calidad_senal_quality_gate.png)
 
-Esta grafica permite separar la interpretacion musical de la calidad de la señal. En esta captura, el artefacto transitorio obliga a interpretar las ventanas contaminadas con cautela, aunque el pipeline haya seguido funcionando.
+Esta grafica permite separar la interpretacion musical de la calidad de la seÃ±al. En esta captura, el artefacto transitorio obliga a interpretar las ventanas contaminadas con cautela, aunque el pipeline haya seguido funcionando.
 
 ## 7. Notas musicales generadas
 
@@ -73,8 +73,9 @@ Se registraron 45 notas deduplicadas. La grafica permite ver la densidad tempora
 
 La musica se considera correctamente registrada, pero su patron debe interpretarse como salida del sistema bajo una senal real con artefactos, no como marcador fisiologico directo.
 
-## 8. Conclusión para el TFG
+## 8. ConclusiÃ³n para el TFG
 
 Esta captura se debe usar como evidencia de funcionamiento real y como ejemplo de limitacion experimental. La frase defendible seria:
 
-> En ojos abiertos, el sistema mantuvo adquisicion continua y registro musical, pero la señal contenia un artefacto transitorio de gran amplitud. Por ello, la condicion se conserva como evidencia tecnica de integracion y como ejemplo de la necesidad de identificar ventanas contaminadas antes de realizar interpretaciones fisiologicas.
+> En ojos abiertos, el sistema mantuvo adquisicion continua y registro musical, pero la seÃ±al contenia un artefacto transitorio de gran amplitud. Por ello, la condicion se conserva como evidencia tecnica de integracion y como ejemplo de la necesidad de identificar ventanas contaminadas antes de realizar interpretaciones fisiologicas.
+

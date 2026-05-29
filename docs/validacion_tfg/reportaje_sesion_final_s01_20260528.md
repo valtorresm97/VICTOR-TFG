@@ -1,4 +1,4 @@
-# Reportaje tecnico de la sesion final EEG-MIDI `s01_20260528`
+﻿# Reportaje tecnico de la sesion final EEG-MIDI `s01_20260528`
 
 ## 1. Proposito del reportaje
 
@@ -233,3 +233,4 @@ captura real -> CSV EEG -> quality reports -> features -> controles de sonificac
 ```
 
 La limitacion principal tambien queda documentada: la adquisicion real presenta artefactos. Esto no invalida el sistema; delimita honestamente el alcance experimental de la prueba.
+

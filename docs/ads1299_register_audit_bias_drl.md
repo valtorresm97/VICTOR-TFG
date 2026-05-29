@@ -1,4 +1,4 @@
-# ADS1299Plus register audit and BIAS/DRL test design
+﻿# ADS1299Plus register audit and BIAS/DRL test design
 
 Documento activo de referencia para registros ADS1299, BIAS/DRL y decisiones de configuracion analogica.
 
@@ -14,7 +14,7 @@ CH2-CH4: apagados/conservados solo por contrato de streaming
 Referencia principal: Texas Instruments ADS1299 datasheet Rev. C, SBAS499C:
 https://www.ti.com/lit/ds/sbas499c/sbas499c.pdf
 
-Este documento procede de la fase de auditoria y diseño BIAS/DRL. La ruta practica del proyecto acabo consolidando el modo `bias_ch1_only_loff_off` para la sesion final de laboratorio. Las pruebas BIAS/DRL descritas aqui siguen siendo utiles como contexto tecnico, pero la evidencia principal del TFG debe leerse en `docs/configuracion_final_v4.md` y `docs/validacion_tfg/`.
+Este documento procede de la fase de auditoria y diseÃ±o BIAS/DRL. La ruta practica del proyecto acabo consolidando el modo `bias_ch1_only_loff_off` para la sesion final de laboratorio. Las pruebas BIAS/DRL descritas aqui siguen siendo utiles como contexto tecnico, pero la evidencia principal del TFG debe leerse en `docs/configuracion_final_v4.md` y `docs/validacion_tfg/`.
 
 ## Estado de evidencia del proyecto
 
@@ -74,7 +74,7 @@ Riesgo de no corregir: activar BIAS usando el helper actual escribiria un CONFIG
 sin bits fijos [6:5]. Aunque el chip ha funcionado en pruebas, no es una base
 limpia para evaluar BIAS/DRL.
 
-## Diseño de pruebas BIAS/DRL
+## DiseÃ±o de pruebas BIAS/DRL
 
 Suposicion de conexion fisica que debe confirmarse antes de compilar:
 
@@ -246,3 +246,4 @@ Antes de modificar el modo analogico en futuras ramas, confirmar:
 - Si el objetivo es una captura comparable con final-v4 o una prueba diagnostica nueva.
 
 No cambiar registros ADS1299 en la futura version esencial UML. La version esencial debe documentar el modo final, no experimentar con la configuracion analogica.
+
