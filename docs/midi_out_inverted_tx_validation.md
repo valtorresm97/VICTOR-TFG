@@ -1,6 +1,15 @@
 # MIDI OUT inverted TX validation
 
-Relevant final branches: `firmware-final-v3` and `codex/direct-band-sonification`.
+Documento activo de referencia para la salida MIDI fisica del sistema EEG-MIDI.
+
+Estado final-v4:
+
+```text
+Rama integrada actual: firmware-final-v4
+Ruta MIDI validada: Python -> Bridge.call("midi_bytes") -> firmware -> Serial1/D1 -> TX invertido -> MIDI OUT fisico
+```
+
+Procedencia historica: la validacion se desarrollo inicialmente entre `firmware-final-v3` y `codex/direct-band-sonification`, pero el resultado queda integrado en `firmware-final-v4` y debe tratarse como requisito tecnico actual.
 
 ## Confirmed result
 
@@ -30,18 +39,19 @@ Serial1.write(byte);
 `Serial` remains reserved for Monitor/App Lab diagnostics and must not be used
 for MIDI bytes.
 
-## Runtime policy
+## Runtime policy final-v4
 
 - MIDI UART is enabled by default on `Serial1`.
 - TX inversion is required; if `USART1` or `USART_CR2_TXINV` is unavailable,
   the firmware build fails instead of silently transmitting with wrong polarity.
 - The MCU self-test arpeggio is available as a compile-time diagnostic but is
   disabled by default.
-- Python MIDI live output is enabled by default again.
+- Python MIDI live output is enabled by default.
 - The Python diagnostic MIDI loop does not autostart by default, so it will not
   mask EEG sonification.
 - The WebUI panic button and MIDI test endpoints use the same `midi_bytes`
   Bridge path as live sonification.
+- `Serial1`/D1 and TX inversion must not be changed without testing on the physical MIDI OUT circuit.
 
 ## Validated MIDI bytes
 
@@ -59,3 +69,18 @@ C9 09      program visible 10
 
 No MIDI clock, PPQ, file header, or extra synchronization is required for
 immediate `note_on` / `note_off` playback on the synthesizer.
+
+## Relacion con la version esencial UML
+
+Para una futura version esencial, el flujo MIDI minimo que debe conservarse es:
+
+```text
+MidiScheduler
+  -> MidiByteTransport
+  -> Bridge.call("midi_bytes", n, b0, b1, b2)
+  -> firmware midi_bytes()
+  -> Serial1 / D1 / USART1_TX con TXINV
+  -> MIDI OUT fisico
+```
+
+No separar ni sustituir este contrato sin una prueba real de sonido y una prueba de panic MIDI.
