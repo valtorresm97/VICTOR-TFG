@@ -49,8 +49,6 @@ La validacion DSP debe leerse en dos niveles:
 1. Comparacion global de todos los estados en una misma figura.
 2. Comparacion directa periodograma vs multitaper para cada estado individual.
 
-La version anterior solo generaba comparaciones directas para reposo y artefacto. El wrapper final-v4 ahora genera comparaciones homogéneas para todos los estados de la timeline.
-
 ### 4.1 Vista global
 
 | Figura | Uso recomendado |
@@ -70,31 +68,43 @@ La version anterior solo generaba comparaciones directas para reposo y artefacto
 
 ### 4.2 Periodograma vs multitaper por estado
 
-Tras regenerar con el wrapper final-v4, se esperan figuras homogéneas con este patron:
+Las siguientes figuras comparan ambos metodos sobre los mismos segmentos de la timeline. El objetivo es mostrar por estado que el periodograma conserva mas variabilidad, mientras que multitaper suaviza la estimacion y da bandpowers mas estables para sonificacion.
 
-```text
-fig_04_periodogram_vs_multitaper_<estado>.png
-```
+#### Ojos abiertos / reposo
 
-Concretamente:
+![periodogram_vs_multitaper_ojos_abiertos](figures/fig_04_periodogram_vs_multitaper_ojos_abiertos_reposo.png)
 
-```text
-fig_04_periodogram_vs_multitaper_ojos_abiertos_reposo.png
-fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_1.png
-fig_04_periodogram_vs_multitaper_mandibula.png
-fig_04_periodogram_vs_multitaper_recuperacion_1.png
-fig_04_periodogram_vs_multitaper_parpadeo_frente.png
-fig_04_periodogram_vs_multitaper_recuperacion_2.png
-fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_2.png
-```
+#### Ojos cerrados / reposo 1
 
-Estas figuras permiten hacer la misma comparacion metodologica para cada estado: el periodograma muestra mas variabilidad, mientras que multitaper suaviza la estimacion y aporta bandpowers mas estables para sonificacion.
+![periodogram_vs_multitaper_ojos_cerrados_1](figures/fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_1.png)
 
-Para regenerar todo el conjunto:
+#### Mandibula
+
+![periodogram_vs_multitaper_mandibula](figures/fig_04_periodogram_vs_multitaper_mandibula.png)
+
+#### Recuperacion 1
+
+![periodogram_vs_multitaper_recuperacion_1](figures/fig_04_periodogram_vs_multitaper_recuperacion_1.png)
+
+#### Parpadeo / frente
+
+![periodogram_vs_multitaper_parpadeo_frente](figures/fig_04_periodogram_vs_multitaper_parpadeo_frente.png)
+
+#### Recuperacion 2
+
+![periodogram_vs_multitaper_recuperacion_2](figures/fig_04_periodogram_vs_multitaper_recuperacion_2.png)
+
+#### Ojos cerrados / reposo 2
+
+![periodogram_vs_multitaper_ojos_cerrados_2](figures/fig_04_periodogram_vs_multitaper_ojos_cerrados_reposo_2.png)
+
+Para regenerar solo figuras:
 
 ```bash
 python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
+
+El wrapper fuerza `--only-figures` por defecto para no sobrescribir los Markdown revisados.
 
 ## 5. Interpretacion
 
