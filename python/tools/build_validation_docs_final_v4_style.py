@@ -12,8 +12,10 @@ homogeneidad de las figuras por estado de la captura mixed_states:
 - escala vertical fija de +-750 uV en senales temporales por estado;
 - periodograma vs multitaper para todos los estados de la timeline.
 
-IMPORTANTE: por defecto este wrapper fuerza `--only-figures` para no volver a
-pisar los Markdown `00` a `05`, que han sido revisados manualmente para final-v4.
+IMPORTANTE: por defecto este wrapper fuerza `--only-figures` y, ademas,
+preserva los Markdown existentes de `docs/validacion_tfg` aunque el generador
+historico intente reescribirlos. Asi no vuelve a pisar los documentos `00` a
+`06`, que han sido revisados manualmente para final-v4.
 
 Uso recomendado desde la raiz del repo:
 
@@ -29,8 +31,7 @@ Equivalente explicito:
       --only-figures
 
 Si algun dia se quieren regenerar tambien documentos, usar conscientemente
-`--only-docs` o el generador historico, y restaurar despues los Markdown
-manuales si fuera necesario.
+`--only-docs` o el generador historico.
 """
 
 from __future__ import annotations
@@ -203,21 +204,51 @@ def patch_base_generator() -> None:
 
 
 def force_figures_only_by_default() -> None:
-    """Evita que el generador historico vuelva a sobrescribir Markdown revisados.
-
-    `build_validation_docs.py` soporta `--only-figures`; este wrapper lo fuerza
-    si el usuario no ha pedido explicitamente `--only-figures` o `--only-docs`.
-    """
+    """Evita que el generador historico vuelva a sobrescribir Markdown revisados."""
 
     args = set(sys.argv[1:])
     if "--only-figures" not in args and "--only-docs" not in args:
         sys.argv.append("--only-figures")
 
 
+def _output_dir_from_argv(default: str = "docs/validacion_tfg") -> Path:
+    """Obtiene el directorio de salida sin depender del parser historico."""
+
+    for idx, arg in enumerate(sys.argv[:-1]):
+        if arg == "--output":
+            return Path(sys.argv[idx + 1])
+    return Path(default)
+
+
+def snapshot_markdown_files(output_dir: Path) -> dict[Path, str]:
+    """Guarda en memoria los Markdown existentes para poder restaurarlos."""
+
+    if not output_dir.exists():
+        return {}
+    return {path: path.read_text(encoding="utf-8") for path in output_dir.glob("*.md")}
+
+
+def restore_markdown_files(snapshot: dict[Path, str]) -> None:
+    """Restaura Markdown manuales tras generar figuras.
+
+    Esto blinda el wrapper frente al comportamiento del generador historico, que
+    aun con `--only-figures` puede volver a escribir documentos en algunos casos.
+    """
+
+    for path, content in snapshot.items():
+        path.write_text(content, encoding="utf-8")
+
+
 def main() -> int:
     patch_base_generator()
     force_figures_only_by_default()
-    return int(base.main() or 0)
+    output_dir = _output_dir_from_argv()
+    preserve_markdown = "--only-docs" not in set(sys.argv[1:])
+    markdown_snapshot = snapshot_markdown_files(output_dir) if preserve_markdown else {}
+    result = int(base.main() or 0)
+    if preserve_markdown:
+        restore_markdown_files(markdown_snapshot)
+    return result
 
 
 if __name__ == "__main__":
