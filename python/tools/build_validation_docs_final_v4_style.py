@@ -11,8 +11,8 @@ capa de estilo Matplotlib mas segura para la memoria del TFG:
 Uso recomendado desde la raiz del repo:
 
     python3 python/tools/build_validation_docs_final_v4_style.py \
-      --captures-dir captures \
-      --docs-dir docs/validacion_tfg
+      --captures captures \
+      --output docs/validacion_tfg
 
 La salida pisa las mismas figuras/documentos generados por `build_validation_docs.py`,
 por lo que debe ejecutarse con `git status --short` limpio o con cambios controlados.
