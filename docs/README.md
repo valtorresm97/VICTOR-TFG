@@ -1,63 +1,119 @@
 # Indice de documentacion
 
-Este indice evita que los reports historicos se interpreten como el estado
-actual del proyecto. No se borra ningun documento: se clasifica la fuente que
-debe usarse en cada fase.
+Este indice define que documentos deben leerse como fuente principal del estado integrado `firmware-final-v4` y cuales quedan como historicos. No se borra documentacion tecnica: se clasifica para evitar confundir versiones antiguas con el estado actual.
 
-## Documentacion definitiva para la fase actual
+Rama documental actual:
+
+```text
+refactor/essential-eeg-midi-plan
+```
+
+Rama base integrada:
+
+```text
+firmware-final-v4
+```
+
+## 1. Entrada principal final-v4
 
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `configuracion_final_v3.md` | Definitivo para final-v3 | Resumen consolidado de arquitectura, firmware, streaming, Python, DSP, sonificacion, MIDI fisico y WebUI. |
-| `auditoria_firmware_final_v1/README.md` | Definitivo para arquitectura y riesgos de refactor | Punto de entrada tecnico antes de tocar firmware/backend/DSP/UI. |
-| `auditoria_firmware_final_v1/10_redundancias_y_deuda_tecnica.md` | Definitivo para eliminacion incremental de redundancias | Lista de trabajo actual de esta rama. |
-| `auditoria_firmware_final_v1/12_mapa_criticidad_refactor.md` | Definitivo para decidir riesgo de cambios | Consultar antes de modificar archivos criticos. |
-| `validacion_tfg/00_resumen_validacion.md` | Definitivo para evidencia de captura/DSP | Resumen consolidado generado desde capturas y tablas. |
-| `validacion_tfg/07_protocolo_final_adquisicion.md` | Definitivo para repetir pruebas en placa | Protocolo recomendado de captura y validacion. |
+| `configuracion_final_v4.md` | Principal final-v4 | Resumen consolidado de arquitectura, firmware, streaming, Python backend, DSP, spectral quality, sonificacion, MIDI fisico, WebUI, capturas finales y benchmarks reales. |
+| `auditoria_final_v4_fase1_2.md` | Auditoria de arranque final-v4 | Lectura previa para entender que se reviso en fases 1 y 2, que incoherencias se detectaron y que queda pendiente para fase 3. |
 
-## Documentacion activa de subsistemas
+Lectura recomendada inicial:
+
+```text
+1. docs/configuracion_final_v4.md
+2. docs/auditoria_final_v4_fase1_2.md
+3. docs/validacion_tfg/09_benchmarks_rendimiento_placa.md
+4. docs/validacion_tfg/10_resultados_captura_final_laboratorio.md
+5. docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md
+```
+
+## 2. Validacion TFG final-v4
+
+La carpeta `validacion_tfg/` contiene la evidencia principal para la memoria: benchmarks reales, capturas finales, reportajes, figuras y tablas. Si un report historico contradice estos documentos, prevalece la documentacion final-v4 listada aqui.
+
+| Documento/carpeta | Estado | Uso recomendado |
+| --- | --- | --- |
+| `validacion_tfg/09_benchmarks_rendimiento_placa.md` | Principal | Evidencia temporal real en placa UNO Q/Linux: benchmarks Python/Linux, benchmarks MCU, margen de 256 ms y 32 ms. |
+| `validacion_tfg/10_resultados_captura_final_laboratorio.md` | Principal | Resumen tecnico de la sesion final `s01_20260528`, calidad de captura, artefactos y datos musicales registrados. |
+| `validacion_tfg/reportaje_sesion_final_s01_20260528.md` | Principal | Relato tecnico global de la sesion final para TFG. |
+| `validacion_tfg/reportajes_capturas_s01_20260528/` | Principal por captura | Lectura individual de prechecks y condiciones `01`, `02`, `03`, `04` y `06`. |
+| `validacion_tfg/figures/capturas_finales_s01_20260528_matplotlib/` | Figuras generadas | Figuras estandar por captura: EEG temporal, bandpowers, controles, calidad y notas. |
+| `validacion_tfg/figures/capturas_finales_s01_20260528_enhanced/` | Figuras reajustadas | Figuras enhanced de la captura 06, candidata principal para memoria. |
+| `validacion_tfg/capturas_finales_s01_20260528_matplotlib/` | Documentacion generada | Salida automatica auxiliar reproducible. |
+
+## 3. Protocolo experimental y plantillas
 
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `ads1299_diagnostic_modes.md` | Activo | Referencia de modos diagnosticos ADS1299. |
+| `protocolo_capturas_multiusuario.md` | Activo | Procedimiento repetible para capturas EEG-MIDI multiusuario. |
+| `templates/plantilla_sesion_sujeto.md` | Activo | Plantilla para documentar sesiones por sujeto. |
+| `sesiones_captura/` | Activo | Sesiones documentadas, incluyendo prueba de casa y sesion final de laboratorio. |
+
+## 4. Auditorias tecnicas activas
+
+La familia `auditoria_codigo_detallada/` sigue siendo muy valiosa para entender el sistema funcion por funcion. Puede contener referencias a final-v3 o ramas antiguas, pero su contenido tecnico debe conservarse mientras se revisa la organizacion documental.
+
+| Carpeta/documento | Estado | Uso recomendado |
+| --- | --- | --- |
+| `auditoria_codigo_detallada/00_inventario_actual.md` | Activo con posible terminologia historica | Inventario del repo y bloques funcionales. |
+| `auditoria_codigo_detallada/01_firmware_funcion_por_funcion.md` | Activo | Firmware, streaming, filtros, bench, MIDI y LED. |
+| `auditoria_codigo_detallada/02_ads1299_spi_driver.md` | Activo | ADS1299, SPI, registros y contratos criticos. |
+| `auditoria_codigo_detallada/03_python_backend_funcion_por_funcion.md` | Activo | Backend, receiver, contratos, capturas y WebUI. |
+| `auditoria_codigo_detallada/04_dsp_eeg_funcion_por_funcion.md` | Activo | DSP, features y quality score. |
+| `auditoria_codigo_detallada/05_sonificacion_midi_funcion_por_funcion.md` | Activo | Sonificacion, musica, MIDI scheduler y transporte. |
+| `auditoria_codigo_detallada/06_led_matrix_funcion_por_funcion.md` | Activo secundario | LED matrix y piano scroll. |
+| `auditoria_codigo_detallada/07_web_server_assets_funcion_por_funcion.md` | Activo | Web server, endpoints y assets HTML/JS/CSS. |
+| `auditoria_codigo_detallada/08_tools_cli_funcion_por_funcion.md` | Activo | Tools offline, capturas, validacion y documentacion. |
+| `auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md` | Activo critico | Contratos productor/consumidor que no deben romperse. |
+| `auditoria_codigo_detallada/10_mapa_funciones_criticas.md` | Activo critico | Criticidad y pruebas minimas. |
+| `auditoria_codigo_detallada/11_hallazgos_para_simplificacion_futura.md` | Activo para fase UML | Base para futura `propuesta_version_esencial_uml.md`. |
+
+## 5. Documentacion activa de subsistemas
+
+| Documento | Estado | Uso recomendado |
+| --- | --- | --- |
+| `ads1299_diagnostic_modes.md` | Activo | Referencia de modos diagnosticos ADS1299 y montaje CH1-only. |
 | `ads1299_register_audit_bias_drl.md` | Activo | Contexto de registros, BIAS/RLD y decisiones ADS1299. |
-| `diseno_spectral_quality_score.md` | Activo | Diseno del score de calidad espectral. |
+| `diseno_spectral_quality_score.md` | Activo | Diseno del score de calidad espectral y quality gate. |
 | `midi_out_inverted_tx_validation.md` | Activo | Validacion de MIDI OUT fisico, `Serial1`/D1 y TX invertido obligatorio. |
-| `led_matrix_piano_scroll.md` | Activo | Referencia del piano scroll LED y su transporte. |
+| `led_matrix_piano_scroll.md` | Activo secundario | Referencia del piano scroll LED y su transporte. |
 
-## Validacion TFG consolidada
+## 6. Historico y documentacion antigua
 
-La carpeta `validacion_tfg/` contiene la salida consolidada generada por
-`python/tools/build_validation_docs.py`. Si hay discrepancia con reports raiz
-anteriores, prevalece `validacion_tfg/`.
+La documentacion historica se conserva en:
 
-| Carpeta/archivo | Estado | Uso recomendado |
+```text
+historico/documentacion antigua/
+```
+
+| Documento | Estado | Documento preferente actual |
 | --- | --- | --- |
-| `validacion_tfg/01_validacion_captura_datos_ads1299.md` | Consolidado | Evidencia ADS1299/SPI/RDATAC/Bridge. |
-| `validacion_tfg/02_validacion_montaje_electrodos_bias_rld.md` | Consolidado | Comparacion de montajes y decision CH1-only. |
-| `validacion_tfg/03_validacion_calidad_senal_real.md` | Consolidado | Calidad de senal, artefactos y capturas finales. |
-| `validacion_tfg/04_validacion_dsp_multitaper.md` | Consolidado | Validacion DSP multitaper. |
-| `validacion_tfg/05_validacion_bandas_eeg_y_features.md` | Consolidado | Bandpowers, features y comparativas. |
-| `validacion_tfg/06_conclusiones_para_sonificacion.md` | Consolidado | Conclusiones para mapping musical. |
-| `validacion_tfg/tables/` | Generado | Tablas fuente para memoria/figuras. |
-| `validacion_tfg/figures/` | Generado | Figuras fuente para memoria. |
+| `historico/documentacion antigua/configuracion_final_v3.md` | Historico | `configuracion_final_v4.md` |
 
-## Reports historicos o solapados
+Criterio: consultar estos documentos solo para entender decisiones anteriores, no como fuente principal del estado final-v4.
 
-Estos documentos siguen siendo utiles para trazabilidad, pero no deben usarse
-como fuente principal si contradicen `validacion_tfg/` o la auditoria final.
+## 7. Reports historicos o solapados pendientes de clasificar
+
+Estos documentos pueden seguir siendo utiles para trazabilidad, pero deben revisarse antes de usarlos como fuente principal. En caso de discrepancia, prevalecen `configuracion_final_v4.md` y `validacion_tfg/`.
 
 | Documento | Estado | Documento preferente |
 | --- | --- | --- |
-| `auditoria_captura_datos.md` | Historico | `auditoria_firmware_final_v1/` y `validacion_tfg/01_validacion_captura_datos_ads1299.md`. |
-| `validacion_de_la_captura_de_datos.md` | Historico | `validacion_tfg/01_validacion_captura_datos_ads1299.md`. |
-| `resultados_validacion_espectral_capturas.md` | Historico | `validacion_tfg/05_validacion_bandas_eeg_y_features.md`. |
-| `resultados_validacion_dsp_mixta.md` | Historico | `validacion_tfg/04_validacion_dsp_multitaper.md`. |
-| `validacion_bandas_eeg_sonificacion.md` | Historico | `validacion_tfg/05_validacion_bandas_eeg_y_features.md` y `validacion_tfg/06_conclusiones_para_sonificacion.md`. |
+| `auditoria_captura_datos.md` | Historico/pendiente de clasificar | `auditoria_codigo_detallada/`, `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
+| `validacion_de_la_captura_de_datos.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` |
+| `resultados_validacion_espectral_capturas.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y reportajes por captura |
+| `resultados_validacion_dsp_mixta.md` | Historico/pendiente de clasificar | `validacion_tfg/09_benchmarks_rendimiento_placa.md` y auditoria DSP |
+| `validacion_bandas_eeg_sonificacion.md` | Historico/pendiente de clasificar | `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `configuracion_final_v4.md` |
 
-## Regla de lectura
+## 8. Regla de lectura
 
-1. Para cambiar codigo, empezar por `auditoria_firmware_final_v1/`.
-2. Para justificar resultados del TFG, usar `validacion_tfg/`.
-3. Para entender una decision antigua, consultar reports historicos.
-4. Para regenerar evidencia, usar `python/tools/build_validation_docs.py`.
+1. Para entender el estado actual, empezar por `configuracion_final_v4.md`.
+2. Para comprobar que se reviso en la migracion documental, leer `auditoria_final_v4_fase1_2.md`.
+3. Para justificar rendimiento temporal del TFG, usar `validacion_tfg/09_benchmarks_rendimiento_placa.md`.
+4. Para justificar capturas reales y resultados experimentales, usar `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `reportaje_sesion_final_s01_20260528.md`.
+5. Para tocar codigo o preparar UML, consultar `auditoria_codigo_detallada/09_mapa_contratos_entre_modulos.md`, `10_mapa_funciones_criticas.md` y `11_hallazgos_para_simplificacion_futura.md`.
+6. Para entender una decision antigua, consultar `historico/documentacion antigua/` o reports historicos.
+7. No borrar benchmarks, capturas, reportajes ni figuras durante esta fase de organizacion documental.
