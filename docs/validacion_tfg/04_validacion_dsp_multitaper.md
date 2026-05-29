@@ -135,3 +135,5 @@ multitaper + bandpowers relativos + suavizado + quality gate
 
 
 
+
+

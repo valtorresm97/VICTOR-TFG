@@ -305,3 +305,5 @@ la validacion offline documenta lo ocurrido en capturas reales.
 
 
 
+
+

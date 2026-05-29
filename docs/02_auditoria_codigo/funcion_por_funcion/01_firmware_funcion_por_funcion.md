@@ -266,3 +266,5 @@ No debe presentar LED ni modo sintetico como parte necesaria del flujo EEG->MIDI
 
 
 
+
+

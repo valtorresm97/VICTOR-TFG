@@ -111,7 +111,7 @@ preservacion de bits fijos/reservados:
 
 Estas correcciones quedaron documentadas en:
 
-- `docs/ads1299_register_audit_bias_drl.md`
+- `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_register_audit_bias_drl.md`
 
 Referencias usadas:
 
@@ -139,7 +139,7 @@ Modos usados:
 
 La documentacion esta en:
 
-- `docs/ads1299_diagnostic_modes.md`
+- `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_diagnostic_modes.md`
 
 ## Balance de capturas
 
@@ -525,6 +525,8 @@ bruscos o mandibula/frente, la senal cambia claramente.
 Por tanto, la adquisicion real puede considerarse preliminarmente plausible. El
 foco de la siguiente fase debe ser repetir estabilidad, clasificar artefactos y
 evitar modificar filtros o registros hasta tener comparativas suficientes.
+
+
 
 
 

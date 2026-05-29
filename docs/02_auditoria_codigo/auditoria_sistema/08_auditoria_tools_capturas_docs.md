@@ -239,10 +239,10 @@ FEATURE_HOP_SAMPLES / FS_HZ = 64 / 250 = 256 ms
 | `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Vigente | Plantilla de sesion simplificada. |
 | `docs/04_protocolos_captura/sesiones_captura/20260528_s01_sesion.md` | Vigente | Sesion final real. |
 | `docs/04_protocolos_captura/sesiones_captura/20260528_s00_home_test_sesion.md` | Vigente como prueba previa | Validacion en casa, no evidencia principal. |
-| `docs/diseno_spectral_quality_score.md` | Vigente con cautela | Base conceptual del quality gate. |
-| `docs/midi_out_inverted_tx_validation.md` | Vigente | Validacion MIDI fisico TX invertido. |
-| `docs/ads1299_diagnostic_modes.md` | Vigente tecnico | Define modos ADS 0..5. |
-| `docs/ads1299_register_audit_bias_drl.md` | Vigente tecnico | Complementa registros/BIAS/DRL. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/diseno_spectral_quality_score.md` | Vigente con cautela | Base conceptual del quality gate. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/midi_out_inverted_tx_validation.md` | Vigente | Validacion MIDI fisico TX invertido. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_diagnostic_modes.md` | Vigente tecnico | Define modos ADS 0..5. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_register_audit_bias_drl.md` | Vigente tecnico | Complementa registros/BIAS/DRL. |
 | `docs/auditoria_captura_datos.md` | Auditoria previa | Util historicamente; contrastar con final-v4. |
 | `docs/resultados_validacion_espectral_capturas.md` | Historico/parcial | Puede contener capturas previas; no debe sustituir sesion final s01. |
 | `docs/resultados_validacion_dsp_mixta.md` | Historico/parcial | Util como antecedente. |
@@ -342,6 +342,8 @@ figuras y reportajes
 ```
 
 Para el TFG, esta capa es fundamental como metodologia y resultados. Para la futura version esencial/UML, debe mantenerse como soporte lateral y no mezclarse con el flujo principal EEG->MIDI.
+
+
 
 
 

@@ -576,7 +576,7 @@ Documentos recomendados como entrada:
 | Documento | Uso |
 | --- | --- |
 | `docs/configuracion_final_v4.md` | Resumen tecnico principal final-v4. |
-| `docs/auditoria_final_v4_fase1_2.md` | Auditoria previa de estado real y pendientes documentales. |
+| `docs/00_entrada_tfg/00_entrada_tfg/auditoria_final_v4_fase1_2.md` | Auditoria previa de estado real y pendientes documentales. |
 | `docs/validacion_tfg/09_benchmarks_rendimiento_placa.md` | Evidencia temporal en placa. |
 | `docs/validacion_tfg/10_resultados_captura_final_laboratorio.md` | Resumen de sesion final de laboratorio. |
 | `docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md` | Relato tecnico global de la sesion. |
@@ -649,6 +649,8 @@ Conclusion:
 final-v4 es la version integrada y trazable del sistema EEG-MIDI.
 La futura version esencial debe simplificar la explicacion y los diagramas, no perder la evidencia de validacion ni modificar contratos criticos sin pruebas.
 ```
+
+
 
 
 

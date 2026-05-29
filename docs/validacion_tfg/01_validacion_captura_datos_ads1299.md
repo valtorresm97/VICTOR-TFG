@@ -98,3 +98,5 @@ Bajo las capturas versionadas, la ruta ADC/SPI/Bridge/Python queda razonablement
 
 
 
+
+

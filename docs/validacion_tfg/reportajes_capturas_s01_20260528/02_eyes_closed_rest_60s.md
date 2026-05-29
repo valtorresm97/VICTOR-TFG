@@ -62,3 +62,5 @@ Esta captura debe reportarse como condicion real de ojos cerrados con adquisicio
 
 
 
+
+

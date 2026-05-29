@@ -503,3 +503,6 @@ No borrar capturas descartadas. Marcar en la plantilla que no se usaran como evi
 
 
 
+
+
+

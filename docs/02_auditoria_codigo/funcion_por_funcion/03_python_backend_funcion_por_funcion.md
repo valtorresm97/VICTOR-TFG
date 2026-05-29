@@ -293,3 +293,5 @@ No borrar ni mover todavia. Primera fase de simplificacion recomendada:
 
 
 
+
+

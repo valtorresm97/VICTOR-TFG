@@ -263,8 +263,10 @@ No aplicar hasta tener capturas reales:
 | Revisar lead-off durante EEG | LOFF/LOFF_SENSP/N/CONFIG4 | Evitar inyeccion/artefacto si molesta | Puede afectar contacto/senal | Si |
 | Ajustar notch/LP/gamma | `filters.h`/DSP | Si datos muestran deformacion o ruido | Puede cambiar features | Si |
 
-Ver `docs/ads1299_diagnostic_modes.md` para ejecutar `shorted_inputs` y
+Ver `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_diagnostic_modes.md` para ejecutar `shorted_inputs` y
 `test_signal_internal` sin alterar el modo EEG real por defecto.
+
+
 
 
 

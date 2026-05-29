@@ -63,3 +63,5 @@ La captura 06 debe reportarse con ambas vistas: completa y reajustada. La comple
 
 
 
+
+

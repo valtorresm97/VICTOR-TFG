@@ -392,3 +392,5 @@ Su responsabilidad es capturar y transportar datos de forma estable, no interpre
 
 
 
+
+

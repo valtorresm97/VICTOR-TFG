@@ -249,3 +249,5 @@ No cambiar registros ADS1299 en la futura version esencial UML. La version esenc
 
 
 
+
+

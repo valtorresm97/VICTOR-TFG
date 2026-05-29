@@ -188,3 +188,5 @@ El protocolo final-v4 queda centrado en capturas reales trazables, con metadata,
 
 
 
+
+

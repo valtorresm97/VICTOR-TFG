@@ -222,3 +222,5 @@ EEG -> DSP -> quality gate -> sonificacion -> MIDI fisico
 
 
 
+
+

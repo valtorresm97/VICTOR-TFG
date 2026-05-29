@@ -43,7 +43,7 @@ Criterio de lectura:
 | `python/eeg_contract.py` | Streaming/Bridge | Constantes y parser Python del payload EEG | Si | Python | Fuente Python compartida: `FS_HZ=250`, `NUM_CH=4`, `BLOCK_SAMPLES=8`, `STATUS_PREFIX=0xC00000`. |
 | `python/eeg_signal_processor.py` | EEG signal processor | Ring buffer multicanal y acceso a DSP | Si | Python | Contrato uV->V; ventana live de features. |
 | `python/dsp_core.py` | DSP | PSD, multitaper, bandpowers y features | Si | Python | Fuente unica de multitaper live/offline. |
-| `python/spectral_quality.py` | DSP/calidad | Score/gate de calidad espectral | Si | Python | Controla si sonificacion se considera valida. Documento activo: `diseno_spectral_quality_score.md`. |
+| `python/spectral_quality.py` | DSP/calidad | Score/gate de calidad espectral | Si | Python | Controla si sonificacion se considera valida. Documento activo: `03_subsistemas_final_v4/diseno_spectral_quality_score.md`. |
 | `python/sonification_features.py` | Sonificacion | Features DSP -> controles reportables de sonificacion | Si | Python | En final-v4 usa nombres publicos `alpha_drive`, `beta_gamma_drive`, `rms_beta_activity`, etc.; alias legacy solo internos. |
 | `python/music_segment.py` | Generacion musical | Estado musical live desde sonificacion | Medio | Python | Escala, nota principal, cadencia y resumen musical. |
 | `python/music_bar.py` | Generacion musical | Acordes, posiciones ritmicas y barras | Medio | Python | Usa RNG; requiere cautela si se busca reproducibilidad. |
@@ -98,15 +98,15 @@ Criterio de lectura:
 | --- | --- | --- | --- | --- | --- |
 | `docs/README.md` | Documentacion | Indice activo final-v4 | Si | Doc | Punto de entrada documental. |
 | `docs/configuracion_final_v4.md` | Documentacion | Resumen tecnico principal final-v4 | Si | Doc | Fuente preferente de estado actual. |
-| `docs/auditoria_final_v4_fase1_2.md` | Documentacion | Auditoria de fases 1 y 2 | Medio | Doc | Deja trazabilidad de decisiones de limpieza documental. |
+| `docs/00_entrada_tfg/00_entrada_tfg/auditoria_final_v4_fase1_2.md` | Documentacion | Auditoria de fases 1 y 2 | Medio | Doc | Deja trazabilidad de decisiones de limpieza documental. |
 | `docs/04_protocolos_captura/protocolo_capturas_multiusuario.md` | Capturas | Protocolo experimental repetible | Medio | Doc | Activo para nuevas sesiones. |
 | `docs/04_protocolos_captura/templates/plantilla_sesion_sujeto.md` | Capturas | Plantilla de sesion | Medio | Doc | Activo. |
 | `docs/04_protocolos_captura/sesiones_captura/` | Capturas | Sesiones documentadas | Medio | Doc | Incluye prueba de casa y sesion final. |
-| `docs/ads1299_diagnostic_modes.md` | Subsistema ADS1299 | Modos diagnosticos | Medio | Doc | Activo final-v4; modo final de capturas = 5. |
-| `docs/ads1299_register_audit_bias_drl.md` | Subsistema ADS1299 | Registros, BIAS/DRL y CH1-only | Medio | Doc | Activo final-v4. |
-| `docs/diseno_spectral_quality_score.md` | Subsistema DSP/calidad | Diseno quality gate | Medio | Doc | Activo final-v4 con nombres reportables nuevos. |
-| `docs/midi_out_inverted_tx_validation.md` | Subsistema MIDI | Validacion TX invertido y `midi_bytes` | Medio | Doc | Activo final-v4. |
-| `docs/led_matrix_piano_scroll.md` | Subsistema LED | Piano scroll opcional | Bajo | Doc | Activo secundario; desactivado por defecto. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_diagnostic_modes.md` | Subsistema ADS1299 | Modos diagnosticos | Medio | Doc | Activo final-v4; modo final de capturas = 5. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_register_audit_bias_drl.md` | Subsistema ADS1299 | Registros, BIAS/DRL y CH1-only | Medio | Doc | Activo final-v4. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/diseno_spectral_quality_score.md` | Subsistema DSP/calidad | Diseno quality gate | Medio | Doc | Activo final-v4 con nombres reportables nuevos. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/midi_out_inverted_tx_validation.md` | Subsistema MIDI | Validacion TX invertido y `midi_bytes` | Medio | Doc | Activo final-v4. |
+| `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/led_matrix_piano_scroll.md` | Subsistema LED | Piano scroll opcional | Bajo | Doc | Activo secundario; desactivado por defecto. |
 | `docs/historico/documentacion antigua/` | Historico | Documentos reemplazados o solapados | No | Doc | Consultar solo para trazabilidad historica. |
 | `docs/02_auditoria_codigo/funcion_por_funcion/**` | Auditoria detallada | Auditoria funcion por funcion y mapas | Medio | Doc | Bloque activo pendiente de refresco progresivo a final-v4. |
 
@@ -190,6 +190,8 @@ Objetivo al revisarla:
 - confirmar `BENCH_REPORT_ENABLED=1` y uso de Monitor;
 - marcar LED matrix como secundaria/desactivada por defecto;
 - no modificar firmware.
+
+
 
 
 

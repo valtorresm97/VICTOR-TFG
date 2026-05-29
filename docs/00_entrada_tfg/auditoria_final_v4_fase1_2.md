@@ -385,7 +385,7 @@ Completado:
 - Fase 1: lectura y contraste de documentos/codigo clave.
 - Fase 2: verificacion del estado real final-v4.
 - Rama documental creada: `refactor/essential-eeg-midi-plan`.
-- Documento creado: `docs/auditoria_final_v4_fase1_2.md`.
+- Documento creado: `docs/00_entrada_tfg/00_entrada_tfg/auditoria_final_v4_fase1_2.md`.
 
 No realizado:
 
@@ -397,6 +397,8 @@ No realizado:
 - No se ha tocado runtime Python.
 - No se ha tocado WebUI.
 - No se han tocado capturas, benchmarks, reports ni figuras.
+
+
 
 
 

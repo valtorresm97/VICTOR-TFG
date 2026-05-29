@@ -19,13 +19,13 @@ firmware-final-v4
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
 | `configuracion_final_v4.md` | Principal final-v4 | Resumen consolidado de arquitectura, firmware, streaming, Python backend, DSP, spectral quality, sonificacion, MIDI fisico, WebUI, capturas finales y benchmarks reales. |
-| `auditoria_final_v4_fase1_2.md` | Auditoria de arranque final-v4 | Lectura previa para entender que se reviso en fases 1 y 2, que incoherencias se detectaron y que queda pendiente para fase 3. |
+| `00_entrada_tfg/auditoria_final_v4_fase1_2.md` | Auditoria de arranque final-v4 | Lectura previa para entender que se reviso en fases 1 y 2, que incoherencias se detectaron y que queda pendiente para fase 3. |
 
 Lectura recomendada inicial:
 
 ```text
 1. docs/configuracion_final_v4.md
-2. docs/auditoria_final_v4_fase1_2.md
+2. docs/00_entrada_tfg/00_entrada_tfg/auditoria_final_v4_fase1_2.md
 3. docs/validacion_tfg/09_benchmarks_rendimiento_placa.md
 4. docs/validacion_tfg/10_resultados_captura_final_laboratorio.md
 5. docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md
@@ -78,11 +78,11 @@ Estos documentos ya han sido revisados en la rama `refactor/essential-eeg-midi-p
 
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `ads1299_diagnostic_modes.md` | Activo final-v4 | Referencia de modos diagnosticos ADS1299. Aclara que el modo final de capturas es `ADS_DIAGNOSTIC_MODE=5 / bias_ch1_only_loff_off`. |
-| `ads1299_register_audit_bias_drl.md` | Activo final-v4 | Contexto de registros, BIAS/RLD y decision practica CH1-only para final-v4. |
-| `diseno_spectral_quality_score.md` | Activo final-v4 | Diseno del score de calidad espectral y quality gate con nombres reportables de sonificacion final-v4. |
-| `midi_out_inverted_tx_validation.md` | Activo final-v4 | Validacion de MIDI OUT fisico, `Serial1`/D1, `midi_bytes` y TX invertido obligatorio. |
-| `led_matrix_piano_scroll.md` | Activo secundario final-v4 | Referencia del piano scroll LED como modulo opcional/desactivado por defecto, no ruta principal EEG->MIDI. |
+| `03_subsistemas_final_v4/ads1299_diagnostic_modes.md` | Activo final-v4 | Referencia de modos diagnosticos ADS1299. Aclara que el modo final de capturas es `ADS_DIAGNOSTIC_MODE=5 / bias_ch1_only_loff_off`. |
+| `03_subsistemas_final_v4/ads1299_register_audit_bias_drl.md` | Activo final-v4 | Contexto de registros, BIAS/RLD y decision practica CH1-only para final-v4. |
+| `03_subsistemas_final_v4/diseno_spectral_quality_score.md` | Activo final-v4 | Diseno del score de calidad espectral y quality gate con nombres reportables de sonificacion final-v4. |
+| `03_subsistemas_final_v4/midi_out_inverted_tx_validation.md` | Activo final-v4 | Validacion de MIDI OUT fisico, `Serial1`/D1, `midi_bytes` y TX invertido obligatorio. |
+| `03_subsistemas_final_v4/led_matrix_piano_scroll.md` | Activo secundario final-v4 | Referencia del piano scroll LED como modulo opcional/desactivado por defecto, no ruta principal EEG->MIDI. |
 
 ## 6. Historico y documentacion antigua
 
@@ -106,12 +106,14 @@ Criterio: consultar estos documentos solo para entender decisiones anteriores, n
 ## 7. Regla de lectura
 
 1. Para entender el estado actual, empezar por `configuracion_final_v4.md`.
-2. Para comprobar que se reviso en la migracion documental, leer `auditoria_final_v4_fase1_2.md`.
+2. Para comprobar que se reviso en la migracion documental, leer `00_entrada_tfg/auditoria_final_v4_fase1_2.md`.
 3. Para justificar rendimiento temporal del TFG, usar `validacion_tfg/09_benchmarks_rendimiento_placa.md`.
 4. Para justificar capturas reales y resultados experimentales, usar `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `reportaje_sesion_final_s01_20260528.md`.
 5. Para tocar codigo o preparar UML, consultar `01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md`, `01_arquitectura_sistema/10_mapa_funciones_criticas.md` y `06_simplificacion_uml/11_hallazgos_para_simplificacion_futura.md`.
 6. Para entender una decision antigua, consultar `historico/documentacion antigua/` o reports historicos.
 7. No borrar benchmarks, capturas, reportajes ni figuras durante esta fase de organizacion documental.
+
+
 
 
 

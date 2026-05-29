@@ -68,14 +68,14 @@ La respuesta obtenida fue que la adquisicion y el DSP eran suficientemente utile
 | --- | --- | --- | --- | --- |
 | Captura requestable | primeras ramas de captura | `capture_eeg_quality.py` permite solicitar capturas al backend vivo. | Guardar CSV/metadata en lugar de depender de observacion visual. | `eeg_timeseries.csv`, `metadata.json`, `quality_report.*`. |
 | Diagnostico ADS1299 | fases `shorted_inputs` / test interno | Modos diagnosticos para aislar ADC/SPI/escala. | Separar problemas digitales de problemas de electrodos. | Capturas diagnosticas, RMS bajo en shorted inputs. |
-| Auditoria de registros ADS1299 | documentacion de auditoria | Revision de CONFIG1/CONFIG3, bits fijos/reservados, BIAS/RLD. | Alinear firmware con datasheet y evitar configuraciones ambiguas. | `docs/ads1299_register_audit_bias_drl.md`. |
+| Auditoria de registros ADS1299 | documentacion de auditoria | Revision de CONFIG1/CONFIG3, bits fijos/reservados, BIAS/RLD. | Alinear firmware con datasheet y evitar configuraciones ambiguas. | `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/ads1299_register_audit_bias_drl.md`. |
 | BIAS/RLD y CH1-only | `captura-datos-dsp` | Modo `bias_ch1_only_loff_off`. | Reducir influencia de canales no usados y estabilizar montaje. | Capturas ear-EEG/Fp1-Fp2. |
 | Metricas por ventanas | herramientas de calidad | RMS mediano, P95, best window, fraccion de artefactos. | No rechazar capturas completas si existen ventanas utiles. | `quality_report.md/json`. |
 | Validacion espectral offline | herramientas DSP | PSD multitaper, bandpowers por ventana, reports espectrales. | Comprobar reproducibilidad de features con CSV reales. | `windowed_bandpowers.csv`, `spectral_validation_report.*`. |
 | Captura `mixed_states` | `diagnosis/sonificacion-atenuacion-artefactos` | Sesion con ojos abiertos/cerrados, mandibula, recuperacion y parpadeo/frente. | Estudiar artefactos y cambios de estado en una misma adquisicion. | Figuras por estado en docs `03` y `04`. |
-| Quality gate | rama de atenuacion | `compute_spectral_quality()` integrado con backend/sonificacion. | Atenuar o bloquear ventanas malas antes de producir musica. | `docs/diseno_spectral_quality_score.md`. |
+| Quality gate | rama de atenuacion | `compute_spectral_quality()` integrado con backend/sonificacion. | Atenuar o bloquear ventanas malas antes de producir musica. | `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/diseno_spectral_quality_score.md`. |
 | Alineacion offline/live | validadores offline | Offline aplica logica comparable al backend live. | Hacer comparables reports, features y snapshots. | `windowed_sonification_features.csv`. |
-| MIDI fisico | final-v3/final-v4 | `midi_bytes`, `Serial1`/D1 y TX invertido. | Validar salida MIDI real en placa. | `docs/midi_out_inverted_tx_validation.md`. |
+| MIDI fisico | final-v3/final-v4 | `midi_bytes`, `Serial1`/D1 y TX invertido. | Validar salida MIDI real en placa. | `docs/03_subsistemas_final_v4/03_subsistemas_final_v4/midi_out_inverted_tx_validation.md`. |
 | Benchmarks reales | `docs/final-v3-audit-update` | Medicion MCU/Python sobre placa y capturas reales. | Cuantificar margen temporal real. | `09_benchmarks_rendimiento_placa.md`, `benchmarks/results`, `benchmarks/reports`. |
 | Capturas finales | `docs/capture-protocol` | Sesion `s01_20260528` con EEG, calidad, features y musica persistida. | Evidencia final de integracion EEG-MIDI real. | `10_resultados_captura_final_laboratorio.md`, reportajes y figuras. |
 | Integracion final | `bench-y-capturas` / `firmware-final-v4` | Fusion de benchmarks y capturas finales. | No perder resultados de ninguna de las dos ramas. | Rama final integrada. |
@@ -215,6 +215,8 @@ Pendiente para fases posteriores, fuera de esta revision documental:
 El historial de ramas muestra una evolucion ordenada: primero se valido la adquisicion y el DSP, despues se introdujo el quality gate, posteriormente se midieron benchmarks reales y finalmente se tomaron capturas finales con musica persistida.
 
 La rama `firmware-final-v4` representa el estado integrado defendible para el TFG. La rama `refactor/essential-eeg-midi-plan` debe entenderse como una fase posterior de preparacion para simplificar y explicar el sistema, no como sustituto de la evidencia final-v4.
+
+
 
 
 

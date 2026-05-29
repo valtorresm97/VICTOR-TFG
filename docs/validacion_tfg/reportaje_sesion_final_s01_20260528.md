@@ -236,3 +236,5 @@ La limitacion principal tambien queda documentada: la adquisicion real presenta 
 
 
 
+
+
