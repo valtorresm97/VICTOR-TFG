@@ -85,50 +85,66 @@ Primero se muestra la captura completa y la evolucion de calidad:
 
 ### 5.2 Estudio homogeneo por estado
 
-Despues se debe estudiar cada estado con el mismo par de figuras:
+Despues se estudia cada estado con el mismo par de figuras:
 
 ```text
 senal temporal del estado
 PSD multitaper del estado
 ```
 
-El wrapper final-v4 genera este patron para todos los estados de la timeline con nombres:
+#### Ojos abiertos / reposo
 
-```text
-fig_03_state_<estado>_timeseries.png
-fig_03_state_<estado>_psd.png
-```
+![state_ojos_abiertos_timeseries](figures/fig_03_state_ojos_abiertos_reposo_timeseries.png)
 
-Figuras esperadas tras regenerar:
+![state_ojos_abiertos_psd](figures/fig_03_state_ojos_abiertos_reposo_psd.png)
 
-```text
-fig_03_state_ojos_abiertos_reposo_timeseries.png
-fig_03_state_ojos_abiertos_reposo_psd.png
-fig_03_state_ojos_cerrados_reposo_1_timeseries.png
-fig_03_state_ojos_cerrados_reposo_1_psd.png
-fig_03_state_mandibula_timeseries.png
-fig_03_state_mandibula_psd.png
-fig_03_state_recuperacion_1_timeseries.png
-fig_03_state_recuperacion_1_psd.png
-fig_03_state_parpadeo_frente_timeseries.png
-fig_03_state_parpadeo_frente_psd.png
-fig_03_state_recuperacion_2_timeseries.png
-fig_03_state_recuperacion_2_psd.png
-fig_03_state_ojos_cerrados_reposo_2_timeseries.png
-fig_03_state_ojos_cerrados_reposo_2_psd.png
-```
+#### Ojos cerrados / reposo 1
 
-Cuando esas figuras esten generadas, el texto final puede insertar solo las mas representativas y dejar el resto como anexo/figuras disponibles.
+![state_ojos_cerrados_1_timeseries](figures/fig_03_state_ojos_cerrados_reposo_1_timeseries.png)
+
+![state_ojos_cerrados_1_psd](figures/fig_03_state_ojos_cerrados_reposo_1_psd.png)
+
+#### Mandibula
+
+![state_mandibula_timeseries](figures/fig_03_state_mandibula_timeseries.png)
+
+![state_mandibula_psd](figures/fig_03_state_mandibula_psd.png)
+
+#### Recuperacion 1
+
+![state_recuperacion_1_timeseries](figures/fig_03_state_recuperacion_1_timeseries.png)
+
+![state_recuperacion_1_psd](figures/fig_03_state_recuperacion_1_psd.png)
+
+#### Parpadeo / frente
+
+![state_parpadeo_frente_timeseries](figures/fig_03_state_parpadeo_frente_timeseries.png)
+
+![state_parpadeo_frente_psd](figures/fig_03_state_parpadeo_frente_psd.png)
+
+#### Recuperacion 2
+
+![state_recuperacion_2_timeseries](figures/fig_03_state_recuperacion_2_timeseries.png)
+
+![state_recuperacion_2_psd](figures/fig_03_state_recuperacion_2_psd.png)
+
+#### Ojos cerrados / reposo 2
+
+![state_ojos_cerrados_2_timeseries](figures/fig_03_state_ojos_cerrados_reposo_2_timeseries.png)
+
+![state_ojos_cerrados_2_psd](figures/fig_03_state_ojos_cerrados_reposo_2_psd.png)
 
 ### 5.3 Comparacion DSP por estado
 
-La comparacion periodograma vs multitaper se trata en el documento `04`, pero se genera para los mismos estados para mantener simetria metodologica.
+La comparacion periodograma vs multitaper se trata en el documento `04`, usando los mismos estados para mantener simetria metodologica.
 
-Para regenerar todo el conjunto con nombres homogeneos:
+Para regenerar solo figuras con nombres homogeneos:
 
 ```bash
 python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
+
+El wrapper fuerza `--only-figures` por defecto para no sobrescribir estos Markdown revisados.
 
 ## 6. Relacion con la sesion final
 
