@@ -29,6 +29,8 @@ DSP features CH1
 
 El EEG no decide directamente la tonalidad ni la nota principal. En final-v4, `root_note`, `main_note` y `scale_key` son controles de usuario/WebUI. El EEG modula densidad, registro, dinamica, probabilidad, estabilidad y tension musical.
 
+Verificacion en `backend_service.py`: el loop live llama a `build_live_segment()`, `generate_live_bar()` y `generate_notes_for_bar()`. No llama a `generate_bars()` ni a `generate_notes_for_segment()` en la ruta principal.
+
 ## 2. Nombres reportables final-v4
 
 En final-v4, la salida publica de sonificacion usa nombres defendibles desde EEG:
@@ -106,7 +108,7 @@ Los alias legacy solo existen para compatibilidad interna y no deben protagoniza
 | `music_bar.py` | `BarGenerator` | `_build_amplitude_slots` | segment, positions | array | Ninguno | Envolvente musical sintetica, no amplitud EEG real | Medio | Rango. |
 | `music_bar.py` | `BarGenerator` | `generate_live_bar` | segment,index | `Bar` | `_last_degree_idx`, RNG | Acorde y patron del compas | Critico musical | Test determinista. |
 | `music_bar.py` | `BarGenerator` | `generate_live_bars` | segment,n | list | RNG | Varias barras | Secundario | Smoke. |
-| `music_bar.py` | `BarGenerator` | `generate_bars` | segment | list | Ninguno | Wrapper compatibilidad | Ruta legacy; excluir UML principal | No priorizar. |
+| `music_bar.py` | `BarGenerator` | `generate_bars` | segment | list | Ninguno | Wrapper compatibilidad, no usado por el backend live final-v4 | Ruta legacy; excluir UML principal | No priorizar. |
 | `music_note.py` | `NoteEvent` | dataclass | tiempos,pitch,vel | objeto | Ninguno | Nota musical de alto nivel | Medio | Invariantes. |
 | `music_note.py` | `NoteGenerator` | `_register_center` | segment | MIDI center | Ninguno | Registro por EEG alrededor de main_note | Medio | Rango. |
 | `music_note.py` | `NoteGenerator` | `_scale_pitches_around` | scale,center,span | pitches | Ninguno | Pitches permitidos | Medio | Escala. |
@@ -118,7 +120,7 @@ Los alias legacy solo existen para compatibilidad interna y no deben protagoniza
 | `music_note.py` | `NoteGenerator` | `_velocity_for_slot` | slot/segment/bar | velocity | Ninguno | Dinamica MIDI | Medio | 0..127. |
 | `music_note.py` | `NoteGenerator` | `_slot_times/_next_on_slot` | bar/slots | tiempos/slot | Ninguno | Duraciones y enlaces | Medio | No solape raro. |
 | `music_note.py` | `NoteGenerator` | `generate_notes_for_bar` | segment,bar,channel,program | list NoteEvent | `_prev_pitch` | Produce notas de compas; ruta live principal | Critico musical | Test no notas fuera escala. |
-| `music_note.py` | `NoteGenerator` | `generate_notes_for_segment` | segment,bars | list | `_prev_pitch` | Compatibilidad multi-bar | Ruta secundaria; excluir UML principal | Smoke. |
+| `music_note.py` | `NoteGenerator` | `generate_notes_for_segment` | segment,bars | list | `_prev_pitch` | Compatibilidad multi-bar, no usada por el backend live final-v4 | Ruta secundaria/legacy; excluir UML principal | Smoke. |
 | `midi_live.py` | `MidiLiveEvent` | `to_dict` | self | dict | Ninguno | Snapshot/transporte | Bajo | Test. |
 | `midi_live.py` | N/A | `_clamp_int/_channel/_data7/_event` | valores | evento/valor | Ninguno | Sanitizacion MIDI | Critico | Bordes. |
 | `midi_live.py` | N/A | `note_to_live_events` | NoteEvent,time_origin,now | note_on/off | Ninguno | Traduce tiempo musical a monotonic | Critico | Nota tardia/duracion minima. |
@@ -174,22 +176,37 @@ MIDI test loop
 MIDI test endpoints
 ```
 
+Verificacion actual: `backend_service.py::_maybe_generate_music()` usa `generate_live_bar()` y `generate_notes_for_bar()`. Por tanto, `generate_bars()` y `generate_notes_for_segment()` no son necesarios para el funcionamiento live final-v4. Se conservan de momento por compatibilidad y porque podrian estar referenciados por pruebas locales, notebooks antiguos o herramientas externas no indexadas.
+
 No borrar todavia sin busqueda de referencias y prueba en placa.
 
-## 7. Hallazgos para simplificacion futura
+## 7. Comentarios historicos detectados
+
+Se han detectado comentarios historicos en codigo que no cambian el funcionamiento, pero si conviene limpiar en la version simplificada/UML:
+
+| Archivo | Comentario historico | Estado real final-v4 | Accion futura recomendada |
+| --- | --- | --- | --- |
+| `midi_live.py` | Indica que otro transporte enviara en el futuro hacia MCU/D1/TX. | Ese transporte ya existe en `midi_byte_transport.py` y MIDI OUT fisico esta validado. | Actualizar comentario para describir ruta actual. |
+| `midi_live.py` | `event_to_midi_bytes()` dice que sera util para transporte MCU/D1 y que no se usa todavia para D1. | Si se usa indirectamente: `MidiByteTransport.send_event()` llama `event_to_midi_bytes()` y envia `midi_bytes`. | Actualizar comentario. |
+| `midi_byte_transport.py` | En `enabled`, recomienda `False` hasta que el sketch tenga `midi_bytes`. | El sketch final-v4 si tiene `midi_bytes`; `EEG_MIDI_LIVE_ENABLED=True` por defecto. | Actualizar comentario/default documental en la version simplificada. |
+| `midi_byte_transport.py` | Protocolo Bridge propuesto. | Ya no es propuesto; es contrato validado. | Cambiar a contrato Bridge validado. |
+
+Decision: es optimo limpiar estos comentarios en la futura version simplificada dedicada a UML, porque reducen confusion. No es necesario tocarlos en esta fase documental si no se cambia runtime.
+
+## 8. Hallazgos para simplificacion futura
 
 | Hallazgo | Impacto | Recomendacion futura |
 | --- | --- | --- |
 | Nombres publicos nuevos conviven con campos internos legacy en `MusicSegment` | Puede confundir UML y memoria | UML debe mostrar nombres final-v4; internamente se puede migrar mas adelante. |
-| `generate_bars()` y `generate_notes_for_segment()` son compatibilidad | No son ruta live principal | Excluir de UML esencial. |
-| `midi_live.py` comenta que el transporte a D1 sera futuro | Comentario historico: en final-v4 ya existe `MidiByteTransport` y firmware validado | Limpiar comentario en refactor futuro. |
-| `midi_byte_transport.py` comenta que `enabled=False` era recomendado hasta tener handler | Comentario historico: en final-v4 `midi_bytes` existe y MIDI esta enabled por defecto | Limpiar comentario en refactor futuro. |
+| `generate_bars()` y `generate_notes_for_segment()` son compatibilidad | No son ruta live principal ni necesarios para el backend final-v4 | Excluir de UML esencial; considerar eliminarlos solo tras busqueda y pruebas. |
+| `midi_live.py` tiene comentarios historicos de futuro transporte D1 | Comentario obsoleto, no error funcional | Limpiar comentario en refactor futuro. |
+| `midi_byte_transport.py` tiene comentarios historicos sobre enabled=False y protocolo propuesto | Comentario obsoleto, no error funcional | Limpiar comentario en refactor futuro. |
 | `send_test_sequence()` en backend usa sleeps | Diagnostico puede bloquear user_loop | Mantener como diagnostico, no UML principal. |
 | Acordes y RNG dependen de estado previo | Reproducibilidad parcial | Para tests, fijar seed o mock RNG. |
 | Panic es esencial | Evita notas colgadas | Mantener siempre en version esencial. |
 | `MidiByteTransport` interpreta `Bridge.call(None)` como exito | Compatible con App Lab, pero puede ocultar fallo real | Tests con mock + prueba en placa. |
 
-## 8. Riesgos principales
+## 9. Riesgos principales
 
 - Cambiar nombres publicos de sonificacion rompe WebUI, capturas y reportes.
 - Quitar alias legacy sin migrar `MusicSegment` y `BackendService` puede romper musica.
@@ -200,7 +217,7 @@ No borrar todavia sin busqueda de referencias y prueba en placa.
 - Quitar TX invertido o cambiar `Serial1`/D1 rompe MIDI fisico.
 - Activar test loop puede enmascarar la sonificacion EEG.
 
-## 9. Pruebas minimas antes de aceptar cambios de sonificacion/MIDI
+## 10. Pruebas minimas antes de aceptar cambios de sonificacion/MIDI
 
 No aplicar cambios runtime en esta fase documental. Si en el futuro se modifica sonificacion/MIDI:
 
@@ -218,7 +235,7 @@ No aplicar cambios runtime en esta fase documental. Si en el futuro se modifica 
 12. Prueba en placa: sonificacion EEG activa durante captura corta.
 13. Si aumenta densidad musical, repetir benchmark/observabilidad Bridge.
 
-## 10. Recomendacion para version esencial UML
+## 11. Recomendacion para version esencial UML
 
 UML principal recomendado:
 
@@ -252,6 +269,7 @@ Regla para simplificacion:
 ```text
 Mantener la ruta live estricta.
 Ocultar wrappers legacy en los diagramas.
+Limpiar comentarios historicos de transporte MIDI.
 No tocar contrato midi_bytes ni panic.
 No presentar test endpoints como parte del flujo EEG->MIDI.
 ```
