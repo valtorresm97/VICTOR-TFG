@@ -1,24 +1,44 @@
 # ADS1299 diagnostic modes
 
+Documento activo de referencia para los modos de diagnostico ADS1299 usados durante la validacion del proyecto.
+
+Estado final-v4:
+
+```text
+Rama integrada actual: firmware-final-v4
+Modo usado en las capturas finales s01_20260528: ADS_DIAGNOSTIC_MODE=5
+Nombre: bias_ch1_only_loff_off
+```
+
+Importante: el modo `0` sigue siendo el modo normal general `INxP-INxN`, pero no es el modo usado en la sesion final documentada `s01_20260528`. En final-v4, las capturas finales se interpretan con CH1 como canal EEG principal y CH2-CH4 apagados/conservados solo por contrato de streaming.
+
 Estos modos son pruebas temporales para aislar si las amplitudes en milivoltios
 vienen del montaje de electrodos/common-mode o de la cadena ADC/configuracion.
 
-El modo normal no cambia:
-
-```cpp
-#define ADS_DIAGNOSTIC_MODE 0
-```
+## Modos disponibles
 
 Modos disponibles en `sketch/sketch.ino`:
 
 | Valor | Nombre | Uso |
 | --- | --- | --- |
-| 0 | normal | Captura real INxP-INxN, modo EEG actual |
-| 1 | shorted_inputs | MUX interno en corto CH1-CH4, lead-off sense desactivado |
-| 2 | test_signal_internal | CONFIG2 test interno + MUX TESTSIG CH1-CH4 |
-| 3 | no_bias_loff_off | Entrada real diferencial, BIAS off, lead-off sense off |
-| 4 | bias_ch1pn_loff_off | Entrada real diferencial, BIAS on derivado de CH1P+CH1N, lead-off sense off |
-| 5 | bias_ch1_only_loff_off | CH1 activo, CH2-CH4 apagados, BIAS CH1P+CH1N, lead-off sense off |
+| 0 | normal | Captura real general INxP-INxN. No fue el modo final de la sesion `s01_20260528`. |
+| 1 | shorted_inputs | MUX interno en corto CH1-CH4, lead-off sense desactivado. |
+| 2 | test_signal_internal | CONFIG2 test interno + MUX TESTSIG CH1-CH4. |
+| 3 | no_bias_loff_off | Entrada real diferencial, BIAS off, lead-off sense off. |
+| 4 | bias_ch1pn_loff_off | Entrada real diferencial, BIAS on derivado de CH1P+CH1N, lead-off sense off. |
+| 5 | bias_ch1_only_loff_off | CH1 activo, CH2-CH4 apagados, BIAS CH1P+CH1N, lead-off sense off. Modo usado en capturas finales. |
+
+Para capturas comparables con la sesion final de laboratorio:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
+```
+
+Para volver al modo normal general:
+
+```bash
+python3 python/tools/set_ads_diagnostic_mode.py normal
+```
 
 ## Prueba 1: entradas internas en corto
 
@@ -74,12 +94,17 @@ Lectura esperada:
 - Debe aparecer una señal periodica lenta coherente entre canales.
 - Si la frecuencia/escala no tienen sentido, revisar CONFIG2, LSB, ganancia y Vref.
 
-## Volver a EEG real
+## Volver despues de pruebas diagnosticas
 
-Despues de cada prueba diagnostica, volver a:
+Despues de cada prueba diagnostica, volver al modo que corresponda al objetivo:
+
+- Para repetir capturas comparables con final-v4: `bias_ch1_only_loff_off`.
+- Para pruebas generales INxP-INxN: `normal`.
+
+Ejemplo para volver al modo final-v4:
 
 ```bash
-python3 python/tools/set_ads_diagnostic_mode.py normal
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
 ```
 
 Compilar/subir de nuevo antes de cualquier captura con electrodos.
@@ -137,10 +162,10 @@ Criterio esperado:
 - El pico persistente alrededor de 21 Hz debe reducirse o desaparecer.
 - `sample gaps` e `invalid status` deben seguir en 0.
 
-Al terminar, volver a:
+Al terminar, volver al modo objetivo. Para final-v4:
 
 ```bash
-python3 python/tools/set_ads_diagnostic_mode.py normal
+python3 python/tools/set_ads_diagnostic_mode.py bias_ch1_only_loff_off
 ```
 
 Y compilar/subir de nuevo.
@@ -252,3 +277,20 @@ Criterio de avance:
 
 No activar filtros nuevos ni cambiar ganancia para ocultar estos problemas hasta
 tener varias capturas estables comparables.
+
+## Relacion con la sesion final `s01_20260528`
+
+La sesion final de laboratorio usa el criterio CH1-only y se documenta en:
+
+```text
+docs/validacion_tfg/10_resultados_captura_final_laboratorio.md
+docs/validacion_tfg/reportaje_sesion_final_s01_20260528.md
+```
+
+Por tanto, para futuras capturas comparables con la memoria del TFG, el punto de partida recomendado es:
+
+```text
+ADS_DIAGNOSTIC_MODE=5
+montage=ear_eeg_ch1_only
+ADS_MODE=bias_ch1_only_loff_off
+```
