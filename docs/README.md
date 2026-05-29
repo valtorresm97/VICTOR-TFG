@@ -74,13 +74,15 @@ La familia `auditoria_codigo_detallada/` sigue siendo muy valiosa para entender 
 
 ## 5. Documentacion activa de subsistemas
 
+Estos documentos ya han sido revisados en la rama `refactor/essential-eeg-midi-plan` para aclarar su relacion con final-v4. Siguen siendo documentos activos, pero no sustituyen a `configuracion_final_v4.md` ni a la evidencia de `validacion_tfg/`.
+
 | Documento | Estado | Uso recomendado |
 | --- | --- | --- |
-| `ads1299_diagnostic_modes.md` | Activo | Referencia de modos diagnosticos ADS1299 y montaje CH1-only. |
-| `ads1299_register_audit_bias_drl.md` | Activo | Contexto de registros, BIAS/RLD y decisiones ADS1299. |
-| `diseno_spectral_quality_score.md` | Activo | Diseno del score de calidad espectral y quality gate. |
-| `midi_out_inverted_tx_validation.md` | Activo | Validacion de MIDI OUT fisico, `Serial1`/D1 y TX invertido obligatorio. |
-| `led_matrix_piano_scroll.md` | Activo secundario | Referencia del piano scroll LED y su transporte. |
+| `ads1299_diagnostic_modes.md` | Activo final-v4 | Referencia de modos diagnosticos ADS1299. Aclara que el modo final de capturas es `ADS_DIAGNOSTIC_MODE=5 / bias_ch1_only_loff_off`. |
+| `ads1299_register_audit_bias_drl.md` | Activo final-v4 | Contexto de registros, BIAS/RLD y decision practica CH1-only para final-v4. |
+| `diseno_spectral_quality_score.md` | Activo final-v4 | Diseno del score de calidad espectral y quality gate con nombres reportables de sonificacion final-v4. |
+| `midi_out_inverted_tx_validation.md` | Activo final-v4 | Validacion de MIDI OUT fisico, `Serial1`/D1, `midi_bytes` y TX invertido obligatorio. |
+| `led_matrix_piano_scroll.md` | Activo secundario final-v4 | Referencia del piano scroll LED como modulo opcional/desactivado por defecto, no ruta principal EEG->MIDI. |
 
 ## 6. Historico y documentacion antigua
 
