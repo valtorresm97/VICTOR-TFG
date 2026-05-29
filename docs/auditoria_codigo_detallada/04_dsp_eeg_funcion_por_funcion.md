@@ -33,6 +33,12 @@ Separacion importante:
 - `sonification_features.py` transforma features EEG en controles musicales.
 - Las tools offline reutilizan `DSPCore` y `compute_spectral_quality()` para mantener comparabilidad con el backend live.
 
+Criterio para simplificacion futura:
+
+- `compute_live_features()` es la ruta live principal.
+- `compute_online_features()` queda fuera del UML principal y no debe usarse como ruta de la version esencial salvo que se justifique expresamente.
+- `compute_quality_diagnostics()` y `compute_spectral_quality()` si deben conservarse, pero representados como un bloque compacto de `SignalQuality` o `QualityGate` para no sobrecargar los diagramas.
+
 ## 2. Parametros activos final-v4
 
 | Parametro | Valor | Archivo | Uso | Riesgo si cambia |
@@ -99,7 +105,7 @@ Regla critica: no mezclar uV y V. `add_sample()` espera voltios; `add_block_uV()
 | `eeg_signal_processor.py` | `get_rms_amplitude()` | ch,window | float V | RMS temporal | Ninguno | Unidad V | Test. |
 | `eeg_signal_processor.py` | `compute_features()` | ch,window,method | dict rico | Incluye spectrum/peaks/band_rel | DSP flags | Coste mayor; usar offline si no se necesita espectro | Offline test. |
 | `eeg_signal_processor.py` | `compute_live_features()` | ch,window,method | dict compacto | Sin freqs/psd, con picos | DSP flags | Ruta live principal benchmarkeada | Test shape + benchmark. |
-| `eeg_signal_processor.py` | `compute_online_features()` | ch,window | dict minimo | Multitaper sin picos/spectrum | DSP flags | No ruta central final-v4 | Test si se mantiene. |
+| `eeg_signal_processor.py` | `compute_online_features()` | ch,window | dict minimo | Multitaper sin picos/spectrum | DSP flags | Ruta secundaria. No usar ni representar en la version esencial/UML principal | No priorizar salvo compatibilidad. |
 | `eeg_signal_processor.py` | `compute_quality_diagnostics()` | ch, window, waveform | dict | RMS/ptp/percentiles/saturacion/jumps/50Hz/waveform | DSP PSD interna | Heuristicas dependen de uV, LSB y filtros MCU | Test captura sintetica/real. |
 | `eeg_signal_processor.py` | `get_spectrogram()` | ch,window,step,method | times,freqs,Sxx | DSP spectrogram | DSP flags | Coste alto; uso offline/figuras | Offline. |
 | `spectral_quality.py` | `SpectralQuality.to_dict()` | self | dict | `asdict` | Ninguno | Bajo | Test. |
@@ -139,6 +145,21 @@ Solo decide si una ventana es fiable para mover la sonificacion.
 ```
 
 Por eso no debe integrarse dentro de `DSPCore` en una simplificacion futura. Debe permanecer como capa de decision posterior al calculo espectral.
+
+Decision para la version esencial:
+
+```text
+compute_quality_diagnostics()
+  -> compute_spectral_quality()
+```
+
+se conserva como bloque esencial de calidad de senal. En diagramas puede aparecer compactado como:
+
+```text
+SignalQuality / QualityGate
+```
+
+Motivo: sin `compute_quality_diagnostics()`, el quality gate perderia medidas directas de amplitud y artefactos como RMS, pico-pico, saturacion, flatline, saltos y 50 Hz. Sin `compute_spectral_quality()`, el sistema volveria a convertir ventanas contaminadas en cambios musicales sin barrera explicita.
 
 ## 6. Relacion con benchmarks final-v4
 
@@ -202,7 +223,9 @@ No borrar estas tools durante la version esencial: pueden quedar fuera del UML p
 | `DSPCore` es la fuente unica de multitaper | Bien para evitar redundancias | Mantenerlo como clase unica de PSD/features. |
 | `EEGSignalProcessor` mezcla buffer y acceso a features | Aceptable, pero puede separarse logicamente | UML: `RingBufferEEG` + `FeatureExtractor` sin mover codigo inicialmente. |
 | `compute_features()` y `compute_live_features()` comparten logica | Bien, pero conviene documentar cual es live | Mantener `compute_live_features` como ruta benchmarkeada. |
-| `compute_online_features()` parece ruta minima secundaria | Puede confundir | Marcar como auxiliar/no principal antes de borrar. |
+| `compute_online_features()` es ruta secundaria/no principal | No aporta a la version esencial y puede confundir | Excluir del UML principal y no usar en la simplificacion salvo compatibilidad temporal. |
+| `compute_quality_diagnostics()` es diagnostico, pero alimenta la seguridad de sonificacion | Si se elimina, el quality gate pierde amplitud/artefactos | Mantenerlo como parte compacta de `SignalQuality`, al menos con campos esenciales. |
+| `compute_spectral_quality()` es la barrera contra artefactos | Sin ella la musica responde a ventanas malas | Mantener como `QualityGate` esencial, separado de `DSPCore`. |
 | Preprocess interpola outliers | Puede ocultar transitorios si se abusa | No cambiar sin comparar capturas reales. |
 | Bandpowers relativos dependen de la suma de bandas, no de toda potencia 0-Nyquist | Coherente con sonificacion pero debe explicarse | Mantener para comparabilidad. |
 | Quality gate esta separado de DSP | Buena arquitectura | No fusionarlo dentro de `DSPCore`. |
@@ -216,6 +239,8 @@ No borrar estas tools durante la version esencial: pueden quedar fuera del UML p
 - Cambiar multitaper por Welch/periodogram cambia features y figuras.
 - Cambiar unidades uV/V rompe RMS, quality score y sonificacion.
 - Integrar quality gate dentro de `DSPCore` mezcla ciencia de señal con decision musical.
+- Eliminar `compute_quality_diagnostics()` sin sustituto elimina indicadores de artefactos importantes.
+- Eliminar `compute_spectral_quality()` elimina la barrera que evita sonificar ventanas malas.
 - Interpretar CH2-CH4 como EEG activo en modo 5 seria incorrecto.
 - Usar resultados sinteticos como evidencia final del TFG no es valido.
 
@@ -249,7 +274,9 @@ EEGReceiver
        -> compute_psd(multitaper)
        -> compute_bandpower()
        -> compute_features()
-  -> compute_spectral_quality()
+  -> SignalQuality / QualityGate
+       -> compute_quality_diagnostics()
+       -> compute_spectral_quality()
   -> SonificationFeatureAdapter
 ```
 
@@ -261,6 +288,12 @@ validate_spectral_features.py
 build_final_capture_docs_matplotlib.py
 build_capture06_enhanced_figures.py
 benchmark_real_capture.py
+```
+
+Excluido del UML principal:
+
+```text
+compute_online_features()
 ```
 
 No mover codigo todavia. Primero crear tests de contrato y diagramas logicos. El primer refactor seguro seria separar en documentacion las responsabilidades de buffer, extractor de features y quality gate, sin cambiar imports ni clases reales.
