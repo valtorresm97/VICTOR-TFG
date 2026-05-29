@@ -46,23 +46,17 @@ CH2-CH4 apagados/conservados por contrato
 
 ## 4. Lectura de las figuras
 
-Las figuras asociadas comparan amplitud, pico-pico, ruido de red, fraccion de artefactos y quality score entre montajes/condiciones.
+Para evitar duplicados, esta seccion debe usar solo las figuras nuevas especificas de montaje (`fig_02_mounting_*`). Las comparaciones generales `fig_04_rms_comparison`, `fig_05_ptp_comparison` y `fig_06_50hz_comparison` se conservan como figuras generadas, pero no se insertan aqui porque mezclan mas capturas y ya aparecen en otros documentos.
 
-| Figura | Uso recomendado |
-| --- | --- |
-| `fig_04_rms_comparison.png` | Comparacion global de RMS mediano. |
-| `fig_05_ptp_comparison.png` | Comparacion de pico-pico/transitorios. |
-| `fig_06_50hz_comparison.png` | Componente de red a 50 Hz. |
-| `fig_03_final_capture_timeseries.png` | Ejemplo temporal de captura intermedia con estados/artefactos. |
-| `fig_02_mounting_*` | Comparaciones especificas por montaje y calidad. |
+Orden recomendado:
 
-![rms_comparison](figures/fig_04_rms_comparison.png)
-
-![ptp_comparison](figures/fig_05_ptp_comparison.png)
-
-![line50_comparison](figures/fig_06_50hz_comparison.png)
-
-![final_timeseries](figures/fig_03_final_capture_timeseries.png)
+| Orden | Figura | Pregunta que responde |
+| --- | --- | --- |
+| 1 | `fig_02_mounting_rms_comparison.png` | Que montaje/condicion presenta menor amplitud RMS mediana. |
+| 2 | `fig_02_mounting_ptp_comparison.png` | Que montaje/condicion presenta mayores transitorios pico-pico. |
+| 3 | `fig_02_mounting_50hz_comparison.png` | Que montaje/condicion esta mas afectado por red de 50 Hz. |
+| 4 | `fig_02_mounting_artifact_fraction.png` | Que montaje/condicion acumula mas ventanas artefactadas. |
+| 5 | `fig_02_mounting_quality_score.png` | Que montaje/condicion tiene mejor calidad espectral mediana. |
 
 ![fig_02_mounting_rms_comparison](figures/fig_02_mounting_rms_comparison.png)
 
@@ -77,7 +71,7 @@ Las figuras asociadas comparan amplitud, pico-pico, ruido de red, fraccion de ar
 Para regenerar estas figuras con margenes/titulos final-v4:
 
 ```bash
-python3 python/tools/build_validation_docs_final_v4_style.py --captures-dir captures --docs-dir docs/validacion_tfg
+python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
 
 ## 5. Tabla asociada
