@@ -66,18 +66,16 @@ Durante la auditoria se exploro la existencia de una captura versionada de `test
 
 ## 5. Figuras asociadas
 
-Estas figuras documentan la validacion de la cadena digital y comparaciones de ruido:
+Para esta seccion conviene usar una figura temporal y una comparacion general de ruido/status. La PSD del modo shorted inputs puede conservarse como artefacto generado, pero no es necesaria en el relato principal de captura ADS1299 porque la validacion de espectro se trata despues en los documentos `04` y `05`.
 
-| Figura | Papel |
-| --- | --- |
-| `fig_01_shorted_inputs_timeseries.png` | Senal temporal en modo shorted inputs. |
-| `fig_02_shorted_inputs_psd.png` | PSD multitaper del ruido interno. |
-| `fig_04_rms_comparison.png` | Comparacion de RMS entre capturas/montajes. |
-| `fig_06_50hz_comparison.png` | Comparacion de componente 50 Hz. |
+| Figura | Usar en texto principal | Papel |
+| --- | --- | --- |
+| `fig_01_shorted_inputs_timeseries.png` | Si | Evidencia visual de ruido bajo con entradas cortocircuitadas. |
+| `fig_04_rms_comparison.png` | Si | Comparacion global de RMS entre capturas/montajes. |
+| `fig_06_50hz_comparison.png` | Si | Comparacion global de componente de red. |
+| `fig_02_shorted_inputs_psd.png` | No principal | Figura auxiliar; mover a DSP/espectro si se necesita. |
 
 ![shorted_timeseries](figures/fig_01_shorted_inputs_timeseries.png)
-
-![shorted_psd](figures/fig_02_shorted_inputs_psd.png)
 
 ![rms_comparison](figures/fig_04_rms_comparison.png)
 
@@ -86,7 +84,7 @@ Estas figuras documentan la validacion de la cadena digital y comparaciones de r
 Si se quieren regenerar con mejor margen/titulo:
 
 ```bash
-python3 python/tools/build_validation_docs_final_v4_style.py --captures-dir captures --docs-dir docs/validacion_tfg
+python3 python/tools/build_validation_docs_final_v4_style.py --captures captures --output docs/validacion_tfg
 ```
 
 ## 6. Tablas
