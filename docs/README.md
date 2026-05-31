@@ -84,7 +84,17 @@ Estos documentos ya han sido revisados en la rama `refactor/essential-eeg-midi-p
 | `03_subsistemas_final_v4/midi_out_inverted_tx_validation.md` | Activo final-v4 | Validacion de MIDI OUT fisico, `Serial1`/D1, `midi_bytes` y TX invertido obligatorio. |
 | `03_subsistemas_final_v4/led_matrix_piano_scroll.md` | Activo secundario final-v4 | Referencia del piano scroll LED como modulo opcional/desactivado por defecto, no ruta principal EEG->MIDI. |
 
-## 6. Historico y documentacion antigua
+## 6. Simplificacion UML
+
+La carpeta `05_simplificacion_uml/` contiene la planificacion documental para una futura version esencial explicativa. No aplica refactor ni sustituye a final-v4.
+
+| Documento/carpeta | Estado | Uso recomendado |
+| --- | --- | --- |
+| `05_simplificacion_uml/11_hallazgos_para_simplificacion_futura.md` | Activo para fase UML | Hallazgos y reglas de conservacion antes de simplificar. |
+| `05_simplificacion_uml/propuesta_version_esencial_uml.md` | Propuesta documental | Define que entra en el UML principal, que queda secundario y que no debe tocarse. |
+| `05_simplificacion_uml/diagramas/` | Diagramas iniciales | Flujo principal, clases, estados y secuencias de adquisicion/sonificacion. |
+
+## 7. Historico y documentacion antigua
 
 La documentacion historica se conserva en:
 
@@ -103,13 +113,13 @@ historico/documentacion antigua/
 
 Criterio: consultar estos documentos solo para entender decisiones anteriores, no como fuente principal del estado final-v4.
 
-## 7. Regla de lectura
+## 8. Regla de lectura
 
 1. Para entender el estado actual, empezar por `configuracion_final_v4.md`.
 2. Para comprobar que se reviso en la migracion documental, leer `00_entrada_tfg/auditoria_final_v4_fase1_2.md`.
 3. Para justificar rendimiento temporal del TFG, usar `validacion_tfg/09_benchmarks_rendimiento_placa.md`.
 4. Para justificar capturas reales y resultados experimentales, usar `validacion_tfg/10_resultados_captura_final_laboratorio.md` y `reportaje_sesion_final_s01_20260528.md`.
-5. Para tocar codigo o preparar UML, consultar `01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md`, `01_arquitectura_sistema/10_mapa_funciones_criticas.md` y `06_simplificacion_uml/11_hallazgos_para_simplificacion_futura.md`.
+5. Para tocar codigo o preparar UML, consultar `01_arquitectura_sistema/09_mapa_contratos_entre_modulos.md`, `01_arquitectura_sistema/10_mapa_funciones_criticas.md` y `05_simplificacion_uml/11_hallazgos_para_simplificacion_futura.md`.
 6. Para entender una decision antigua, consultar `historico/documentacion antigua/` o reports historicos.
 7. No borrar benchmarks, capturas, reportajes ni figuras durante esta fase de organizacion documental.
 
