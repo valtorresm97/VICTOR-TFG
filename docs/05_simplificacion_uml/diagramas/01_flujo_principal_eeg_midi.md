@@ -42,11 +42,11 @@ flowchart LR
   midiHandler --> uart["Serial1 / D1\nTX invertido"]
   uart --> midiOut["MIDI OUT fisico"]
 
-  buffer -. snapshot .-> web["WebUI\nweb_server.py + assets"]
-  quality -. snapshot .-> web
-  music -. music.recent_notes .-> web
-  web -. root/main/scale + panic .-> sonif
-  web -. POST /midi/panic .-> scheduler
+  buffer -.->|snapshot| web["WebUI\nweb_server.py + assets"]
+  quality -.->|snapshot| web
+  music -.->|music.recent_notes| web
+  web -.->|root/main/scale + panic| sonif
+  web -.->|POST /midi/panic| scheduler
 ```
 
 ## Notas de correspondencia con archivos reales
