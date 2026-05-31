@@ -104,7 +104,9 @@ classDiagram
 
 ### 2.2 Vista Python runtime EEG->MIDI
 
-Lectura: esta vista muestra el pipeline Python live. `BackendService` orquesta el uso de DSP y quality gate; por eso `DSPCore` no se conecta directamente a `SpectralQuality`. El contrato `midi_bytes` vuelve al firmware mediante `BridgeContract`.
+Lectura: esta vista se divide en subdiagramas para evitar una cadena lineal falsa. `BackendService` aparece varias veces porque es el orquestador del ciclo live: drena recepcion, dispara DSP, calcula calidad, actualiza controles de sonificacion, genera eventos musicales, bombea MIDI y publica snapshot.
+
+#### 2.2A Ingesta y procesamiento EEG
 
 ```mermaid
 classDiagram
@@ -114,13 +116,10 @@ classDiagram
     <<contract>>
     +linux_started()
     +eeg_block_uV()
-    +midi_bytes()
   }
 
   class BackendService {
     +step()
-    +send_panic()
-    +update_music_config()
     +get_latest_snapshot()
   }
 
@@ -143,6 +142,23 @@ classDiagram
     +compute_bandpower()
   }
 
+  BridgeContract --> EEGReceiver : eeg_block_uV
+  BackendService --> EEGReceiver : drain_blocks_to_processor()
+  EEGReceiver --> EEGSignalProcessor : add_block_uV(samples)
+  EEGSignalProcessor --> DSPCore : compute_live_features()
+  EEGSignalProcessor --> BackendService : features and diagnostics
+```
+
+#### 2.2B Quality gate y adaptacion de sonificacion
+
+```mermaid
+classDiagram
+  direction LR
+
+  class BackendService {
+    +step()
+  }
+
   class SpectralQuality {
     +score
     +state
@@ -162,6 +178,32 @@ classDiagram
     +rms_beta_activity
     +band_driven_density
     +to_dict()
+  }
+
+  BackendService --> SpectralQuality : compute_spectral_quality(features, diagnostics, rx)
+  BackendService --> SonificationFeatureAdapter : update(features, quality)
+  SpectralQuality --> SonificationFeatureAdapter : gate_factor and state
+  SonificationFeatureAdapter --> SonificationFeatures : normalized controls
+```
+
+#### 2.2C Generacion musical y MIDI
+
+Lectura: `root`, `main` y `scale` vienen de controles de usuario/WebUI dentro de `music_config`; no son inferencias directas del EEG. El EEG modula actividad, densidad, registro, estabilidad, dinamica y probabilidad. `MidiScheduler` agenda `note_on`, `note_off` y `panic`; `MidiByteTransport` envia el contrato `midi_bytes`.
+
+```mermaid
+classDiagram
+  direction LR
+
+  class BackendService {
+    +step()
+    +send_panic()
+  }
+
+  class SonificationFeatures {
+    +alpha_drive
+    +beta_gamma_drive
+    +rms_beta_activity
+    +band_driven_density
   }
 
   class MusicSegmentBuilder {
@@ -215,6 +257,50 @@ classDiagram
     +get_status()
   }
 
+  class BridgeContract {
+    <<contract>>
+    +midi_bytes()
+  }
+
+  SonificationFeatures --> MusicSegmentBuilder : EEG modulates activity density register stability dynamics
+  BackendService --> MusicSegmentBuilder : build_live_segment(sonif, music_config)
+  MusicSegmentBuilder --> MusicSegment
+  BackendService --> BarGenerator : generate_live_bar(segment)
+  MusicSegment --> BarGenerator : segment context
+  BarGenerator --> Bar
+  BackendService --> NoteGenerator : generate_notes_for_bar(segment, bar)
+  MusicSegment --> NoteGenerator : segment context
+  Bar --> NoteGenerator : bar context
+  NoteGenerator --> NoteEvent
+  BackendService --> MidiScheduler : schedule_notes(notes)
+  MidiScheduler --> MidiLiveEvent : pop_due_events()
+  BackendService --> MidiByteTransport : send_events(due_events)
+  MidiLiveEvent --> MidiByteTransport : note_on note_off panic
+  MidiByteTransport --> BridgeContract : call midi_bytes
+```
+
+#### 2.2D Snapshot y WebUI auxiliar
+
+```mermaid
+classDiagram
+  direction LR
+
+  class BackendService {
+    +get_latest_snapshot()
+    +update_music_config()
+    +send_panic()
+  }
+
+  class RuntimeSnapshot {
+    <<conceptual>>
+    +status
+    +rx_metrics
+    +features
+    +quality
+    +music
+    +midi
+  }
+
   class EEGWebServer {
     +get_latest()
     +post_midi_panic()
@@ -222,26 +308,11 @@ classDiagram
     +publish_snapshot()
   }
 
-  BridgeContract --> EEGReceiver : eeg_block_uV
-  EEGReceiver --> EEGSignalProcessor : drain blocks
-  EEGSignalProcessor --> DSPCore : compute features
-  BackendService --> EEGReceiver : owns
-  BackendService --> EEGSignalProcessor : owns
-  BackendService --> SpectralQuality : compute quality
-  SpectralQuality --> SonificationFeatureAdapter : apply quality gate
-  SonificationFeatureAdapter --> SonificationFeatures : normalized controls
-  SonificationFeatures --> MusicSegmentBuilder : build segment
-  MusicSegmentBuilder --> MusicSegment
-  MusicSegment --> BarGenerator : generate bar
-  BarGenerator --> Bar
-  MusicSegment --> NoteGenerator : generate notes
-  Bar --> NoteGenerator
-  NoteGenerator --> NoteEvent
-  NoteEvent --> MidiScheduler : schedule notes
-  MidiScheduler --> MidiLiveEvent : due events
-  MidiLiveEvent --> MidiByteTransport : send bytes
-  MidiByteTransport --> BridgeContract : call midi_bytes
-  BackendService --> EEGWebServer : publish snapshot
+  BackendService --> RuntimeSnapshot : build latest snapshot
+  RuntimeSnapshot --> EEGWebServer : publish state
+  EEGWebServer --> BackendService : get_latest_snapshot()
+  EEGWebServer --> BackendService : update_music_config()
+  EEGWebServer --> BackendService : send_panic()
 ```
 
 ### 2.3 Vista resumida de arquitectura por modulos
@@ -272,16 +343,17 @@ flowchart LR
 
 ## Notas de correspondencia con archivos reales
 
-- `FirmwareRuntime`, `MCUFilters`, `BridgeContract` y `MidiUartOut` son modulos conceptuales para documentacion UML. Representan responsabilidades de `sketch/sketch.ino`, `filters.h`, contratos Bridge y salida UART MIDI; no implican que existan como clases C++ reales.
+- `FirmwareRuntime`, `MCUFilters`, `BridgeContract`, `MidiUartOut` y `RuntimeSnapshot` son modulos o conceptos para documentacion UML. Representan responsabilidades de `sketch/sketch.ino`, `filters.h`, contratos Bridge, salida UART MIDI y estado publicado; no implican que existan como clases C++ reales.
 - `ADS1299Plus`, `ADS1299_SafeSPI`, `EegBlockUV` y `TxBlockRing` si corresponden a clases/estructuras C++ reales o estructuras definidas en headers.
-- `BackendService` orquesta RX, DSP, quality, sonificacion, MIDI y snapshot desde `python/backend_service.py`.
+- `BackendService` aparece en varias vistas porque orquesta RX, DSP, quality, sonificacion, MIDI y snapshot desde `python/backend_service.py`.
 - `SpectralQuality` representa el resultado de `compute_spectral_quality()` en `python/spectral_quality.py`; el calculo lo invoca `BackendService` usando features y diagnostics.
 - `SonificationFeatures` conserva alias legacy, pero el UML principal prioriza nombres final-v4.
-- `EEGWebServer` no calcula DSP ni musica; expone rutas, socket y assets para observar/controlar.
+- `EEGWebServer` es auxiliar: no calcula DSP ni genera musica; expone rutas, socket y assets para observar estado y enviar controles ligeros.
 - `MidiByteTransport` no accede a UART directamente; solo llama `Bridge.call("midi_bytes", n, b0, b1, b2)`.
+- Las flechas pueden representar dependencia, llamada o entrega de datos segun la etiqueta de la relacion.
 
 ## Advertencias de simplificacion
 
-- Dividir el diagrama en tres vistas evita flechas cruzadas y hace mas defendible cada responsabilidad.
+- Dividir el diagrama en varias vistas evita flechas cruzadas y hace mas defendible cada responsabilidad.
 - El UML principal oculta `CaptureManager`, `LedMatrixTransport`, tools offline, benchmarks y capturas porque son laterales o de validacion, no el nucleo EEG->MIDI.
 - El diagrama representa dependencias conceptuales y de flujo; no debe usarse como receta para mover archivos o refactorizar codigo.
