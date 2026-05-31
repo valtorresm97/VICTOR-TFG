@@ -2,35 +2,42 @@
 
 ## Objetivo del diagrama
 
-Representar las clases y estructuras principales que sostienen el runtime EEG->MIDI final-v4.
+Representar con claridad las clases, estructuras y modulos conceptuales que sostienen el runtime EEG->MIDI final-v4, separando el mundo firmware/MCU del mundo Python/Linux.
+
+La intencion no es convertir cada funcion C++ en una clase real, sino hacer defendible el reparto de responsabilidades en una memoria de ingenieria.
 
 ## Que incluye
 
-- Driver ADS1299 y streaming firmware.
-- Modulos conceptuales del runtime firmware/MCU.
-- Receiver, buffer, DSP y quality gate.
-- Sonificacion, generacion musical, scheduler y transporte MIDI.
-- WebUI como consumidor de snapshot y emisor de controles ligeros.
+- Firmware/MCU: runtime del sketch, ADS1299, SPI seguro, filtros MCU, bloques de streaming, contrato Bridge y salida UART MIDI.
+- Python/Linux: backend, receiver, buffer EEG, DSP, quality gate, sonificacion, generacion musical, scheduler MIDI, transporte `midi_bytes` y WebUI.
+- Una vista resumida de arquitectura por modulos grandes.
+- Etiquetas de relacion para los contratos principales: `notify eeg_block_uV`, `call midi_bytes`, `drain blocks`, `compute features`, `apply quality gate`, `schedule notes` y `send bytes`.
 
 ## Que excluye
 
+- `CaptureManager`, que queda como runtime lateral de captura.
+- `LedMatrixTransport` y LED matrix, que quedan como consumidor opcional de `music.recent_notes`.
 - Tools offline.
 - Benchmarks.
-- Capturas experimentales.
-- Clases LED, salvo mencion secundaria en notas.
-- Funciones legacy y helpers internos.
+- Capturas y reportajes experimentales.
+- Funciones legacy como `eeg_frame_uV`, `compute_online_features`, `generate_bars` y `generate_notes_for_segment`.
+- Helpers privados internos que no aportan claridad al UML principal.
 
-## Diagrama Mermaid
+## Diagramas Mermaid
+
+### 2.1 Vista firmware/MCU y contrato Bridge
+
+Lectura: esta vista compacta el firmware en modulos conceptuales. El flujo EEG sale del ADS1299, pasa por filtros y bloque de streaming, y cruza a Python por `eeg_block_uV`. La ruta MIDI vuelve desde Bridge al firmware y termina en UART fisica.
 
 ```mermaid
 classDiagram
-  class FirmwareRuntime {
-    <<module>>
-    +setup()
-    +loop()
-    +onDrdyFalling()
-    +applyAdsDiagnosticMode()
-    +midi_bytes()
+  direction LR
+
+  class ADS1299_SafeSPI {
+    +begin()
+    +select()
+    +xfer()
+    +deselect()
   }
 
   class ADS1299Plus {
@@ -41,11 +48,13 @@ classDiagram
     +unpack24()
   }
 
-  class ADS1299_SafeSPI {
-    +begin()
-    +select()
-    +xfer()
-    +deselect()
+  class FirmwareRuntime {
+    <<module>>
+    +setup()
+    +loop()
+    +onDrdyFalling()
+    +applyAdsDiagnosticMode()
+    +midi_bytes()
   }
 
   class MCUFilters {
@@ -55,18 +64,18 @@ classDiagram
     +volts_to_uV_i32()
   }
 
+  class TxBlockRing {
+    +appendSampleToFillBlock()
+    +enqueueCompletedBlock()
+    +publishPendingBlocks()
+  }
+
   class EegBlockUV {
     +block_idx
     +first_sample_idx
     +sample_count
     +status[8]
     +ch_uV[8][4]
-  }
-
-  class TxBlockRing {
-    +appendSampleToFillBlock()
-    +enqueueCompletedBlock()
-    +publishPendingBlocks()
   }
 
   class BridgeContract {
@@ -81,6 +90,31 @@ classDiagram
     +Serial1.write()
     +D1/TX
     +TX invertido
+  }
+
+  ADS1299_SafeSPI --> ADS1299Plus : SPI MODE1
+  ADS1299Plus --> FirmwareRuntime : RDATAC frame
+  FirmwareRuntime --> MCUFilters : filter uV
+  MCUFilters --> TxBlockRing : append sample
+  TxBlockRing --> EegBlockUV : fill block
+  EegBlockUV --> BridgeContract : notify eeg_block_uV
+  BridgeContract --> FirmwareRuntime : call midi_bytes
+  FirmwareRuntime --> MidiUartOut : send bytes
+```
+
+### 2.2 Vista Python runtime EEG->MIDI
+
+Lectura: esta vista muestra el pipeline Python live. `BackendService` orquesta el uso de DSP y quality gate; por eso `DSPCore` no se conecta directamente a `SpectralQuality`. El contrato `midi_bytes` vuelve al firmware mediante `BridgeContract`.
+
+```mermaid
+classDiagram
+  direction LR
+
+  class BridgeContract {
+    <<contract>>
+    +linux_started()
+    +eeg_block_uV()
+    +midi_bytes()
   }
 
   class BackendService {
@@ -112,8 +146,14 @@ classDiagram
   class SpectralQuality {
     +score
     +state
-    +valid
+    +gate_factor
+    +valid_for_sonification
     +to_dict()
+  }
+
+  class SonificationFeatureAdapter {
+    +update()
+    +reset()
   }
 
   class SonificationFeatures {
@@ -122,11 +162,6 @@ classDiagram
     +rms_beta_activity
     +band_driven_density
     +to_dict()
-  }
-
-  class SonificationFeatureAdapter {
-    +update()
-    +reset()
   }
 
   class MusicSegmentBuilder {
@@ -187,46 +222,66 @@ classDiagram
     +publish_snapshot()
   }
 
-  FirmwareRuntime --> ADS1299Plus
-  FirmwareRuntime --> MCUFilters
-  FirmwareRuntime --> TxBlockRing
-  FirmwareRuntime --> BridgeContract
-  FirmwareRuntime --> MidiUartOut
-  ADS1299Plus --> ADS1299_SafeSPI
-  TxBlockRing --> EegBlockUV
-  TxBlockRing --> BridgeContract : notify EEG blocks
-  MidiByteTransport --> BridgeContract : call midi_bytes
   BridgeContract --> EEGReceiver : eeg_block_uV
-  BridgeContract --> MidiUartOut : midi_bytes
-  BackendService --> EEGReceiver
-  BackendService --> EEGSignalProcessor
-  BackendService --> SpectralQuality
-  BackendService --> SonificationFeatureAdapter
-  BackendService --> MusicSegmentBuilder
-  BackendService --> BarGenerator
-  BackendService --> NoteGenerator
-  BackendService --> MidiScheduler
-  BackendService --> MidiByteTransport
-  BackendService --> EEGWebServer
   EEGReceiver --> EEGSignalProcessor : drain blocks
-  EEGSignalProcessor --> DSPCore
-  SpectralQuality --> SonificationFeatureAdapter : quality gate
-  SonificationFeatureAdapter --> SonificationFeatures
+  EEGSignalProcessor --> DSPCore : compute features
+  BackendService --> EEGReceiver : owns
+  BackendService --> EEGSignalProcessor : owns
+  BackendService --> SpectralQuality : compute quality
+  SpectralQuality --> SonificationFeatureAdapter : apply quality gate
+  SonificationFeatureAdapter --> SonificationFeatures : normalized controls
+  SonificationFeatures --> MusicSegmentBuilder : build segment
   MusicSegmentBuilder --> MusicSegment
+  MusicSegment --> BarGenerator : generate bar
   BarGenerator --> Bar
+  MusicSegment --> NoteGenerator : generate notes
+  Bar --> NoteGenerator
   NoteGenerator --> NoteEvent
-  MidiScheduler --> MidiLiveEvent
-  MidiByteTransport --> MidiLiveEvent
+  NoteEvent --> MidiScheduler : schedule notes
+  MidiScheduler --> MidiLiveEvent : due events
+  MidiLiveEvent --> MidiByteTransport : send bytes
+  MidiByteTransport --> BridgeContract : call midi_bytes
+  BackendService --> EEGWebServer : publish snapshot
+```
+
+### 2.3 Vista resumida de arquitectura por modulos
+
+Lectura: esta vista elimina detalle de clases para explicar el sistema en una diapositiva o figura de memoria. La WebUI aparece como rama lateral de observacion y control; no participa en el DSP pesado.
+
+```mermaid
+flowchart LR
+  firmware["Firmware / MCU\nADS1299 + filtros + streaming"]
+  bridge["BridgeContract\nlinux_started / eeg_block_uV / midi_bytes"]
+  backend["BackendService\norquestacion runtime"]
+  dsp["DSP / Quality\nbuffer + multitaper + gate"]
+  sonif["Sonification / Music\ncontroles + compas + notas"]
+  midi["MIDI Transport\nscheduler + bytes"]
+  midiOut["Firmware MIDI OUT\nSerial1 / D1 / TX invertido"]
+  web["WebUI\nsnapshot + panic + root/main/scale"]
+
+  firmware -->|notify eeg_block_uV| bridge
+  bridge -->|blocks| backend
+  backend -->|compute features| dsp
+  dsp -->|apply quality gate| sonif
+  sonif -->|schedule notes| midi
+  midi -->|call midi_bytes| bridge
+  bridge -->|send bytes| midiOut
+  backend -.->|snapshot + controls| web
+  web -.->|panic + music config| backend
 ```
 
 ## Notas de correspondencia con archivos reales
 
-- `SpectralQuality` es la dataclass de `python/spectral_quality.py`; se crea con `compute_spectral_quality()`.
-- `FirmwareRuntime`, `MCUFilters`, `BridgeContract` y `MidiUartOut` son modulos conceptuales para documentacion UML. Representan responsabilidades de `sketch/sketch.ino`, `filters.h`, los contratos Bridge y la salida UART MIDI; no implican que existan como clases C++ reales.
-- `SonificationFeatures` conserva alias legacy, pero el UML principal debe usar nombres final-v4.
-- `EEGWebServer` no calcula DSP ni musica; solo expone rutas, socket y assets.
-- `CaptureManager`, `LedMatrixConfig`, `LedMatrixTransport`, tools offline, benchmarks y capturas quedan fuera del UML principal.
+- `FirmwareRuntime`, `MCUFilters`, `BridgeContract` y `MidiUartOut` son modulos conceptuales para documentacion UML. Representan responsabilidades de `sketch/sketch.ino`, `filters.h`, contratos Bridge y salida UART MIDI; no implican que existan como clases C++ reales.
+- `ADS1299Plus`, `ADS1299_SafeSPI`, `EegBlockUV` y `TxBlockRing` si corresponden a clases/estructuras C++ reales o estructuras definidas en headers.
+- `BackendService` orquesta RX, DSP, quality, sonificacion, MIDI y snapshot desde `python/backend_service.py`.
+- `SpectralQuality` representa el resultado de `compute_spectral_quality()` en `python/spectral_quality.py`; el calculo lo invoca `BackendService` usando features y diagnostics.
+- `SonificationFeatures` conserva alias legacy, pero el UML principal prioriza nombres final-v4.
+- `EEGWebServer` no calcula DSP ni musica; expone rutas, socket y assets para observar/controlar.
+- `MidiByteTransport` no accede a UART directamente; solo llama `Bridge.call("midi_bytes", n, b0, b1, b2)`.
 
 ## Advertencias de simplificacion
 
-El diagrama no muestra todas las funciones privadas de `backend_service.py`, `music_bar.py` ni `music_note.py`. Es intencional: para UML principal importa la responsabilidad, no cada helper.
+- Dividir el diagrama en tres vistas evita flechas cruzadas y hace mas defendible cada responsabilidad.
+- El UML principal oculta `CaptureManager`, `LedMatrixTransport`, tools offline, benchmarks y capturas porque son laterales o de validacion, no el nucleo EEG->MIDI.
+- El diagrama representa dependencias conceptuales y de flujo; no debe usarse como receta para mover archivos o refactorizar codigo.
