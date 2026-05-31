@@ -31,7 +31,8 @@ flowchart LR
   filters --> blocks["Bloques uV x8\nstreaming.h"]
   blocks -->|Bridge.notify eeg_block_uV| rx["EEGReceiver\nreceiver.py"]
   rx --> contract["eeg_contract.py\nparse + status"]
-  rx --> buffer["EEGSignalProcessor\nbuffer uV->V"]
+  rx -->|drain blocks| backend["BackendService\norquestacion runtime\nbackend_service.py"]
+  backend -->|add_block_uV + compute_live_features| buffer["EEGSignalProcessor\nbuffer uV->V"]
   buffer --> dsp["DSPCore\nPSD multitaper + bandpowers"]
   dsp --> quality["compute_spectral_quality\nquality gate"]
   quality --> sonif["SonificationFeatureAdapter\ncontroles final-v4"]
@@ -42,11 +43,8 @@ flowchart LR
   midiHandler --> uart["Serial1 / D1\nTX invertido"]
   uart --> midiOut["MIDI OUT fisico"]
 
-  buffer -.->|snapshot| web["WebUI\nweb_server.py + assets"]
-  quality -.->|snapshot| web
-  music -.->|music.recent_notes| web
-  web -.->|root/main/scale + panic| sonif
-  web -.->|POST /midi/panic| scheduler
+  web["WebUI\nweb_server.py + assets"] -.->|root/main/scale + panic| backend
+  backend -.->|snapshot + music.recent_notes| web
 ```
 
 ## Notas de correspondencia con archivos reales
@@ -54,7 +52,8 @@ flowchart LR
 - `sketch/sketch.ino` contiene el loop de adquisicion, handlers Bridge y MIDI UART.
 - `sketch/streaming.h` emite el payload manual de 8 muestras.
 - `python/eeg_contract.py` centraliza constantes y parser.
-- `python/backend_service.py` orquesta DSP, quality, sonificacion, MIDI y snapshot.
+- `python/backend_service.py` es el orquestador del runtime Python/Linux: drena `EEGReceiver`, alimenta `EEGSignalProcessor`, dispara DSP/quality, actualiza sonificacion, genera eventos musicales, bombea MIDI y publica snapshot.
+- La WebUI no controla directamente `SonificationFeatureAdapter` ni `MidiScheduler`; envia configuracion musical y `panic` a `BackendService`, y recibe snapshots con `music.recent_notes`.
 - `assets/app.js` renderiza el snapshot y usa `music.recent_notes` para el piano roll.
 
 ## Advertencias de simplificacion
