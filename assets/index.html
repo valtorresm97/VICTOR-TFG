@@ -19,126 +19,132 @@
       </div>
     </header>
 
-    <section class="card section dashboard-panel dashboard-panel--wide">
-      <h2 class="section-title">Rendimiento de adquisición</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
-        <div class="card metric"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
-        <div class="card metric"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
-        <div class="card metric"><h3>Malformed</h3><p id="malformed">0</p></div>
-        <div class="card metric"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
-        <div class="card metric"><h3>Lost blocks</h3><p id="lost-blocks">0</p></div>
-      </div>
-      <div id="channel-status" class="channel-status"></div>
-    </section>
+    <div class="dashboard-region dashboard-region--monitoring">
+      <section class="card section dashboard-panel panel-acquisition">
+        <h2 class="section-title">Rendimiento de adquisición</h2>
+        <div class="grid stats">
+          <div class="card metric"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
+          <div class="card metric"><h3>Block rate</h3><p id="block-rate">n/a</p></div>
+          <div class="card metric"><h3>Last sample idx</h3><p id="last-idx">n/a</p></div>
+          <div class="card metric"><h3>Malformed</h3><p id="malformed">0</p></div>
+          <div class="card metric"><h3>Lost frames</h3><p id="lost-frames">0</p></div>
+          <div class="card metric"><h3>Lost blocks</h3><p id="lost-blocks">0</p></div>
+        </div>
+        <div id="channel-status" class="channel-status"></div>
+      </section>
 
-    <section class="card section dashboard-panel dashboard-panel--wide">
-      <h2 class="section-title">Features EEG (canal activo)</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>RMS</h3><p id="rms">n/a</p></div>
-        <div class="card metric"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
-        <div class="card metric"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
-        <div class="card metric"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
-        <div class="card metric"><h3>Peak Delta</h3><p id="peak-delta">n/a</p></div>
-        <div class="card metric"><h3>Peak Theta</h3><p id="peak-theta">n/a</p></div>
-        <div class="card metric"><h3>Peak Alpha</h3><p id="peak-alpha">n/a</p></div>
-        <div class="card metric"><h3>Peak Beta</h3><p id="peak-beta">n/a</p></div>
-        <div class="card metric"><h3>Peak Gamma</h3><p id="peak-gamma">n/a</p></div>
-      </div>
-    </section>
+      <section class="card section dashboard-panel panel-quality">
+        <h2 class="section-title">Calidad EEG / Diagnostico ADS1299</h2>
+        <div class="grid stats">
+          <div class="card metric"><h3>RMS CH1</h3><p id="diag-rms">n/a</p></div>
+          <div class="card metric"><h3>Pico-pico CH1</h3><p id="diag-ptp">n/a</p></div>
+          <div class="card metric"><h3>Offset CH1</h3><p id="diag-offset">n/a</p></div>
+          <div class="card metric"><h3>Ruido 50 Hz</h3><p id="diag-50hz">n/a</p></div>
+          <div class="card metric"><h3>Saturacion</h3><p id="diag-saturation">n/a</p></div>
+          <div class="card metric"><h3>Saltos bruscos</h3><p id="diag-jumps">n/a</p></div>
+        </div>
+        <div id="diag-warnings" class="warnings diag-warnings"></div>
+        <canvas id="diag-waveform" class="waveform" width="960" height="180"></canvas>
+      </section>
+    </div>
 
-    <section class="card section dashboard-panel">
-      <h2 class="section-title">Bandpower relativo</h2>
-      <div id="bands"></div>
-    </section>
+    <div class="dashboard-region dashboard-region--processing">
+      <section class="card section dashboard-panel panel-features">
+        <h2 class="section-title">Features EEG (canal activo)</h2>
+        <div class="grid stats">
+          <div class="card metric"><h3>RMS</h3><p id="rms">n/a</p></div>
+          <div class="card metric"><h3>Peak frequency</h3><p id="peak-freq">n/a</p></div>
+          <div class="card metric"><h3>Dominant band</h3><p id="dominant-band">n/a</p></div>
+          <div class="card metric"><h3>Alpha/Beta ratio</h3><p id="alpha-beta">n/a</p></div>
+          <div class="card metric"><h3>Peak Delta</h3><p id="peak-delta">n/a</p></div>
+          <div class="card metric"><h3>Peak Theta</h3><p id="peak-theta">n/a</p></div>
+          <div class="card metric"><h3>Peak Alpha</h3><p id="peak-alpha">n/a</p></div>
+          <div class="card metric"><h3>Peak Beta</h3><p id="peak-beta">n/a</p></div>
+          <div class="card metric"><h3>Peak Gamma</h3><p id="peak-gamma">n/a</p></div>
+        </div>
+      </section>
 
-    <section class="card section dashboard-panel">
-      <h2 class="section-title">Bandpower absoluto (V² aprox)</h2>
-      <div id="bands-abs" class="bands-abs"></div>
-    </section>
+      <section class="card section dashboard-panel panel-band-rel">
+        <h2 class="section-title">Bandpower relativo</h2>
+        <div id="bands"></div>
+      </section>
 
-    <section class="card section dashboard-panel dashboard-panel--wide">
-      <h2 class="section-title">Calidad EEG / Diagnostico ADS1299</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>RMS CH1</h3><p id="diag-rms">n/a</p></div>
-        <div class="card metric"><h3>Pico-pico CH1</h3><p id="diag-ptp">n/a</p></div>
-        <div class="card metric"><h3>Offset CH1</h3><p id="diag-offset">n/a</p></div>
-        <div class="card metric"><h3>Ruido 50 Hz</h3><p id="diag-50hz">n/a</p></div>
-        <div class="card metric"><h3>Saturacion</h3><p id="diag-saturation">n/a</p></div>
-        <div class="card metric"><h3>Saltos bruscos</h3><p id="diag-jumps">n/a</p></div>
-      </div>
-      <div id="diag-warnings" class="warnings diag-warnings"></div>
-      <canvas id="diag-waveform" class="waveform" width="960" height="180"></canvas>
-    </section>
+      <section class="card section dashboard-panel panel-band-abs">
+        <h2 class="section-title">Bandpower absoluto (V² aprox)</h2>
+        <div id="bands-abs" class="bands-abs"></div>
+      </section>
 
-    <section class="card section dashboard-panel dashboard-panel--wide">
-      <h2 class="section-title">Sonificación Live</h2>
-      <div id="warnings" class="warnings"></div>
-      <div class="grid stats">
-        <div class="card metric"><h3>Alpha drive</h3><p id="sonif-alpha-drive">n/a</p></div>
-        <div class="card metric"><h3>Beta/Gamma drive</h3><p id="sonif-beta-gamma-drive">n/a</p></div>
-        <div class="card metric"><h3>RMS/Beta activity</h3><p id="sonif-rms-beta-activity">n/a</p></div>
-        <div class="card metric"><h3>Band-driven density</h3><p id="sonif-band-driven-density">n/a</p></div>
-        <div class="card metric"><h3>Spectral register</h3><p id="sonif-spectral-register">n/a</p></div>
-        <div class="card metric"><h3>Alpha stability</h3><p id="sonif-alpha-stability">n/a</p></div>
-        <div class="card metric"><h3>RMS/Band velocity</h3><p id="sonif-rms-band-velocity">n/a</p></div>
-        <div class="card metric"><h3>Band note probability</h3><p id="sonif-band-note-probability">n/a</p></div>
-      </div>
-      <div class="grid stats compact-stats">
-        <div class="card metric"><h3>Rhythm cadence</h3><p id="music-rhythm-cadence">n/a</p></div>
-        <div class="card metric"><h3>Current chord</h3><p id="music-current-chord">n/a</p></div>
-        <div class="card metric"><h3>Scale</h3><p id="music-scale">n/a</p></div>
-        <div class="card metric"><h3>Main note</h3><p id="music-main-note">n/a</p></div>
-      </div>
-      <div class="music-controls">
-        <label>
-          <span>Root</span>
-          <select id="music-root-select"></select>
-        </label>
-        <label>
-          <span>Main</span>
-          <select id="music-main-select"></select>
-        </label>
-        <label>
-          <span>Scale</span>
-          <select id="music-scale-select">
-            <option value="major">Major</option>
-            <option value="minor">Natural minor</option>
-            <option value="blues">Blues</option>
-            <option value="spanish">Spanish</option>
-            <option value="arabic">Arabic</option>
-            <option value="harmonic_minor">Harmonic minor</option>
-            <option value="phrygian_dominant">Phrygian dominant</option>
-            <option value="minor_pentatonic">Minor pentatonic</option>
-            <option value="major_pentatonic">Major pentatonic</option>
-          </select>
-        </label>
-        <button id="music-apply-button" type="button">Apply</button>
-        <span id="music-config-status" class="action-status">Listo</span>
-      </div>
-    </section>
+      <section class="card section dashboard-panel panel-sonification">
+        <h2 class="section-title">Sonificación Live</h2>
+        <div id="warnings" class="warnings"></div>
+        <div class="grid stats">
+          <div class="card metric"><h3>Alpha drive</h3><p id="sonif-alpha-drive">n/a</p></div>
+          <div class="card metric"><h3>Beta/Gamma drive</h3><p id="sonif-beta-gamma-drive">n/a</p></div>
+          <div class="card metric"><h3>RMS/Beta activity</h3><p id="sonif-rms-beta-activity">n/a</p></div>
+          <div class="card metric"><h3>Band-driven density</h3><p id="sonif-band-driven-density">n/a</p></div>
+          <div class="card metric"><h3>Spectral register</h3><p id="sonif-spectral-register">n/a</p></div>
+          <div class="card metric"><h3>Alpha stability</h3><p id="sonif-alpha-stability">n/a</p></div>
+          <div class="card metric"><h3>RMS/Band velocity</h3><p id="sonif-rms-band-velocity">n/a</p></div>
+          <div class="card metric"><h3>Band note probability</h3><p id="sonif-band-note-probability">n/a</p></div>
+        </div>
+        <div class="grid stats compact-stats">
+          <div class="card metric"><h3>Rhythm cadence</h3><p id="music-rhythm-cadence">n/a</p></div>
+          <div class="card metric"><h3>Current chord</h3><p id="music-current-chord">n/a</p></div>
+          <div class="card metric"><h3>Scale</h3><p id="music-scale">n/a</p></div>
+          <div class="card metric"><h3>Main note</h3><p id="music-main-note">n/a</p></div>
+        </div>
+        <div class="music-controls">
+          <label>
+            <span>Root</span>
+            <select id="music-root-select"></select>
+          </label>
+          <label>
+            <span>Main</span>
+            <select id="music-main-select"></select>
+          </label>
+          <label>
+            <span>Scale</span>
+            <select id="music-scale-select">
+              <option value="major">Major</option>
+              <option value="minor">Natural minor</option>
+              <option value="blues">Blues</option>
+              <option value="spanish">Spanish</option>
+              <option value="arabic">Arabic</option>
+              <option value="harmonic_minor">Harmonic minor</option>
+              <option value="phrygian_dominant">Phrygian dominant</option>
+              <option value="minor_pentatonic">Minor pentatonic</option>
+              <option value="major_pentatonic">Major pentatonic</option>
+            </select>
+          </label>
+          <button id="music-apply-button" type="button">Apply</button>
+          <span id="music-config-status" class="action-status">Listo</span>
+        </div>
+      </section>
+    </div>
 
-    <section class="card section dashboard-panel">
-      <h2 class="section-title">MIDI Live</h2>
-      <div class="grid stats">
-        <div class="card metric"><h3>Live enabled</h3><p id="midi-live-enabled">n/a</p></div>
-        <div class="card metric"><h3>Queued events</h3><p id="midi-queued-events">0</p></div>
-        <div class="card metric"><h3>Active notes</h3><p id="midi-active-notes">0</p></div>
-        <div class="card metric"><h3>Sent events</h3><p id="midi-sent-events">0</p></div>
-        <div class="card metric"><h3>Dropped events</h3><p id="midi-dropped-events">0</p></div>
-        <div class="card metric"><h3>Failed events</h3><p id="midi-failed-events">0</p></div>
-      </div>
-      <div class="midi-actions">
-        <button id="midi-panic-button" class="danger-button" type="button">Panic</button>
-        <span id="midi-panic-status" class="action-status">Listo</span>
-      </div>
-    </section>
+    <div class="dashboard-region dashboard-region--output">
+      <section class="card section dashboard-panel panel-midi">
+        <h2 class="section-title">MIDI Live</h2>
+        <div class="grid stats">
+          <div class="card metric"><h3>Live enabled</h3><p id="midi-live-enabled">n/a</p></div>
+          <div class="card metric"><h3>Queued events</h3><p id="midi-queued-events">0</p></div>
+          <div class="card metric"><h3>Active notes</h3><p id="midi-active-notes">0</p></div>
+          <div class="card metric"><h3>Sent events</h3><p id="midi-sent-events">0</p></div>
+          <div class="card metric"><h3>Dropped events</h3><p id="midi-dropped-events">0</p></div>
+          <div class="card metric"><h3>Failed events</h3><p id="midi-failed-events">0</p></div>
+        </div>
+        <div class="midi-actions">
+          <button id="midi-panic-button" class="danger-button" type="button">Panic</button>
+          <span id="midi-panic-status" class="action-status">Listo</span>
+        </div>
+      </section>
 
-    <section class="card section dashboard-panel dashboard-panel--full">
-      <h2 class="section-title">Piano roll live</h2>
-      <div id="piano-roll-empty" class="empty-note">Sin notas recientes todavía.</div>
-      <div id="piano-roll" class="piano-roll"></div>
-    </section>
+      <section class="card section dashboard-panel panel-piano">
+        <h2 class="section-title">Piano roll live</h2>
+        <div id="piano-roll-empty" class="empty-note">Sin notas recientes todavía.</div>
+        <div id="piano-roll" class="piano-roll"></div>
+      </section>
+    </div>
   </main>
   <script src="./app.js"></script>
 </body>
