@@ -10,8 +10,10 @@
 }
 
 * { box-sizing: border-box; }
+html { min-width: 0; }
 body {
   margin: 0;
+  min-width: 0;
   color: var(--text);
   background:
     radial-gradient(circle at 20% 20%, rgba(255, 79, 216, 0.24), transparent 40%),
@@ -20,8 +22,25 @@ body {
   font-family: "Orbitron", "Rajdhani", "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-.container { max-width: 1120px; margin: 0 auto; padding: 24px 16px 32px; }
-.section { margin-top: 18px; }
+.container {
+  width: min(100%, 1800px);
+  max-width: none;
+  margin: 0 auto;
+  padding: 20px clamp(12px, 2vw, 32px) 28px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.section,
+.dashboard-panel {
+  min-width: 0;
+  margin: 0;
+}
 
 .card {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)), var(--card);
@@ -32,6 +51,7 @@ body {
 }
 
 .topbar {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -83,6 +103,18 @@ h1 { margin: 0; font-size: 1.55rem; letter-spacing: 0.2px; }
 }
 
 .compact-stats { margin-top: 12px; }
+
+.dashboard-panel > .stats .metric {
+  min-width: 0;
+  padding: 10px 11px;
+  background: rgba(8, 0, 18, 0.34);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: none;
+}
+
+.dashboard-panel > .stats .metric p {
+  overflow-wrap: anywhere;
+}
 
 .music-controls {
   display: flex;
@@ -270,9 +302,117 @@ h1 { margin: 0; font-size: 1.55rem; letter-spacing: 0.2px; }
 .waveform {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: 180px;
   margin-top: 12px;
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 8px;
   background: rgba(8, 0, 18, 0.45);
+}
+
+body.capture-mode .container {
+  padding-top: 10px;
+  padding-bottom: 12px;
+}
+
+body.capture-mode .dashboard-grid {
+  gap: 10px;
+}
+
+body.capture-mode .card {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+body.capture-mode .section-title {
+  margin-bottom: 7px;
+}
+
+body.capture-mode .grid {
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+}
+
+body.capture-mode .compact-stats,
+body.capture-mode .channel-status,
+body.capture-mode .music-controls,
+body.capture-mode .midi-actions,
+body.capture-mode .diag-warnings,
+body.capture-mode .waveform {
+  margin-top: 8px;
+}
+
+body.capture-mode .warnings {
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+body.capture-mode .band-row {
+  margin: 6px 0;
+}
+
+body.capture-mode .waveform {
+  height: 140px;
+}
+
+body.capture-mode .piano-roll {
+  min-height: 220px;
+}
+
+@media (min-width: 760px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+  }
+
+  .dashboard-panel--wide,
+  .dashboard-panel--full {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboard-panel--full {
+    grid-column: span 3;
+  }
+}
+
+@media (min-width: 1680px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dashboard-panel--full {
+    grid-column: span 4;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding-top: 12px;
+  }
+
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .state-chip-wrap {
+    align-items: flex-start;
+  }
+
+  .band-row {
+    grid-template-columns: 72px minmax(0, 1fr) 58px;
+    gap: 7px;
+  }
+
+  .music-controls label,
+  .music-controls button {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
 }

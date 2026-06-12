@@ -2,6 +2,11 @@ const bands = ["delta", "theta", "alpha", "beta", "gamma"];
 const musicNoteOptions = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
   .flatMap((note) => [3, 4, 5].map((octave) => `${note}${octave}`));
 
+const pageParams = new URLSearchParams(window.location.search);
+if (pageParams.get("capture") === "1") {
+  document.body.classList.add("capture-mode");
+}
+
 function fmt(v, n = 3) {
   const x = Number(v);
   return Number.isFinite(x) ? x.toFixed(n) : "n/a";

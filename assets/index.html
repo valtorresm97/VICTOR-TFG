@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <main class="container">
+  <main class="container dashboard-grid">
     <header class="topbar card">
       <div>
         <h1>EEG Spectral Dashboard</h1>
@@ -19,7 +19,7 @@
       </div>
     </header>
 
-    <section class="section">
+    <section class="card section dashboard-panel dashboard-panel--wide">
       <h2 class="section-title">Rendimiento de adquisición</h2>
       <div class="grid stats">
         <div class="card metric"><h3>Sample rate</h3><p id="sample-rate">n/a</p></div>
@@ -32,7 +32,7 @@
       <div id="channel-status" class="channel-status"></div>
     </section>
 
-    <section class="section">
+    <section class="card section dashboard-panel dashboard-panel--wide">
       <h2 class="section-title">Features EEG (canal activo)</h2>
       <div class="grid stats">
         <div class="card metric"><h3>RMS</h3><p id="rms">n/a</p></div>
@@ -47,17 +47,17 @@
       </div>
     </section>
 
-    <section class="card section">
+    <section class="card section dashboard-panel">
       <h2 class="section-title">Bandpower relativo</h2>
       <div id="bands"></div>
     </section>
 
-    <section class="card section">
+    <section class="card section dashboard-panel">
       <h2 class="section-title">Bandpower absoluto (V² aprox)</h2>
       <div id="bands-abs" class="bands-abs"></div>
     </section>
 
-    <section class="section">
+    <section class="card section dashboard-panel dashboard-panel--wide">
       <h2 class="section-title">Calidad EEG / Diagnostico ADS1299</h2>
       <div class="grid stats">
         <div class="card metric"><h3>RMS CH1</h3><p id="diag-rms">n/a</p></div>
@@ -71,7 +71,7 @@
       <canvas id="diag-waveform" class="waveform" width="960" height="180"></canvas>
     </section>
 
-    <section class="section">
+    <section class="card section dashboard-panel dashboard-panel--wide">
       <h2 class="section-title">Sonificación Live</h2>
       <div id="warnings" class="warnings"></div>
       <div class="grid stats">
@@ -118,7 +118,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="card section dashboard-panel">
       <h2 class="section-title">MIDI Live</h2>
       <div class="grid stats">
         <div class="card metric"><h3>Live enabled</h3><p id="midi-live-enabled">n/a</p></div>
@@ -134,12 +134,11 @@
       </div>
     </section>
 
-    <section class="card section">
+    <section class="card section dashboard-panel dashboard-panel--full">
       <h2 class="section-title">Piano roll live</h2>
       <div id="piano-roll-empty" class="empty-note">Sin notas recientes todavía.</div>
       <div id="piano-roll" class="piano-roll"></div>
     </section>
-
   </main>
   <script src="./app.js"></script>
 </body>
